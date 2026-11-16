@@ -1,0 +1,4 @@
+import {db} from "@/lib/db";
+import {requireAdmin} from "@/lib/auth";
+import {formatPrice} from "@/lib/jobs";
+export default async function Orders(){await requireAdmin();const orders=await db.order.findMany({orderBy:{createdAt:"desc"},take:100,select:{id:true,amountFen:true,provider:true,status:true,createdAt:true,user:{select:{email:true}},job:{select:{title:true}}}});return <><h1>订单管理</h1><p className="muted">最近 100 条订单</p><div className="card scroll"><table><thead><tr>{["订单号","用户","招聘","金额","渠道","状态"].map(t=><th key={t}>{t}</th>)}</tr></thead><tbody>{orders.map(o=><tr key={o.id}><td>{o.id}</td><td>{o.user.email}</td><td>{o.job.title}</td><td>¥{formatPrice(o.amountFen)}</td><td>{o.provider}</td><td>{o.status}</td></tr>)}</tbody></table></div></>}

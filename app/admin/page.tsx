@@ -1,0 +1,4 @@
+import {db} from "@/lib/db";
+import {requireAdmin} from "@/lib/auth";
+import {formatPrice} from "@/lib/jobs";
+export default async function Admin(){await requireAdmin();const [jobs,published,users,orders,amount]=await Promise.all([db.job.count(),db.job.count({where:{status:"PUBLISHED"}}),db.user.count(),db.order.count({where:{status:"PAID"}}),db.order.aggregate({_sum:{amountFen:true},where:{status:"PAID",provider:{not:"MOCK"}}})]);return <><h1>数据概览</h1>{[["招聘总数",jobs],["已发布",published],["用户数",users],["已支付订单（含测试）",orders],["真实支付收入","¥"+formatPrice(amount._sum.amountFen??0)]].map(([k,v])=><div className="card" key={k}><span className="muted">{k}</span><h2>{v}</h2></div>)}</>}

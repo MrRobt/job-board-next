@@ -1,0 +1,4 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import {mockPaymentEnabled} from "../lib/payment/mock";
+test("mock payment never enabled in production",()=>{const old=process.env.NODE_ENV;const flag=process.env.ENABLE_MOCK_PAYMENT;try{Object.assign(process.env,{NODE_ENV:"production",ENABLE_MOCK_PAYMENT:"true"});assert.equal(mockPaymentEnabled(),false);Object.assign(process.env,{NODE_ENV:"development"});assert.equal(mockPaymentEnabled(),true);process.env.ENABLE_MOCK_PAYMENT="false";assert.equal(mockPaymentEnabled(),false);}finally{if(old===undefined)Reflect.deleteProperty(process.env,"NODE_ENV");else Object.assign(process.env,{NODE_ENV:old});if(flag===undefined)delete process.env.ENABLE_MOCK_PAYMENT;else process.env.ENABLE_MOCK_PAYMENT=flag;}});

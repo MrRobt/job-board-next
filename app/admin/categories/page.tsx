@@ -1,0 +1,4 @@
+import {db} from "@/lib/db";
+import {requireAdmin} from "@/lib/auth";
+import {addCategory,renameCategory} from "@/app/actions/admin";
+export default async function Categories(){await requireAdmin();const cats=await db.category.findMany({include:{_count:{select:{jobs:true}}},orderBy:{name:"asc"}});return <><h1>行业分类</h1><form className="card row" action={addCategory}><input name="name" aria-label="新分类名称" required maxLength={80} placeholder="新分类名称"/><button>新增分类</button></form>{cats.map(c=><form key={c.id} className="card row" action={renameCategory.bind(null,c.id)}><input name="name" aria-label="分类名称" required maxLength={80} defaultValue={c.name}/><span>{c._count.jobs} 条招聘</span><button className="quiet">修改</button></form>)}</>}
