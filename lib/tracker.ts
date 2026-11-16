@@ -1,0 +1,1 @@
+export const stages={SAVED:"待投递",APPLIED:"已投递",INTERVIEW:"面试中",OFFER:"已获 Offer",REJECTED:"未通过",WITHDRAWN:"已放弃"} as const;

@@ -1,12 +1,5 @@
+import {notFound} from "next/navigation";
+import {requireUser} from "@/lib/auth";
+import {db} from "@/lib/db";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { currentUser } from "@/lib/auth";
-import { getPublicJob,getJobDetails,formatPrice } from "@/lib/jobs";
-export const dynamic = "force-dynamic";
-export default async function Job({params}:{params:Promise<{id:string}>}){
- const {id}=await params;
- const [job,user]=await Promise.all([getPublicJob(id),currentUser()]);
- if(!job)notFound();
- const details=await getJobDetails(id,user?.id);
- return <article className="card top"><Link href="/">← 返回招聘列表</Link><h1>{job.title}</h1><p className="muted">{job.company} · {job.city} · {job.category.name} · {job.employment}</p><p className="salary">{job.salary}</p><h2>岗位简介</h2><p className="content">{job.summary}</p>{details?<><h2>完整招聘信息</h2><p className="content">{details.details}</p>{/^https?:\/\//i.test(details.sourceUrl)&&<a className="button" rel="noopener noreferrer" target="_blank" href={details.sourceUrl}>前往原始招聘页面</a>}</>:<section className="card"><h2>完整信息需付费解锁</h2><p>解锁价格：¥{formatPrice(job.priceFen)}。请先确认信息适合你，付费不保证录用。</p>{user?<Link className="button" href={"/checkout/"+id}>查看解锁方式</Link>:<Link className="button" href="/login">登录后解锁</Link>}</section>}<p className="muted">信息过期或涉嫌虚假？ <Link href={"/report/"+id}>举报招聘信息</Link></p></article>;
-}
+export default async function LegacyPurchased({params}:{params:Promise<{id:string}>}){const user=await requireUser();const {id}=await params;const paid=await db.unlock.findFirst({where:{userId:user.id,jobId:id,order:{status:"PAID"}},select:{job:{select:{title:true,summary:true,details:true,sourceUrl:true,status:true,expiresAt:true}}}});if(!paid)notFound();const {job}=paid;return <article className="card top"><h1>历史已购信息</h1><p className="muted">招聘业务已暂停，仅保留原已付费用户售后访问。请核实信息时效。</p><h2>{job.title}</h2>{job.status==="PUBLISHED"&&(!job.expiresAt||job.expiresAt>new Date())?<><p className="content">{job.summary}</p><p className="content">{job.details}</p>{/^https?:\/\//i.test(job.sourceUrl)&&<a href={job.sourceUrl} rel="noreferrer">原始来源</a>}</>:<p>信息已过期或下架，请联系客服处理历史订单。</p>}<Link href="/account">返回账户</Link></article>}

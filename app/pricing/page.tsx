@@ -1,0 +1,1 @@
+import Link from "next/link";export default function Pricing(){return <section className="card top"><h1>求职工具服务</h1><p>求职管理与规则示例免费。真实 AI 调用次数包暂未开放购买，未来只为独立工具服务收费。</p><Link className="button" href="/tracker">免费开始管理</Link></section>}

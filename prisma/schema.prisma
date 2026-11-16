@@ -34,6 +34,10 @@ model User {
   sessions Session[]
   orders Order[]
   unlocks Unlock[]
+  applications Application[]
+  toolOrders ToolOrder[]
+  toolGrants ToolGrant[]
+  toolRuns ToolRun[]
 }
 model Session {
   tokenHash String @id @db.Char(64)
@@ -115,4 +119,76 @@ model Report {
   createdAt DateTime @default(now())
   @@unique([jobId,userId])
   @@index([status,createdAt])
+}
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  INTERVIEW
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+model Application {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title String @db.VarChar(160)
+  company String @db.VarChar(160)
+  status ApplicationStatus @default(SAVED)
+  nextAt DateTime?
+  notes String @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId,status,updatedAt])
+}
+model ToolOrder {
+  id String @id @db.VarChar(32)
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  sku String @db.VarChar(40)
+  amountFen Int
+  credits Int
+  provider Provider
+  status OrderStatus @default(PENDING)
+  activeKey String? @unique @db.Char(64)
+  providerTradeId String? @unique
+  codeUrl String? @db.VarChar(2048)
+  paymentExpiresAt DateTime?
+  paidAt DateTime?
+  createdAt DateTime @default(now())
+  grant ToolGrant?
+  @@index([userId,createdAt])
+}
+model ToolGrant {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  orderId String? @unique @db.VarChar(32)
+  order ToolOrder? @relation(fields: [orderId], references: [id])
+  trialKey String? @unique
+  total Int
+  remaining Int
+  createdAt DateTime @default(now())
+  runs ToolRun[]
+  @@index([userId,remaining,createdAt])
+}
+enum ToolRunStatus {
+  RESERVED
+  SUCCEEDED
+  FAILED
+}
+model ToolRun {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  grantId String
+  grant ToolGrant @relation(fields: [grantId], references: [id])
+  requestId String @db.VarChar(64)
+  kind String @db.VarChar(30)
+  status ToolRunStatus @default(RESERVED)
+  createdAt DateTime @default(now())
+  finishedAt DateTime?
+  @@unique([userId,requestId])
+  @@index([userId,createdAt])
 }
