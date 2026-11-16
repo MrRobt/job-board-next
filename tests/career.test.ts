@@ -1,0 +1,3 @@
+import {test} from "node:test";import assert from "node:assert/strict";import {input,output,hasContact} from "../lib/career/contracts";import {sample} from "../lib/career/sample";
+test("sample validates and is explicitly not AI",()=>{const v=input.parse({kind:"questions",role:"开发工程师",context:"",text:""});const result=sample(v);assert.match(result.summary,/非 AI/);assert.ok(output.safeParse(result).success);});
+test("validation rejects short input and detects contact patterns",()=>{assert.equal(input.safeParse({kind:"resume",role:"开发",context:"",text:"短"}).success,false);assert.equal(hasContact("13800138000"),true);assert.equal(hasContact("me@example.com"),true);assert.equal(hasContact("负责前端开发"),false);});
