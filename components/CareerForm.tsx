@@ -4,9 +4,10 @@ import {practice,type PracticeState} from "@/app/actions/career";
 import {titles,type Kind} from "@/lib/career/contracts";
 export default function CareerForm({tool,live=false,provider="",privacy="",credits=0,requestId=""}:{tool:"resume"|"interview";live?:boolean;provider?:string;privacy?:string;credits?:number;requestId?:string}){
  const [kind,setKind]=useState<Kind>(tool==="resume"?"resume":"questions");
- const [state,action,pending]=useActionState(practice,{} as PracticeState);
+ const [id,setId]=useState(requestId);
+ const [state,action,pending]=useActionState(async(prev:PracticeState,form:FormData)=>{const result=await practice(prev,form);setId(crypto.randomUUID());return result;},{} as PracticeState);
  const [role,setRole]=useState("");const [context,setContext]=useState("");const [text,setText]=useState("");const [consent,setConsent]=useState(false);
- return <><form action={action} className="card form"><input type="hidden" name="kind" value={kind}/><input type="hidden" name="requestId" value={requestId}/>
+ return <><form action={action} className="card form"><input type="hidden" name="kind" value={kind}/><input type="hidden" name="requestId" value={id}/>
  {tool==="interview"&&<><label htmlFor="kind">练习方式</label><select id="kind" value={kind} onChange={e=>{setKind(e.target.value==="feedback"?"feedback":"questions");setContext("");setText("");}} disabled={pending}><option value="questions">生成练习题</option><option value="feedback">回答反馈</option></select></>}
  <label htmlFor="role">目标岗位</label><input id="role" name="role" required minLength={2} maxLength={120} placeholder="例如：Go 后端开发" value={role} onChange={e=>setRole(e.target.value)}/>
  <label htmlFor="context">{kind==="feedback"?"面试问题":"目标岗位要求（可选）"}</label><textarea id="context" name="context" rows={4} maxLength={5000} required={kind==="feedback"} value={context} onChange={e=>setContext(e.target.value)}/>
