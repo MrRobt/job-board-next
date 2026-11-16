@@ -1,0 +1,2 @@
+import {test} from "node:test";import assert from "node:assert/strict";import {packages,product,price} from "../lib/career/catalog";
+test("server-owned package price and credits",()=>{assert.equal(packages.length,2);assert.deepEqual(product("STARTER20"),{sku:"STARTER20",title:"轻量次数包",amountFen:990,credits:20});assert.equal(product("PRO100")?.credits,100);assert.equal(product("unknown"),undefined);assert.equal(price(990),"9.9");});

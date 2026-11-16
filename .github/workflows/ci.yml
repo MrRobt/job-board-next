@@ -30,6 +30,8 @@ jobs:
       ADMIN_PASSWORD: ci-only-password-not-production
       ENABLE_REAL_PAYMENT: "false"
       ENABLE_MOCK_PAYMENT: "false"
+      ENABLE_LIVE_AI: "false"
+      ENABLE_TOOL_PAYMENTS: "false"
       INTEGRATION_TEST_DATABASE: "true"
     steps:
       - uses: actions/checkout@v4
@@ -52,6 +54,13 @@ jobs:
             sleep 2
           done
           grep -q "职讯集" /tmp/jobs.html
+          grep -q "求职工作台" /tmp/jobs.html
+          curl -fsS http://localhost:3000/pricing | grep -q "轻量次数包"
           curl -fsS http://localhost:3000/login > /dev/null
           code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/admin)
           test "$code" = 307 || test "$code" = 308
+          for path in tools/resume tools/interview tracker account; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3000/$path")
+            test "$code" = 307 || test "$code" = 308 || exit 1
+          done
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/checkout/disabled)" = 404
