@@ -1,0 +1,3 @@
+import Link from "next/link";
+import {register} from "@/app/actions/auth";
+export default async function Register({searchParams}:{searchParams:Promise<{error?:string}>}){const {error}=await searchParams;return <section className="card form top"><h1>注册账号</h1>{error&&<p className="error">注册失败，请检查信息或尝试登录。</p>}<form action={register}><label htmlFor="email">邮箱</label><input id="email" name="email" type="email" autoComplete="email" required/><label htmlFor="password">密码（至少 12 位）</label><input id="password" name="password" type="password" autoComplete="new-password" minLength={12} maxLength={128} required/><button>注册</button></form><p>已有账号？ <Link href="/login">登录</Link></p></section>}

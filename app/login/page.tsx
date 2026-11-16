@@ -1,0 +1,3 @@
+import Link from "next/link";
+import {login} from "@/app/actions/auth";
+export default async function Login({searchParams}:{searchParams:Promise<{error?:string}>}){const {error}=await searchParams;return <section className="card form top"><h1>登录职讯集</h1>{error&&<p className="error">邮箱或密码不正确。</p>}<form action={login}><label htmlFor="email">邮箱</label><input id="email" name="email" type="email" autoComplete="email" required/><label htmlFor="password">密码</label><input id="password" name="password" type="password" autoComplete="current-password" minLength={12} maxLength={128} required/><button>登录</button></form><p>还没有账号？ <Link href="/register">注册</Link></p></section>}
