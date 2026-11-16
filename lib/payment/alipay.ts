@@ -3,11 +3,11 @@ import {canonical,sign,verify,yuanToFen} from "./crypto";
 import {env,origin} from "./config";
 import type {PaymentNotice} from "./settlement";
 function localTimestamp(){return new Date(Date.now()+8*3600000).toISOString().slice(0,19).replace("T"," ");}
-export function createAlipayUrl(order:{id:string;amountFen:number;jobId:string;paymentExpiresAt:Date|null}){
+export function createAlipayUrl(order:{id:string;amountFen:number;jobId?:string;paymentExpiresAt:Date|null;tool?:boolean}){
  const gateway=process.env.ALIPAY_GATEWAY||"https://openapi.alipay.com/gateway.do";
  const target=new URL(gateway);
  if(target.href!=="https://openapi.alipay.com/gateway.do"&&target.href!=="https://openapi-sandbox.dl.alipaydev.com/gateway.do")throw new Error("Unsupported gateway");
- const params:Record<string,string>={app_id:env("ALIPAY_APP_ID"),method:"alipay.trade.page.pay",format:"JSON",charset:"utf-8",sign_type:"RSA2",timestamp:localTimestamp(),version:"1.0",notify_url:origin()+"/api/payment/alipay/notify",return_url:origin()+"/account",biz_content:JSON.stringify({out_trade_no:order.id,total_amount:(order.amountFen/100).toFixed(2),subject:"职讯集招聘信息服务",product_code:"FAST_INSTANT_TRADE_PAY",time_expire:order.paymentExpiresAt?new Date(order.paymentExpiresAt.getTime()+8*3600000).toISOString().slice(0,19).replace("T"," "):undefined})};
+ const params:Record<string,string>={app_id:env("ALIPAY_APP_ID"),method:"alipay.trade.page.pay",format:"JSON",charset:"utf-8",sign_type:"RSA2",timestamp:localTimestamp(),version:"1.0",notify_url:origin()+(order.tool?"/api/tool-payment/alipay/notify":"/api/payment/alipay/notify"),return_url:origin()+"/account",biz_content:JSON.stringify({out_trade_no:order.id,total_amount:(order.amountFen/100).toFixed(2),subject:order.tool?"职讯集求职工具调用次数包":"职讯集历史招聘信息服务",product_code:"FAST_INSTANT_TRADE_PAY",time_expire:order.paymentExpiresAt?new Date(order.paymentExpiresAt.getTime()+8*3600000).toISOString().slice(0,19).replace("T"," "):undefined})};
  params.sign=sign(canonical(params),env("ALIPAY_PRIVATE_KEY"));
  target.search=new URLSearchParams(params).toString();return target.toString();
 }
