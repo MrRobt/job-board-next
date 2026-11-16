@@ -9,7 +9,7 @@ export async function reserveOrder(userId:string,jobId:string,provider:Channel){
  const job=await db.job.findFirst({where:{id:jobId,...visibleJobs()},select:{priceFen:true}});
  if(!job||job.priceFen<=0)throw new Error("Job unavailable");
  if(await db.unlock.findUnique({where:{userId_jobId:{userId,jobId}}}))throw new Error("Already unlocked");
- const order=await db.order.upsert({where:{activeKey},create:{activeKey,userId,jobId,provider,amountFen:job.priceFen},update:{}});
+ const order=await db.order.upsert({where:{activeKey},create:{activeKey,userId,jobId,provider,amountFen:job.priceFen,paymentExpiresAt:new Date(Date.now()+15*60*1000)},update:{}});
  if(order.provider!==provider||order.status!=="PENDING"||order.amountFen!==job.priceFen)throw new Error("Existing order requires reconciliation before retry");
  return order;
 }

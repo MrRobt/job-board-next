@@ -8,5 +8,5 @@ export function visibleJobs(): Prisma.JobWhereInput {
 export function formatPrice(fen:number){return (fen/100).toFixed(2);}
 export async function getPublicJob(id:string){return db.job.findFirst({where:{id,...visibleJobs()},select:publicJob});}
 export async function getJobDetails(id:string,userId?:string){
- return db.job.findFirst({where:{id,...visibleJobs(),AND:[{OR:[{priceFen:0},...(userId?[{unlocks:{some:{userId}}}]:[])]}]},select:{details:true,sourceUrl:true}});
+ return db.job.findFirst({where:{id,...visibleJobs(),AND:[{OR:[{priceFen:0},...(userId?[{unlocks:{some:{userId,order:{status:"PAID"}}}}]:[])]}]},select:{details:true,sourceUrl:true}});
 }

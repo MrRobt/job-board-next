@@ -8,10 +8,10 @@ function verifyMessage(headers:Headers,body:string){
  const timestamp=headers.get("wechatpay-timestamp")||"",nonce=headers.get("wechatpay-nonce")||"",serial=headers.get("wechatpay-serial")||"",signature=headers.get("wechatpay-signature")||"";
  if(!/^\d{10}$/.test(timestamp)||Math.abs(Date.now()/1000-Number(timestamp))>300||!nonce||!signature||serial!==env("WECHAT_PAY_PUBLIC_KEY_ID")||!verify(timestamp+"\n"+nonce+"\n"+body+"\n",signature,env("WECHAT_PAY_PUBLIC_KEY")))throw new Error("Invalid WeChat signature");
 }
-export async function createWechatUrl(order:{id:string;amountFen:number}){
+export async function createWechatUrl(order:{id:string;amountFen:number;paymentExpiresAt:Date|null}){
  const path="/v3/pay/transactions/native",timestamp=Math.floor(Date.now()/1000).toString(),nonce=randomBytes(16).toString("hex");
  const mchid=env("WECHAT_MCH_ID");
- const body=JSON.stringify({appid:env("WECHAT_APP_ID"),mchid,description:"职讯集招聘信息服务",out_trade_no:order.id,notify_url:origin()+"/api/payment/wechat/notify",amount:{total:order.amountFen,currency:"CNY"}});
+ const body=JSON.stringify({appid:env("WECHAT_APP_ID"),mchid,description:"职讯集招聘信息服务",out_trade_no:order.id,time_expire:order.paymentExpiresAt?.toISOString().replace(/\.\d{3}Z$/,"+00:00"),notify_url:origin()+"/api/payment/wechat/notify",amount:{total:order.amountFen,currency:"CNY"}});
  const signature=sign("POST\n"+path+"\n"+timestamp+"\n"+nonce+"\n"+body+"\n",env("WECHAT_PRIVATE_KEY"));
  const authorization='WECHATPAY2-SHA256-RSA2048 mchid="'+mchid+'",nonce_str="'+nonce+'",timestamp="'+timestamp+'",serial_no="'+env("WECHAT_MERCHANT_SERIAL")+'",signature="'+signature+'"';
  const res=await fetch("https://api.mch.weixin.qq.com"+path,{method:"POST",headers:{Authorization:authorization,Accept:"application/json","Content-Type":"application/json"},body,cache:"no-store",signal:AbortSignal.timeout(15000)});
