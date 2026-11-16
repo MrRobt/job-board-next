@@ -98,3 +98,21 @@ model Unlock {
   order Order @relation(fields: [orderId], references: [id])
   @@id([userId, jobId])
 }
+
+model AuthAttempt {
+  key String @id @db.Char(64)
+  count Int @default(0)
+  resetAt DateTime
+  @@index([resetAt])
+}
+model Report {
+  id String @id @default(cuid())
+  jobId String
+  userId String
+  reason String @db.VarChar(40)
+  description String @db.VarChar(1000)
+  status String @default("OPEN") @db.VarChar(20)
+  createdAt DateTime @default(now())
+  @@unique([jobId,userId])
+  @@index([status,createdAt])
+}

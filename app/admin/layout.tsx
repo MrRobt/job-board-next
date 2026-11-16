@@ -1,3 +1,3 @@
 import Link from "next/link";
 import {requireAdmin} from "@/lib/auth";
-export default async function AdminLayout({children}:{children:React.ReactNode}){await requireAdmin();return <div className="grid top"><aside className="card categories"><h3>管理后台</h3><Link href="/admin">数据概览</Link><Link href="/admin/jobs">招聘管理</Link><Link href="/admin/categories">行业分类</Link><Link href="/admin/orders">订单管理</Link></aside><section>{children}</section></div>}
+export default async function AdminLayout({children}:{children:React.ReactNode}){await requireAdmin();return <div className="grid top"><aside className="card categories"><h3>管理后台</h3><Link href="/admin">数据概览</Link><Link href="/admin/jobs">招聘管理</Link><Link href="/admin/categories">行业分类</Link><Link href="/admin/orders">订单管理</Link><Link href="/admin/reports">举报处理</Link></aside><section>{children}</section></div>}

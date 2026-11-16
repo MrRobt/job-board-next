@@ -1,0 +1,6 @@
+import Link from "next/link";
+import {notFound} from "next/navigation";
+import {requireUser} from "@/lib/auth";
+import {getPublicJob} from "@/lib/jobs";
+import {reportJob} from "@/app/actions/report";
+export default async function Report({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{ok?:string;error?:string}>}){await requireUser();const {id}=await params;const job=await getPublicJob(id);if(!job)notFound();const {ok,error}=await searchParams;return <section className="card form top"><h1>举报招聘信息</h1><p>{job.title}</p>{ok?<p>已收到举报，平台将进行核查。</p>:<form action={reportJob.bind(null,id)}>{error&&<p className="error">请检查举报内容。</p>}<label htmlFor="reason">举报原因</label><select name="reason" id="reason"><option value="FRAUD">涉嫌诈骗</option><option value="EXPIRED">岗位过期</option><option value="WRONG">信息不准确</option><option value="OTHER">其他</option></select><label htmlFor="description">情况说明（不要填写身份证号或银行账户等敏感信息）</label><textarea id="description" name="description" maxLength={1000} required rows={6}/><button>提交举报</button></form>}<p><Link href={"/jobs/"+id}>返回招聘详情</Link></p></section>}
