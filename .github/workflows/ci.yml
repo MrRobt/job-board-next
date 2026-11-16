@@ -30,6 +30,7 @@ jobs:
       ADMIN_PASSWORD: ci-only-password-not-production
       ENABLE_REAL_PAYMENT: "false"
       ENABLE_MOCK_PAYMENT: "false"
+      INTEGRATION_TEST_DATABASE: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -41,6 +42,7 @@ jobs:
       - run: npx tsx prisma/seed.ts
       - run: npm run typecheck
       - run: npm test
+      - run: npm run test:integration
       - run: npm run build
       - name: Smoke test
         run: |
