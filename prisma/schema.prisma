@@ -78,6 +78,7 @@ model Order {
   provider Provider
   status OrderStatus @default(PENDING)
   providerTradeId String? @unique
+  activeKey String? @unique @db.Char(64)
   createdAt DateTime @default(now())
   paidAt DateTime?
   user User @relation(fields: [userId], references: [id])

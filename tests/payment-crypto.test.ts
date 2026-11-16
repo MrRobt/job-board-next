@@ -1,0 +1,7 @@
+import {test} from "node:test";
+import assert from "node:assert/strict";
+import {generateKeyPairSync,createCipheriv} from "node:crypto";
+import {canonical,sign,verify,yuanToFen,decryptResource} from "../lib/payment/crypto";
+test("canonical RSA2 signature and tamper rejection",()=>{const {privateKey,publicKey}=generateKeyPairSync("rsa",{modulusLength:2048,privateKeyEncoding:{type:"pkcs8",format:"pem"},publicKeyEncoding:{type:"spki",format:"pem"}});const message=canonical({z:"中文",a:"3.90",empty:""});assert.equal(message,"a=3.90&z=中文");const signature=sign(message,privateKey);assert.equal(verify(message,signature,publicKey),true);assert.equal(verify(message+"x",signature,publicKey),false);});
+test("integer money parsing",()=>{assert.equal(yuanToFen("3.90"),390);assert.equal(yuanToFen("1.1"),110);assert.throws(()=>yuanToFen("0.001"));assert.throws(()=>yuanToFen("1e2"));});
+test("AES-GCM authenticated decryption",()=>{const key="12345678901234567890123456789012",nonce="123456789012",aad="test";const cipher=createCipheriv("aes-256-gcm",Buffer.from(key),Buffer.from(nonce));cipher.setAAD(Buffer.from(aad));const encrypted=Buffer.concat([cipher.update("hello"),cipher.final(),cipher.getAuthTag()]);const resource={algorithm:"AEAD_AES_256_GCM",ciphertext:encrypted.toString("base64"),nonce,associated_data:aad};assert.equal(decryptResource(resource,key),"hello");assert.throws(()=>decryptResource({...resource,associated_data:"corrupt"},key));});
