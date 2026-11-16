@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+}
+enum Role {
+  USER
+  ADMIN
+}
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+enum Provider {
+  ALIPAY
+  WECHAT
+  MOCK
+}
+enum OrderStatus {
+  PENDING
+  PAID
+  CLOSED
+  REFUNDED
+}
+model User {
+  id String @id @default(cuid())
+  email String @unique @db.VarChar(254)
+  passwordHash String @db.VarChar(255)
+  role Role @default(USER)
+  createdAt DateTime @default(now())
+  sessions Session[]
+  orders Order[]
+  unlocks Unlock[]
+}
+model Session {
+  tokenHash String @id @db.Char(64)
+  userId String
+  expiresAt DateTime
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([expiresAt])
+}
+model Category {
+  id String @id @default(cuid())
+  name String @unique @db.VarChar(80)
+  jobs Job[]
+}
+model Job {
+  id String @id @default(cuid())
+  categoryId String
+  category Category @relation(fields: [categoryId], references: [id])
+  title String @db.VarChar(160)
+  company String @db.VarChar(160)
+  city String @db.VarChar(80)
+  employment String @db.VarChar(40)
+  salary String @db.VarChar(80)
+  summary String @db.Text
+  details String @db.Text
+  sourceUrl String @db.VarChar(2048)
+  priceFen Int @default(0)
+  status JobStatus @default(DRAFT)
+  featured Boolean @default(false)
+  expiresAt DateTime?
+  publishedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders Order[]
+  unlocks Unlock[]
+  @@index([status, categoryId, publishedAt])
+}
+model Order {
+  id String @id @default(cuid())
+  userId String
+  jobId String
+  amountFen Int
+  provider Provider
+  status OrderStatus @default(PENDING)
+  providerTradeId String? @unique
+  createdAt DateTime @default(now())
+  paidAt DateTime?
+  user User @relation(fields: [userId], references: [id])
+  job Job @relation(fields: [jobId], references: [id])
+  unlock Unlock?
+  @@index([userId, createdAt])
+}
+model Unlock {
+  userId String
+  jobId String
+  orderId String @unique
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id])
+  job Job @relation(fields: [jobId], references: [id])
+  order Order @relation(fields: [orderId], references: [id])
+  @@id([userId, jobId])
+}
