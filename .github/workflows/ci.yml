@@ -1,0 +1,55 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: test_root
+          MYSQL_DATABASE: jobs
+          MYSQL_USER: jobs
+          MYSQL_PASSWORD: test_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+    env:
+      DATABASE_URL: mysql://jobs:test_password@127.0.0.1:3306/jobs
+      ADMIN_EMAIL: admin@example.invalid
+      ADMIN_PASSWORD: ci-only-password-not-production
+      ENABLE_REAL_PAYMENT: "false"
+      ENABLE_MOCK_PAYMENT: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - run: npx prisma validate
+      - run: npm run db:push
+      - run: npx tsx prisma/seed.ts
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Smoke test
+        run: |
+          npm start > /tmp/jobs.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/ > /tmp/jobs.html; then break; fi
+            sleep 2
+          done
+          grep -q "职讯集" /tmp/jobs.html
+          curl -fsS http://localhost:3000/login > /dev/null
+          code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/admin)
+          test "$code" = 307 || test "$code" = 308
