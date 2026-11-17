@@ -39,6 +39,13 @@
 - 当前代码尚未建立管理员查询入口；读渠道必须双门禁 `ENABLE_REAL_PAYMENT` + `ENABLE_REFUND_QUERY`，测试仅用伪 fetch 和临时密钥，不得在生产开启。
 - 上述独立新文件已通过 `1ccf99b` 分批 commit/push 到 `origin/main`，其他 Agent 的未提交内容仍保留。
 
+## 2026-11-18 P0 可信代理限流与原子计数修复
+
+- 登录注册新增可选 IP 级限流，默认关闭；在配置 `TRUSTED_CLIENT_IP_HEADER` 后仅从受控代理头读取 IP，异常头拒绝；原本按邮箱次数仍保留。
+- MySQL 并发测试发现原 Prisma upsert 在 7 个同 key 请求时抛 `PRIMARY` 唯一冲突；已改为原生原子 SQL 与事务读数，复验集成 12/12、单测 10/10、TS 和 build 全通过。
+- 明确生产前置：代理覆盖头、源站禁止绕过、真实环境联调。无生产代理配置变更；详见 `docs/goal/mvp/trusted-ip-limit-2026-11-18.md`。
+- P0 资金退款/撤权、备份恢复、邮箱验证和外部合规门禁依旧未完成；其他 Agent 的原有未提交文件没有修改。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

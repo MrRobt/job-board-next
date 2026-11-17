@@ -29,6 +29,12 @@
 - 查询代码与独立证据已单独 commit/push：`1ccf99b`（`main` → `origin/main`）；对应工作包已提交，B06 整体仍 IN_PROGRESS。
 - 后续最高优先级是退款请求号持久化与幂等资金申请、最终渠道结果确认、在途 AI 调用和剩余权益一致性；实际商户及外部合规 UAT 继续 BLOCKED。
 
+## 2026-11-18 P0 身份认证限流子包
+
+- `lib/rate-limit.ts` 修复 Prisma upsert 并发首次插入 MySQL `PRIMARY` 冲突：改为参数化 SQL 原子递增及事务内读数，实测并发允许次数精确。
+- `app/actions/auth.ts` 新增可选可信代理 IP 双维度限流；仅接受配置的 `x-real-ip` 或 `cf-connecting-ip`，默认不启用，真实代理 UAT 未完成。
+- 新增单元/集成测试；隔离库集成 12/12 PASS，单元 10/10 PASS，TypeScript 0 错、Next.js 生产 build exit 0；详情 `trusted-ip-limit-2026-11-18.md`。U01 保持 IN_PROGRESS，邮箱验证/注销及真实代理验证仍缺。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
