@@ -52,6 +52,12 @@
 - 原先依赖未提交 Schema 的数据库权限/预检适配已从已提交模块移除；不能宣称现有退款预检服务端 DB API 已交付。未来须待退款 Schema、迁移和接口提交后实施鉴权及强一致资金复核。
 - 纯规则涵盖 RESERVED 在途、已消费、失败返还、历史退款与异常账本；任何结果 `automaticallyRefundable=false`。原有退款申请/Schema 等其他 Agent 未提交文件仍原样保留，资金与撤权闭环未完成，详见 `docs/goal/mvp/refund-preflight-2026-11-18.md`。
 
+## 2026-11-18 P0 确定性渠道退款请求负载
+
+- `lib/payment/refund-request-payload.ts` 是纯函数（无 DB、无 HTTP、无秘钥），用已有 caseId + orderId 生成相同 outRefundNo，并将金额、渠道、交易引用、原因绑定指纹；不同内容的重试必须被已存指纹拦截。
+- 微信 payload 含整数分和 CNY；支付宝含元/两位小数和 out_request_no。新增 4/4 单测，全量单元 18/18、隔离 DB 集成 12/12、TS/build 均通过，详见 `docs/goal/mvp/refund-request-payload-2026-11-18.md`。
+- **没有发起真实退款！** 退款 caseId、金额、指纹须先经受控数据库事务持久化；真实 HTTP API、结果验签、人工审批、在途账务、撤权均未完成；B06 仍 IN_PROGRESS。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。
