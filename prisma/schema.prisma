@@ -39,6 +39,7 @@ model User {
   toolGrants ToolGrant[]
   toolRuns ToolRun[]
   toolRunAdjustments ToolRunAdjustment[]
+  toolOrderReconcileEvents ToolOrderReconcileEvent[]
 }
 model Session {
   tokenHash String @id @db.Char(64)
@@ -159,6 +160,7 @@ model ToolOrder {
   paidAt DateTime?
   createdAt DateTime @default(now())
   grant ToolGrant?
+  reconciliationEvents ToolOrderReconcileEvent[]
   @@index([userId,createdAt])
 }
 model ToolGrant {
@@ -193,6 +195,20 @@ model ToolRun {
   adjustment ToolRunAdjustment?
   @@unique([userId,requestId])
   @@index([userId,createdAt])
+}
+
+model ToolOrderReconcileEvent {
+  id String @id @default(cuid())
+  orderId String @db.VarChar(32)
+  order ToolOrder @relation(fields: [orderId], references: [id])
+  operatorId String
+  operator User @relation(fields: [operatorId], references: [id])
+  action String @db.VarChar(16)
+  observed String @db.VarChar(16)
+  outcome String @db.VarChar(24)
+  createdAt DateTime @default(now())
+  @@index([orderId,createdAt])
+  @@index([operatorId,createdAt])
 }
 
 model ToolRunAdjustment {
