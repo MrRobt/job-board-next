@@ -10,7 +10,7 @@
 
 `P0-PAYMENT-RECONCILIATION`：先建立可测试的渠道查单/安全关闭/异常账务分类与重复通知幂等行为。没有商户有效凭据前只能完成代码和模拟服务测试，**不得强制关闭或清空未确认支付状态的订单**。
 
-并行可推进：`P0-CI-LOCKFILE-MIGRATIONS`（依赖锁定、受控生产迁移和备份/恢复方案）、邮箱验证/IP 级限流；不重复已验收的部分。
+并行可推进：`P0-CI-LOCKFILE-MIGRATIONS`。现已由 Prisma CLI 从空库生成基线迁移 SQL（`prisma/migrations/20261117000100_baseline/`），但独立 MySQL 的 `migrate deploy` 执行被安全检查拦截，**未通过迁移验收、不得在生产使用**。临时测试容器已停止。之后需要在授权的测试执行环境完成全新库 migrate deploy 与幂等复跑、备份/恢复和 CI，不能假定迁移成功。
 
 ## Git 安全
 

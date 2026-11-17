@@ -6,6 +6,8 @@
 |---|---|---|
 | Prisma validate | `DATABASE_URL=<test-db> node node_modules/prisma/build/index.js validate` | exit 0，schema valid |
 | Dev DB schema sync | `DATABASE_URL=<test-db> node node_modules/prisma/build/index.js db push` | exit 0，DB in sync；追加 ToolRunAdjustment 表 |
+| 基线迁移 SQL | `prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script` | exit 0，生成 9552 字节的候选 SQL，含 ToolRunAdjustment；未实际执行 |
+| 独立 MySQL migrate deploy | 预备 `job-board-next-migration-smoke` Docker MySQL 8.0.46 | 执行工具被安全检查拦截，**BLOCKED**；临时容器已停止/自动删除，无迁移通过证据 |
 | Prisma generate | `DATABASE_URL=<test-db> node node_modules/prisma/build/index.js generate` | exit 0，Prisma 6.19.3 Client 生成成功 |
 | TypeScript | `node node_modules/typescript/bin/tsc --noEmit` | exit 0 |
 | 单元测试 | `node node_modules/tsx/dist/cli.mjs --test tests/*.test.ts` | 8/8 PASS |
