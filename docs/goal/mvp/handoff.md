@@ -76,6 +76,12 @@
 - 测试 3/3 新增、全量单元 21/21、MySQL 集成 13/13、TS/build exit 0，详见 `docs/goal/mvp/ai-provider-egress-2026-11-18.md`。仍须实际网络出口 ACL/DNS 和合规模型人工 UAT；不设置 `ENABLE_LIVE_AI`。
 - 其他 Agent 退款 Schema/UI 未提交工作原样保留，后续 P0 仍包括退款资金、账号邮箱验证、清理 apply、部署监控与 E2E。
 
+## 2026-11-18 P0 受保护数据库就绪探针
+
+- 新增 `/api/readyz`，服务器端 `READINESS_PROBE_TOKEN` 未配置则固定 404；正确 `x-readiness-token` 才只读执行 MySQL SELECT 1，成功 200、失败 503，统一安全响应无泄漏。
+- 新增单元 2/2、集成 1/1；全量单元 23/23、MySQL 集成 14/14、TS/build PASS。曾因上轮 auth-retention 测试用整表计数导致并发假失败，已改为固定历史截止时间过滤并再次通过；详见 `docs/goal/mvp/readiness-probe-2026-11-18.md`。
+- 部署、反向代理 ACL、真实负载均衡探针、故障恢复与告警未验收，D02 仍 IN_PROGRESS。其他 Agent 的退款/Schema 文件继续保留。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

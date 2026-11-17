@@ -64,6 +64,12 @@
 - 新增 3/3 单元测试，全量 21/21 单元、13/13 MySQL 集成、TypeScript 和 Next.js build 全通过，见 `ai-provider-egress-2026-11-18.md`。
 - A01/A02 继续 IN_PROGRESS：DNS/出口网络 ACL、实际合规模型、隐私/成本/质量/注入测试仍待验证，真实 AI 默认关闭。
 
+## 2026-11-18 P0 数据库就绪探针子包
+
+- 新增受凭据保护的 `GET /api/readyz`：未配置/未授权返回空 404、授权查询专用 MySQL 返回 200，失败不泄露错误，仅用摘要常量时间比较凭据；绝不暴露数据库内容。
+- 新增 2/2 单元、1/1 集成；全量单元 23/23、MySQL 集成 14/14、TS/Next.js 构建通过。历史认证清理测试在并发环境下误比较整表行数，已调整为历史过期边界计数，修复后 14/14 PASS。
+- 生产需内网 ACL、探针凭据注入与轮换、断库/恢复/告警 UAT，D02 仍 IN_PROGRESS；详见 `readiness-probe-2026-11-18.md`。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

@@ -5,4 +5,5 @@
 - 真实支付默认禁用；商户查单、关闭、退款、对账、资金异常处理及真实测试尚未完成。
 - 过期 Session/AuthAttempt 已有独立的默认只读 `auth:retention` 维护命令（`--apply` 需显式审批开关），尚未通过实际删除测试或设定生产周期调度。见 `docs/goal/mvp/auth-retention-2026-11-18.md`。
 - AI 模型出站接口新增精确批准列表 `AI_APPROVED_BASE_URLS` 和有界流式读取；仍需真实预发布 DNS/出口 ACL、隐私协议、成本与模型质量验收。见 `docs/goal/mvp/ai-provider-egress-2026-11-18.md`。
+- `/api/readyz` 数据库就绪接口在无凭据时默认 404；部署前需要强随机凭据、内部网络 ACL 和探针请求限流。见 `docs/goal/mvp/readiness-probe-2026-11-18.md`。
 - 不得提交生产用户数据及商户证书。

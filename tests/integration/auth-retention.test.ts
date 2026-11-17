@@ -7,18 +7,21 @@ test("retention preview is read-only and validates the bounded batch", async () 
   if (process.env.INTEGRATION_TEST_DATABASE !== "true") {
     throw new Error("Disposable database required");
   }
+  const cutoff = new Date("2000-01-01T00:00:00.000Z");
   try {
     const [sessionsBefore, attemptsBefore] = await Promise.all([
-      db.session.count(), db.authAttempt.count(),
+      db.session.count({ where: { expiresAt: { lte: cutoff } } }),
+      db.authAttempt.count({ where: { resetAt: { lte: cutoff } } }),
     ]);
     const preview = await pruneExpiredAuthRecords({
-      now: new Date("2000-01-01T00:00:00.000Z"), batchSize: 1,
+      now: cutoff, batchSize: 1,
     });
     assert.equal(preview.mode, "DRY_RUN");
     assert.equal(preview.deletedSessions, 0);
     assert.equal(preview.deletedAttempts, 0);
     const [sessionsAfter, attemptsAfter] = await Promise.all([
-      db.session.count(), db.authAttempt.count(),
+      db.session.count({ where: { expiresAt: { lte: cutoff } } }),
+      db.authAttempt.count({ where: { resetAt: { lte: cutoff } } }),
     ]);
     assert.equal(sessionsAfter, sessionsBefore);
     assert.equal(attemptsAfter, attemptsBefore);

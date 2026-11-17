@@ -73,6 +73,12 @@
 - 全量单元 21/21 PASS、隔离 MySQL 集成 13/13 PASS、TypeScript exit 0、Next.js 生产 build exit 0。
 - 无真实模型调用或生产 DNS/出口 ACL 测试，隐私/Token 成本/质量门禁未解除，详见 `ai-provider-egress-2026-11-18.md`。
 
+## 2026-11-18：P0 私有数据库就绪探针
+
+- `tests/readiness.test.ts` 2/2 PASS，`tests/integration/readiness.test.ts` 1/1 PASS；默认/错误凭据 404，正确随机凭据在隔离 MySQL 200，只输出状态。
+- 全量单元 23/23 PASS、全量 MySQL 集成重跑 14/14 PASS、TypeScript exit 0、Next.js 生产 build exit 0（包含 `/api/readyz`）。第一轮 13/14 因 `auth-retention` 测试并行计数竞争，已改为历史过期边界查询并复验。
+- 未完成真实网络 ACL、断库 503、恢复 200、LB 告警/运维 UAT；详见 `readiness-probe-2026-11-18.md`，D02 继续 IN_PROGRESS。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
