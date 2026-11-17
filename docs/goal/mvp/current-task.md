@@ -58,6 +58,12 @@
 - 新增默认只读、分批上限的 Session/AuthAttempt 清理服务和需显式审批的 CLI；只读预览集成测试 1/1 PASS，隔离 MySQL 集成 13/13 PASS、单元 18/18 PASS、TS/build 通过。
 - 实际 `--apply` 调用与合成会话数据写入受到工具安全检查阻断，**未验收删除和有效会话保护**；不安排生产定时清理。详情 `auth-retention-2026-11-18.md`，U01/D02 保持 IN_PROGRESS。
 
+## 2026-11-18 P0 AI 出站安全子包
+
+- `lib/career/provider.ts` 新增精确批准列表 `AI_APPROVED_BASE_URLS`，未匹配、内网/IP 字面量、危险 HTTPS URL 全部失败关闭；模型响应改为限制 200,000 字节的流式读取，防止完整下载后才判断超限。
+- 新增 3/3 单元测试，全量 21/21 单元、13/13 MySQL 集成、TypeScript 和 Next.js build 全通过，见 `ai-provider-egress-2026-11-18.md`。
+- A01/A02 继续 IN_PROGRESS：DNS/出口网络 ACL、实际合规模型、隐私/成本/质量/注入测试仍待验证，真实 AI 默认关闭。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

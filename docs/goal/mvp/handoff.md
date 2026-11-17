@@ -70,6 +70,12 @@
 - 测试：预览 1/1、MySQL 集成 13/13、单元 18/18、TS/build 全通过；实际删除/有效会话保护测试被工具安全检查阻断，**不允许标 VERIFIED 或在生产调度**。详见 `docs/goal/mvp/auth-retention-2026-11-18.md`。
 - 与退款资金 Schema/用户界面改动无交叉；其他 Agent 的未提交文件仍保持原样。继续从未验收的 P0 安全、退款及 AI 提供方处理边界推进。
 
+## 2026-11-18 P0 AI 模型出口安全子包
+
+- `lib/career/provider-safety.ts` 限定服务器批准列表中的公网 DNS HTTPS 精确 base URL，并以最大 200,000 字节流式读取响应。原 `lib/career/provider.ts` 已接入检查，未批准地址不调用模型且不发送用户内容/凭据。
+- 测试 3/3 新增、全量单元 21/21、MySQL 集成 13/13、TS/build exit 0，详见 `docs/goal/mvp/ai-provider-egress-2026-11-18.md`。仍须实际网络出口 ACL/DNS 和合规模型人工 UAT；不设置 `ENABLE_LIVE_AI`。
+- 其他 Agent 退款 Schema/UI 未提交工作原样保留，后续 P0 仍包括退款资金、账号邮箱验证、清理 apply、部署监控与 E2E。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。
