@@ -40,7 +40,15 @@ jobs:
           node-version: "22"
       - run: npm install --no-audit --no-fund
       - run: npx prisma validate
-      - run: npm run db:push
+      # Prove that the versioned migrations deploy on an empty MySQL service.
+      - name: Deploy migrations to fresh MySQL
+        run: npx prisma migrate deploy
+      - name: Check migration status
+        run: npx prisma migrate status
+      - name: Confirm migrate deploy is repeatable
+        run: |
+          npx prisma migrate deploy
+          npx prisma migrate status
       - run: npx tsx prisma/seed.ts
       - run: npm run typecheck
       - run: npm test
