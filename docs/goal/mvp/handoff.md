@@ -1,12 +1,29 @@
-# 工作交接（2026-11-17）
+# 长期 Goal 交接（2026-11-17）
 
-- 工作区：`F:\code\job-board-next`；`main`。每轮重新核对真实 Git 与正在运行的服务。
-- Windows/MSYS2 Bash：Node `D:\nvm4w\nodejs\node.exe`；项目路径 `/f/code/job-board-next`。npm 可能不在 Bash PATH，可直接调用 Node + 本地 CLI 入口。
-- 独立开发 MySQL：Docker `job-board-next-db-1`、localhost:3306、库 `jobs`。不要使用或修改其他项目的 `djs-mysql-uat`。
-- 现已创建 `docs/goal/mvp` 正式恢复文件；之前 `.ai-bridge` 无交接。
-- 已交付：>10 分钟 RESERVED 可在管理员工具订单页查询；管理员确认实际未交付后调用 `confirmCreditRefund`，核查依据及操作者写 `ToolRunAdjustment`，事务内返还一次；重复、未授权、过早返还均拒绝。
-- 本轮仅开发库执行 `prisma db push`，**不是生产迁移**。新增 `ToolRunAdjustment` 表；已生成基线迁移 SQL 文件，但在临时独立 MySQL 容器上执行 migrate deploy 时被安全检查拦截，未验证实际迁移；临时容器 `job-board-next-migration-smoke` 已停止且 --rm 自动删除。该迁移当前只是候选版本，不得直接用于已有非空数据库；现有开发数据库未被迁移重放。
-- Windows 当前生产 `next start` 可能占用 Prisma query_engine DLL，需先精确识别并仅停止本项目 3000 端口对应的 Next 进程、重新 Prisma generate、再恢复本地服务；勿终止其它 node/Docker/Agent 进程。本轮已完成该操作并复测 HTTP 200。
-- 验证：Prisma validate exit 0、TypeScript exit 0、单元 8/8、集成 3/3、Next build exit 0，详情见 test-evidence。
-- 真实 AI、真实商户支付仍默认关闭，没有相关合规/商户联调证据；继续 P0 渠道查单、关闭、对账、退款和上线门禁。
-- 不可混提交 `next-env.d.ts`、`package-lock.json`、`.dsh-meow/`；`lib/jobs.ts` 上轮类型修复已独立提交（`f734138`），避免远端 CI 遗漏修复。
+## 工作区
+
+- job-codexpro：`F:\code\job-board-next`，Git `main`；每轮重新检查 current-task、矩阵、Git 与 .ai-bridge，不能仅相信本文件。
+- Windows MSYS2 Bash：项目目录 `/f/code/job-board-next`，Node `/d/nvm4w/nodejs/node.exe`，Docker MySQL `job-board-next-db-1`（`127.0.0.1:3306/jobs`）。严禁动 `djs-mysql-uat` 等其他项目数据库/进程。
+- 构建/Prisma 在 Windows 上可能受本项目 Next.js 的 DLL 锁影响，只处理已确认的 localhost:3000 Next.js 进程。其他 Node、Agent、Docker 工作负载不属于本 Goal。
+
+## 本轮已实现
+
+- `lib/payment/merchant-observation.ts`：纯状态映射。
+- `lib/payment/merchant-gateway.ts`：微信支付 API v3 交易查询和关单、签名验签；支付宝 OpenAPI 查询和关单、对原始 JSON 业务响应验签；任何异常均拒绝作为付款/关单凭证。微信关单 204 只代表接口接受，必须随后查单 CLOSED。
+- `lib/career/payment-reconciliation.ts`：管理员鉴权、到期确认、先查单/请求关单/再查单、安全释放待支付占用、复用 `settleToolPayment` 幂等结算、`ToolOrderReconcileEvent` 审计。
+- `app/actions/payment-reconciliation.ts` + `app/admin/tool-orders/page.tsx`：管理员查单/到期关单独立入口；`ENABLE_PAYMENT_RECONCILIATION` 默认 false，不触发真实商户 API。
+- `prisma/schema.prisma` 和增量迁移 SQL：新增 `ToolOrderReconcileEvent` 及关系，开发库经 `db push --skip-generate` 同步；基线 `migrate deploy` 仍为未验收。
+- `tests/integration/payment-reconciliation.test.ts`、`tests/integration/merchant-gateway.test.ts`：金额异常、未付/未知、已关闭、跨用户/管理员、幂等和密文签名相关离线模拟测试。
+- `docs/goal/mvp/payment-reconciliation.md`：人工操作与安全不变量。
+
+## 验收结果与阻断
+
+- Prisma validate exit 0，开发库 push exit 0，Prisma Client generate exit 0。
+- TypeScript exit 0，单元 8/8、集成 7/7、Next.js 生产构建 exit 0。见 `test-evidence.md`。
+- 没有真实支付渠道测试、退款回款、自动对账、密钥审批、法律合规审批；不能启用真实收费。
+- 之前独立库 `migrate deploy` 被安全检查阻断；**不能声称生产迁移通过**。
+- 不要覆盖已有 `next-env.d.ts`、`package-lock.json`、`.dsh-meow/` 未提交工作。
+
+## 续跑
+
+从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

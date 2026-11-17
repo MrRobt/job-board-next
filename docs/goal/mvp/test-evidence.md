@@ -1,26 +1,28 @@
-# 测试证据（2026-11-17）
+# MVP 测试证据（2026-11-17）
 
-执行环境：job-codexpro，Windows `F:\code\job-board-next`，独立 Docker 开发 MySQL（非 djs-mysql-uat）。
+执行环境：job-codexpro，本机独立 Docker MySQL `job-board-next-db-1`。未使用 `djs-mysql-uat`。
 
-| 试验 | 命令摘要 | 真实结果 |
+| 测试 | 命令摘要 | 实际结果 |
 |---|---|---|
-| Prisma validate | `DATABASE_URL=<test-db> node node_modules/prisma/build/index.js validate` | exit 0，schema valid |
-| Dev DB schema sync | `DATABASE_URL=<test-db> node node_modules/prisma/build/index.js db push` | exit 0，DB in sync；追加 ToolRunAdjustment 表 |
-| 基线迁移 SQL | `prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script` | exit 0，生成 9552 字节的候选 SQL，含 ToolRunAdjustment；未实际执行 |
-| 独立 MySQL migrate deploy | 预备 `job-board-next-migration-smoke` Docker MySQL 8.0.46 | 执行工具被安全检查拦截，**BLOCKED**；临时容器已停止/自动删除，无迁移通过证据 |
-| Prisma generate | `DATABASE_URL=<test-db> node node_modules/prisma/build/index.js generate` | exit 0，Prisma 6.19.3 Client 生成成功 |
-| TypeScript | `node node_modules/typescript/bin/tsc --noEmit` | exit 0 |
-| 单元测试 | `node node_modules/tsx/dist/cli.mjs --test tests/*.test.ts` | 8/8 PASS |
-| MySQL 集成 | `INTEGRATION_TEST_DATABASE=true DATABASE_URL=<test-db> node --conditions=react-server --import tsx --test tests/integration/*.test.ts` | 3/3 PASS |
-| 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6 compiled successfully |
-| 本机存活 | `curl http://127.0.0.1:3000` 的状态响应 | HTTP 200 |
+| Prisma schema | `DATABASE_URL=<dev-db> node node_modules/prisma/build/index.js validate` | exit 0，合法 Schema |
+| 开发库同步 | `DATABASE_URL=<dev-db> node node_modules/prisma/build/index.js db push --skip-generate` | exit 0，仅开发库 |
+| Prisma Client | `DATABASE_URL=<dev-db> node node_modules/prisma/build/index.js generate` | exit 0，Prisma 6.19.3 |
+| 类型检查 | `node node_modules/typescript/bin/tsc --noEmit` | exit 0 |
+| 单元测试 | `node node_modules/tsx/dist/cli.mjs --test tests/*.test.ts` | 8 PASS / 0 FAIL |
+| DB 集成测试 | `INTEGRATION_TEST_DATABASE=true DATABASE_URL=<dev-db> node --conditions=react-server --import tsx --test tests/integration/*.test.ts` | 7 PASS / 0 FAIL |
+| Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
+| 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
-数据库集成测试 `manual stale AI credit refund is authorized, audited and idempotent` 覆盖：
-- 刚创建的预留不允许人工返还；
-- 普通用户无法返还；
-- 太短的理由被拒绝；
-- 超过 10 分钟的异常预留可核查，但只读检查不会变更余额；
-- 管理员确认后余额恢复、ToolRun 变为 FAILED、ToolRunAdjustment 正确记录操作人/原因；
-- 重复返还/迟到的 finish 不会重复发放。
+## 本轮支付测试新增的实际场景
 
-**限制**：无真实模型服务调用、真实商户支付/退款、生产迁移/备份恢复/全量浏览器 E2E；测试通过不表示正式商业上线已获批准。
+- PENDING 在本地过期但渠道 UNKNOWN 或 UNPAID 时不关单/不释放 `activeKey`。
+- 关单前必须本地过期，且渠道先确认 UNPAID；关单 API 返回之后再次查询 CLOSED 才允许关闭本地订单。
+- 关单成功后，activeKey 释放；订单允许创建新支付渠道的待支付订单。
+- 已关闭订单重复操作不造成二次改账；支付回调与确认流程复用幂等结算。
+- 错金额订单查询绝不发放权益，非管理员不能进行商户查单。
+- 微信 API v3 伪响应 RSA 验签及 204 关单响应处理；支付宝 OpenAPI RSA2 请求加签、原始 JSON 响应验签、伪造签名拒绝。
+- `ToolOrderReconcileEvent` 记录操作人、动作、观察状态和结果。无真实商户 API 请求，测试签名密钥运行时随机生成。
+
+## 保留的局限
+
+没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
