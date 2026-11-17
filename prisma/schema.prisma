@@ -38,6 +38,7 @@ model User {
   toolOrders ToolOrder[]
   toolGrants ToolGrant[]
   toolRuns ToolRun[]
+  toolRunAdjustments ToolRunAdjustment[]
 }
 model Session {
   tokenHash String @id @db.Char(64)
@@ -189,6 +190,18 @@ model ToolRun {
   status ToolRunStatus @default(RESERVED)
   createdAt DateTime @default(now())
   finishedAt DateTime?
+  adjustment ToolRunAdjustment?
   @@unique([userId,requestId])
   @@index([userId,createdAt])
+}
+
+model ToolRunAdjustment {
+  id String @id @default(cuid())
+  runId String @unique
+  run ToolRun @relation(fields: [runId], references: [id])
+  operatorId String
+  operator User @relation(fields: [operatorId], references: [id])
+  reason String @db.VarChar(500)
+  createdAt DateTime @default(now())
+  @@index([operatorId,createdAt])
 }
