@@ -58,6 +58,12 @@
 - 微信 payload 含整数分和 CNY；支付宝含元/两位小数和 out_request_no。新增 4/4 单测，全量单元 18/18、隔离 DB 集成 12/12、TS/build 均通过，详见 `docs/goal/mvp/refund-request-payload-2026-11-18.md`。
 - **没有发起真实退款！** 退款 caseId、金额、指纹须先经受控数据库事务持久化；真实 HTTP API、结果验签、人工审批、在途账务、撤权均未完成；B06 仍 IN_PROGRESS。
 
+## 2026-11-18 MySQL 隔离库结构恢复验证
+
+- 仅在 `job-board-next-db-1` 容器导出 `jobs_mvp_migrate_20261118_8f72`，容器内 SQL 22,573 bytes、SHA-256 `cd9dfc159014a1b25a9bb02d59a17ab8b2bdf2018424cabf623e809af07cc550`；创建全新库 `jobs_mvp_restore_20261118_61ac` 并成功导入。
+- 源/目标 16 表、120 列、19 FK、3 迁移记录及关键空表行数匹配，恢复库 Prisma migrate status exit 0。尝试创建合成非空数据被工具安全检查阻止，故不能证明数据恢复；B07/D02 仍未完成。
+- SQL 快照只在容器 `/tmp`，不提交仓库；恢复库未覆盖源库。详情 `docs/goal/mvp/restore-structure-uat-2026-11-18.md`；未来需预发布真实授权非空数据回归和备份加密/RPO/RTO。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

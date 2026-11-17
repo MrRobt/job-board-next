@@ -47,6 +47,12 @@
 - 4/4 新增单元测试及全量单元 18/18、隔离 MySQL 集成 12/12、TypeScript/Next.js build 全通过。详情 `refund-request-payload-2026-11-18.md`。
 - 要真正提交商户申请，必须等待其他 Agent 的退款 Schema/事务代码完成并提交，然后持久化 ID/指纹，做授权/人工审批、发送与验签/查单/撤权。B06 仍 IN_PROGRESS，不得开启真实支付。
 
+## 2026-11-18 P0 隔离库结构恢复子包
+
+- 专用 MySQL 容器对独立测试库完成逻辑备份、在全新恢复库导入，16 张表、120 列、19 条外键、3 个 Prisma 迁移记录一致，恢复库 `migrate status` exit 0；见 `restore-structure-uat-2026-11-18.md`。
+- 原库空业务表，尝试插入合成测试夹具被安全检查阻止，未验证**非空用户数据恢复**；不绕过限制，B07/D02 和正式上线门禁保持未完成。
+- 恢复库只属于本项目，未接触其它数据库。后续需独立预发布非空数据演练、备份加密、旧库 baseline、CI/E2E 与真实商户人工审批。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
