@@ -1,41 +1,27 @@
-# P0 退款账务只读预检子包 — 2026-11-18
+# P0 退款账务预检规则：纯函数交付（2026-11-18）
 
-## 目的
+## 目标与依赖边界
 
-在 `P0-REFUND-ENTITLEMENT-LIFECYCLE` 中补齐资金退款之前的**只读风险判定**，识别用户申请后的冻结次数包是否仍有在途 AI 调用、已消耗权益、异常账本，以及历史未结清退款；不误把退款申请当作退款成功，也不自动拒绝用户依法拥有的售后权利。
+- `lib/career/refund-preflight.ts` 现只提供 `assessRefundSnapshot(orderId, snapshot)`。**不导入 Prisma、数据库、商户 SDK 或其他 Agent 未提交的退款文件**。
+- `tests/refund-preflight.test.ts` 提供基于显式账本快照的纯单元验证；GitHub 干净 checkout 不需要 `ToolRefundCase` Schema 或本地尚未提交的退款申请服务。
+- 调用方必须先执行用户/管理员鉴权，读取**同一用户、同一订单**的可信账本，按最新到最旧排序退款申请，再传入规则函数。该 DB 适配层**尚未交付**，不能拿用户提交的任意快照作为财务事实。
 
-## 新增文件与边界
+## 决策规则
 
-- `lib/career/refund-preflight.ts`：`readToolRefundPreflight(viewerId, orderId)`，只允许下单用户或管理员查看；返回渠道、应付金额（分）、已用/剩余/在途次数、退款请求状态、异常码、是否需人工对账。
-- `tests/integration/refund-preflight.test.ts`：真实隔离 MySQL 的冻结前/冻结后、在途、失败返还、成功消费、跨账户隔离、读请求不改变订单和权益测试；另有纯函数测试异常账本及未结束退款历史。
-- 结果只区分 `NEEDS_RECONCILIATION` 和 `READY_FOR_MANUAL_REVIEW`；**`automaticallyRefundable` 始终为 false**。仅意味着可进入人工审核，不代表退款款项已经到账或可自动发起资金操作。
-- 当前是**内部服务层只读能力**，没有新增可由用户触发的退款支付路由，也没有在后台增加资金操作按钮；没有更新原有未提交退款申请/冻结代码或 Prisma Schema。
+- 仅当真实支付订单 `PAID`、非 MOCK、`refundHold=true`、最新申请 `OPEN`、本地支付交易引用存在，且账本无异常、没有成功消耗/在途运行和未清退款历史时，才返回 `READY_FOR_MANUAL_REVIEW`。
+- `RESERVED` 表示仍在执行或待恢复，`SUCCEEDED` 表示已使用；`FAILED` 应已经返还权益。核对 `remaining + RESERVED + SUCCEEDED === total`，并检查总次数与原订单一致。
+- 缺冻结、缺 OPEN 申请、重复 PROCESSING/成功退款、MOCK、账本错误或非法金额时均 `NEEDS_RECONCILIATION`，**并非自动拒绝消费者依法应有的售后权利**。
+- `automaticallyRefundable` **始终是 false**。本地商户交易引用不等于渠道付款证明。规则不会发起资金转账、解冻或撤权，不具备资金操作权限。
 
-## 核心不变量
+## 验收证据
 
-1. `status=PAID`、非 MOCK、`refundHold=true`、最新退款申请 `OPEN`，且没有旧 `PROCESSING/SUCCEEDED` 历史，才可能进入人工复核。
-2. 冻结前已经 `RESERVED` 的 AI 调用、已 `SUCCEEDED` 的调用、账本不一致、原支付交易引用缺失，均提示人工核账。消费情况只作风险事实，不作为自动拒绝售后的法律结论。
-3. 核验 `remaining + RESERVED + SUCCEEDED = total`，还检查权益总数是否与订单次数一致；历史失败运行的返还应包含在剩余次数中。
-4. `providerTradeId` 的存在**不是渠道付款真实性证明**，只代表本地有交易引用；真正资金操作仍必须查询并验证真实商户结果与退款请求幂等信息。
-5. **这是时点快照，并未对后续资金事务加锁**。将来真正创建退款资金请求与撤回权益时，必须在事务中重新核验、使用持久化商户退款单号及原子条件更新。
+- 原始实现曾依赖工作区内尚未提交的 Prisma/退款申请代码；在该**本地脏工作树**上曾完成 2/2 预检集成场景、14/14 全量 MySQL 集成、10/10 单元测试、Prisma validate、TS 和 Next.js 构建。**这些历史本地结果不可直接视作干净 checkout 证据**。
+- 为保证提交可独立部署，已去掉该 DB 适配器，将纯测试移至 `tests/refund-preflight.test.ts`；新单元 4/4 PASS，运行全量单元 14/14 PASS，且模块不再依赖尚未提交的退款 Schema。
+- 当前工作包只交付**纯规则与自动化测试**，不是已上线的退款预检 API、不是商户退款闭环。远端 GitHub Actions 需要在提交后另行核验。
 
-## 实际验证
+## 待完成
 
-工作区：`F:\code\job-board-next`，分支 `main`，使用仅属于本项目的 MySQL 测试库 `jobs_mvp_migrate_20261118_8f72`，未使用其他项目数据库。
-
-| 门禁 | 实测 |
-| --- | --- |
-| 新增预检测试 | 2/2 PASS |
-| 全量 MySQL 集成（含既有退款冻结场景） | 14/14 PASS |
-| 全量单元测试 | 10/10 PASS |
-| Prisma validate | exit 0 |
-| TypeScript 类型检查 | exit 0 |
-| Next.js 16.4.6 生产构建 | exit 0 |
-
-首轮预检测试使用了不合法的调用类型，并因免费试用与已购次数的创建顺序误判消费归属；修复测试为先消费试用、再购买并创建付费在途运行，随后 2/2 通过。这不是资金代码缺陷。
-
-## 下一步与剩余 P0
-
-- 退款资金申请的持久化退款单号、同一申请的重复调用幂等、真实渠道受理与最终查询、金额核算、已退款剩余权益原子撤回及跨进程故障恢复仍未实现/验收。
-- 真实商户 UAT、审批、法律合规和个人信息处理审查为人工门禁；真实支付及 AI 服务开关保持关闭。
-- 仅本子包经过离线/隔离库验证，**B06 整体仍为 IN_PROGRESS，不能标记为 VERIFIED**。
+1. 先由原退款申请工作包安全地提交/验收数据库 Schema、迁移和 API；不能混入其他 Agent 未提交变更。
+2. 实现受控数据库适配器、授权、时点一致性/锁定、审计，以及稳定持久化的退款单号和实际退款金额。
+3. 商户退款申请、查单、最终资金证明、并发/崩溃恢复、撤权账务必须经过真正的渠道联调及人工审批；保留 `B06=IN_PROGRESS`。
+4. 真实支付/AI 默认禁用；不得自动启用公网收费、生产凭据或法律门禁。

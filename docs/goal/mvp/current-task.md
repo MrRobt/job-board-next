@@ -37,9 +37,9 @@
 
 ## 2026-11-18 P0 退款账务只读预检
 
-- 新增 `lib/career/refund-preflight.ts`：仅订单用户/管理员可检查冻结状态、在途 RESERVED、已用 SUCCEEDED、退款历史和账本一致性；返回人工审核/核账建议，`automaticallyRefundable=false`。
-- 新增 `tests/integration/refund-preflight.test.ts`：2/2 PASS；全量隔离 MySQL 集成 14/14 PASS、单元 10/10 PASS、Prisma validate/TypeScript/Next.js build exit 0。
-- 此处仅为时点只读数据，不涉及商户真实资金申请、成功退款证据或原子撤销次数。B06 继续 IN_PROGRESS，详情 `refund-preflight-2026-11-18.md`；下一优先级为持久退款请求号和幂等渠道申请。
+- 修正远端构建依赖：`lib/career/refund-preflight.ts` 仅保留可独立复用的**纯规则函数**，不引用其他 Agent 未提交的 `ToolRefundCase` Prisma 模型或退款申请源码；DB 鉴权/快照适配器待原工作包提交后实现。
+- 预检识别在途 RESERVED、已用 SUCCEEDED、退款历史和账本不一致，`automaticallyRefundable=false`；纯单元 `tests/refund-preflight.test.ts` 新增 4/4 PASS、全量单元 14/14 PASS，脏工作树 MySQL 集成 12/12 PASS，TypeScript exit 0。先前 2/2 DB 预检测试仅属于旧本地实现，不能据此宣称干净 checkout 验收。
+- 工作包整体 B06 继续 IN_PROGRESS；当前交付仅为纯账务判定规则，不涉及退款资金、最终渠道验证或原子撤权。详情 `refund-preflight-2026-11-18.md`。
 
 ## Git 安全
 

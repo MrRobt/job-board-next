@@ -48,9 +48,9 @@
 
 ## 2026-11-18 P0 退款账务只读预检
 
-- 独立实现 `lib/career/refund-preflight.ts`，严格检查查看者权限，仅读取 ToolOrder/ToolGrant/ToolRun/ToolRefundCase，不更新任何资金、订单或权益；对于 RESERVED、已消费次数和历史退款冲突明确要求核账。
-- 新增集成测试覆盖跨账户、真实冻结、在途 AI、失败返还、已消费、只读不变更和错误账本；2/2 PASS，全量 MySQL 14/14、单元 10/10、Prisma/TS/build 均通过，见 `docs/goal/mvp/refund-preflight-2026-11-18.md`。
-- 预检非强一致资金事务；它不表示真实商户已退款，不允许单独据此撤销权益。原有退款申请/Schema 等其他 Agent 未提交工作仍原样保留；下一步需要稳定退款单号、金额审计、渠道提交/查询/撤权闭环。
+- **远端可重现性修正**：`lib/career/refund-preflight.ts` 现在是纯账务判定，无 Prisma 或他人尚未提交退款依赖；独立单元测试已移至 `tests/refund-preflight.test.ts`，4/4 PASS，全量单元 14/14 PASS。当前脏工作树其它 DB 集成 12/12 PASS、TypeScript exit 0。
+- 原先依赖未提交 Schema 的数据库权限/预检适配已从已提交模块移除；不能宣称现有退款预检服务端 DB API 已交付。未来须待退款 Schema、迁移和接口提交后实施鉴权及强一致资金复核。
+- 纯规则涵盖 RESERVED 在途、已消费、失败返还、历史退款与异常账本；任何结果 `automaticallyRefundable=false`。原有退款申请/Schema 等其他 Agent 未提交文件仍原样保留，资金与撤权闭环未完成，详见 `docs/goal/mvp/refund-preflight-2026-11-18.md`。
 
 ## 续跑
 

@@ -45,9 +45,9 @@
 
 ## 2026-11-18：退款账务只读预检
 
-- 新增 `refund-preflight.test.ts` 2/2 PASS：订单用户/管理员隔离、退款冻结、在途 AI、失败返还、已消费、错误账本，以及预检前后财务状态不变。
-- 全量 MySQL 集成 14/14 PASS；全量单元 10/10 PASS；Prisma validate、TypeScript、Next.js 生产 build 均 exit 0。测试库 `jobs_mvp_migrate_20261118_8f72`，未发起真实退款。
-- 详见 `refund-preflight-2026-11-18.md`。B06 整体仍 IN_PROGRESS：预检是只读时点快照，不是渠道到账证明或原子资金事务。
+- **历史本地（依赖未提交退款 Schema）**：旧 DB 预检 2/2 PASS、全量 MySQL 14/14、单元 10/10、Prisma/TS/build exit 0；该实现有远端 checkout 依赖风险，不能当作正式 CI 证明。
+- **纠正后（独立提交所需）**：将 DB 适配移除，纯预检测试放入 `tests/refund-preflight.test.ts`，4/4 PASS；全量单元 14/14 PASS；其余 MySQL 集成 12/12 PASS；TypeScript exit 0。CI 实际运行尚待验证。
+- 详见 `refund-preflight-2026-11-18.md`；规则没有 DB 授权查询入口、更无资金接口，B06 仍 IN_PROGRESS。
 
 ## 保留的局限
 
