@@ -4,6 +4,7 @@ import { z } from "zod";
 import { canonical, sign, verify, yuanToFen } from "./crypto";
 import { env, type Channel } from "./config";
 import { extractAlipaySignedObject } from "./merchant-gateway";
+import { readBoundedHttpText } from "../http-body-limit";
 
 /**
  * Read-only merchant refund inquiry. Neither a successful HTTP response nor a
@@ -88,8 +89,7 @@ async function queryWechat(inquiry: RefundInquiry): Promise<RefundInquiryObserva
     cache: "no-store", redirect: "error", signal: AbortSignal.timeout(15_000),
   });
   if (!response.ok) throw new Error("Refund inquiry HTTP failed");
-  const raw = await response.text();
-  if (Buffer.byteLength(raw) > maxBytes) throw new Error("Oversized refund inquiry response");
+  const raw = await readBoundedHttpText(response, maxBytes);
   const replyTimestamp = response.headers.get("wechatpay-timestamp") ?? "";
   const replyNonce = response.headers.get("wechatpay-nonce") ?? "";
   const serial = response.headers.get("wechatpay-serial") ?? "";
@@ -151,8 +151,7 @@ async function queryAlipay(inquiry: RefundInquiry): Promise<RefundInquiryObserva
     redirect: "error", signal: AbortSignal.timeout(15_000),
   });
   if (!response.ok) throw new Error("Refund inquiry HTTP failed");
-  const raw = await response.text();
-  if (Buffer.byteLength(raw) > maxBytes) throw new Error("Oversized refund inquiry response");
+  const raw = await readBoundedHttpText(response, maxBytes);
   const key = "alipay_trade_fastpay_refund_query_response";
   const result = JSON.parse(raw);
   if (typeof result.sign !== "string" ||

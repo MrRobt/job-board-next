@@ -82,6 +82,12 @@
 - 新增单元 2/2、集成 1/1；全量单元 23/23、MySQL 集成 14/14、TS/build PASS。曾因上轮 auth-retention 测试用整表计数导致并发假失败，已改为固定历史截止时间过滤并再次通过；详见 `docs/goal/mvp/readiness-probe-2026-11-18.md`。
 - 部署、反向代理 ACL、真实负载均衡探针、故障恢复与告警未验收，D02 仍 IN_PROGRESS。其他 Agent 的退款/Schema 文件继续保留。
 
+## 2026-11-18 P0 支付 HTTP 字节上限防内存耗尽
+
+- 新增 `lib/http-body-limit.ts`，四个支付通知入站 65,536 字节限额、渠道查询和回包 100,000 字节限额；在读取过程中检查实际 UTF-8 字节并限制 Content-Length，保留已有原文验签顺序。
+- 新增单测 5/5、原微信/支付宝商户验签集成 2/2、TypeScript exit 0。最终全量回归/build 被执行工具安全检查阻断，不能认定已验证完整支付闭环；详见 `docs/goal/mvp/payment-body-bounds-2026-11-18.md`。
+- 不修改任何资金账本或真实密钥；其他 Agent 原有退款 Schema、页面及 lockfile 未提交改动继续原样保留。后续优先完整回归与支付/退款资金 P0。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

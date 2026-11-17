@@ -4,6 +4,7 @@ import {z} from "zod";
 import {sign,verify,decryptResource} from "./crypto";
 import {env,origin} from "./config";
 import type {PaymentNotice} from "./settlement";
+import {readBoundedHttpText} from "../http-body-limit";
 function verifyMessage(headers:Headers,body:string){
  const timestamp=headers.get("wechatpay-timestamp")||"",nonce=headers.get("wechatpay-nonce")||"",serial=headers.get("wechatpay-serial")||"",signature=headers.get("wechatpay-signature")||"";
  if(!/^\d{10}$/.test(timestamp)||Math.abs(Date.now()/1000-Number(timestamp))>300||!nonce||!signature||serial!==env("WECHAT_PAY_PUBLIC_KEY_ID")||!verify(timestamp+"\n"+nonce+"\n"+body+"\n",signature,env("WECHAT_PAY_PUBLIC_KEY")))throw new Error("Invalid WeChat signature");
@@ -15,7 +16,8 @@ export async function createWechatUrl(order:{id:string;amountFen:number;paymentE
  const signature=sign("POST\n"+path+"\n"+timestamp+"\n"+nonce+"\n"+body+"\n",env("WECHAT_PRIVATE_KEY"));
  const authorization='WECHATPAY2-SHA256-RSA2048 mchid="'+mchid+'",nonce_str="'+nonce+'",timestamp="'+timestamp+'",serial_no="'+env("WECHAT_MERCHANT_SERIAL")+'",signature="'+signature+'"';
  const res=await fetch("https://api.mch.weixin.qq.com"+path,{method:"POST",headers:{Authorization:authorization,Accept:"application/json","Content-Type":"application/json"},body,cache:"no-store",signal:AbortSignal.timeout(15000)});
- const raw=await res.text();if(!res.ok)throw new Error("WeChat order request failed");
+ if(!res.ok)throw new Error("WeChat order request failed");
+ const raw=await readBoundedHttpText(res,100_000);
  verifyMessage(res.headers,raw);
  return z.object({code_url:z.string().startsWith("weixin://wxpay/")}).parse(JSON.parse(raw)).code_url;
 }

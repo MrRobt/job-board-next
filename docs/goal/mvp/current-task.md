@@ -70,6 +70,11 @@
 - 新增 2/2 单元、1/1 集成；全量单元 23/23、MySQL 集成 14/14、TS/Next.js 构建通过。历史认证清理测试在并发环境下误比较整表行数，已调整为历史过期边界计数，修复后 14/14 PASS。
 - 生产需内网 ACL、探针凭据注入与轮换、断库/恢复/告警 UAT，D02 仍 IN_PROGRESS；详见 `readiness-probe-2026-11-18.md`。
 
+## 2026-11-18 P0 支付 HTTP 流式限额
+
+- 4 个支付回调以及微信/支付宝商户查询、只读退款查询和微信 Native 下单回包由先整体 `.text()` 后检查改为按字节流式限额，已通过 5/5 新增单测、2/2 渠道验签集成、TS exit 0。
+- 尝试执行最终全量测试和生产 build 的调用被工具安全检查阻断；**不能宣称完整验收**。需预发布代理/CDN 大报文回归、商户 UAT；见 `payment-body-bounds-2026-11-18.md`，B05/B06/D02 继续 IN_PROGRESS。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

@@ -12,6 +12,9 @@ GitHub Actions 使用 Node 22 + MySQL 8，依次执行 Prisma validate、版本�
 ## 只读数据库就绪探针
 - `GET /api/readyz` 默认关闭（404），仅在部署侧配置高熵 `READINESS_PROBE_TOKEN` 并携带 `x-readiness-token` 请求头时返回 DB 200/503。必须通过内网/反向代理访问控制和速率限制保护，禁止将 Header 凭据放入 URL 或日志。正式环境使用前还需断库、恢复、告警 UAT，见 `docs/goal/mvp/readiness-probe-2026-11-18.md`。
 
+## 支付回调入口请求大小
+- 四个支付异步回调应用层按 65,536 字节流式限额，商户查询/退款查询及微信下单回包为 100,000 字节；反向代理/CDN 还必须限制请求正文、连接超时和频率。最终全量构建/回归与商户 UAT 尚未验收，见 `docs/goal/mvp/payment-body-bounds-2026-11-18.md`。
+
 ## 容器
 docker build -t job-board-next .
 使用独立 MySQL、独立低权限数据库账号，通过安全环境文件注入运行配置。容器内数据库地址不能使用 127.0.0.1 指向宿主数据库。发布前先备份数据库并执行受控迁移；db:push 仅适用于开发/空库，不建议在生产运行。当前有 `prisma/migrations/20261117000100_baseline/migration.sql` 候选基线，由 Prisma migrate diff 生成但 **已在本项目独立空库成功进行首次 migrate deploy**（见 `docs/goal/mvp/migration-uat-2026-11-18.md`），但旧库基线登记、重复部署与生产迁移仍未验收，不可当作生产就绪。另有 `20261117000200_tool_order_reconcile` 增量候选迁移用于审计表，开发库已 db push，独立空库首次 migrate deploy 已应用，但旧库及生产迁移仍未单独验收；不要将 db push 当作迁移演练。全新库应先在独立预发布容器验证 `prisma migrate deploy` 和幂等复跑；已存在表的旧库必须先备份、核对 schema 并制定 migrate resolve 基线登记方案，禁止直接重放全量 CREATE TABLE。

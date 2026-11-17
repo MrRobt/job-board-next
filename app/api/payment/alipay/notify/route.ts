@@ -1,4 +1,5 @@
 import {parseAlipay} from "@/lib/payment/alipay";
 import {settlePayment} from "@/lib/payment/settlement";
+import {readBoundedHttpText} from "@/lib/http-body-limit";
 export const runtime="nodejs";
-export async function POST(req:Request){try{const raw=await req.text();if(raw.length>65536)throw new Error("Oversized notification");const notice=parseAlipay(raw);if(notice)await settlePayment(notice);return new Response("success");}catch{return new Response("failure",{status:400});}}
+export async function POST(req:Request){try{const raw=await readBoundedHttpText(req,65536);const notice=parseAlipay(raw);if(notice)await settlePayment(notice);return new Response("success");}catch{return new Response("failure",{status:400});}}

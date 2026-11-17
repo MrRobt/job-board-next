@@ -5,6 +5,7 @@ import {canonical,sign,verify,yuanToFen} from "./crypto";
 import {env} from "./config";
 import type {Channel} from "./config";
 import {checkedMerchantPayment,type MerchantObservation} from "./merchant-observation";
+import {readBoundedHttpText} from "../http-body-limit";
 
 /** No caller should interpret request success or local expiry as financial proof. */
 export interface MerchantGateway {
@@ -42,8 +43,7 @@ async function callWechat(method:"GET"|"POST",path:string,body=""){
  // The close endpoint returns 204 with no body; it proves only request acceptance.
  // The caller must query again and verify a signed CLOSED state before changing the DB.
  if(method==="POST"&&res.status===204)return "";
- const raw=await res.text();
- if(raw.length>maxBody)throw new Error("Merchant response oversized");
+ const raw=await readBoundedHttpText(res,maxBody);
  verifyWechatResponse(res.headers,raw);
  return raw;
 }
@@ -107,8 +107,7 @@ async function callAlipay(method:"alipay.trade.query"|"alipay.trade.close",order
   body:new URLSearchParams(params).toString(),cache:"no-store",redirect:"error",signal:AbortSignal.timeout(15_000)
  });
  if(!res.ok)throw new Error("Alipay request failed");
- const raw=await res.text();
- if(raw.length>maxBody)throw new Error("Merchant response oversized");
+ const raw=await readBoundedHttpText(res,maxBody);
  const key=method.replaceAll(".","_")+"_response";
  const result=JSON.parse(raw);
  if(typeof result.sign!=="string"||!verify(extractAlipaySignedObject(raw,key),result.sign,env("ALIPAY_PUBLIC_KEY")))throw new Error("Unverified Alipay response");
