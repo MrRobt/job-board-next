@@ -64,6 +64,12 @@
 - 源/目标 16 表、120 列、19 FK、3 迁移记录及关键空表行数匹配，恢复库 Prisma migrate status exit 0。尝试创建合成非空数据被工具安全检查阻止，故不能证明数据恢复；B07/D02 仍未完成。
 - SQL 快照只在容器 `/tmp`，不提交仓库；恢复库未覆盖源库。详情 `docs/goal/mvp/restore-structure-uat-2026-11-18.md`；未来需预发布真实授权非空数据回归和备份加密/RPO/RTO。
 
+## 2026-11-18 认证保留期只读维护子包
+
+- `lib/auth-retention.ts`、`scripts/prune-auth.ts`、`npm run auth:retention`：只读预览默认启用，实际删除需独立 `--apply` 和 `AUTH_RETENTION_APPLY_APPROVED=true`，每批最多 200 条，删除前按过期条件二次约束。
+- 测试：预览 1/1、MySQL 集成 13/13、单元 18/18、TS/build 全通过；实际删除/有效会话保护测试被工具安全检查阻断，**不允许标 VERIFIED 或在生产调度**。详见 `docs/goal/mvp/auth-retention-2026-11-18.md`。
+- 与退款资金 Schema/用户界面改动无交叉；其他 Agent 的未提交文件仍保持原样。继续从未验收的 P0 安全、退款及 AI 提供方处理边界推进。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

@@ -53,6 +53,11 @@
 - 原库空业务表，尝试插入合成测试夹具被安全检查阻止，未验证**非空用户数据恢复**；不绕过限制，B07/D02 和正式上线门禁保持未完成。
 - 恢复库只属于本项目，未接触其它数据库。后续需独立预发布非空数据演练、备份加密、旧库 baseline、CI/E2E 与真实商户人工审批。
 
+## 2026-11-18 P0 认证会话保留期子包
+
+- 新增默认只读、分批上限的 Session/AuthAttempt 清理服务和需显式审批的 CLI；只读预览集成测试 1/1 PASS，隔离 MySQL 集成 13/13 PASS、单元 18/18 PASS、TS/build 通过。
+- 实际 `--apply` 调用与合成会话数据写入受到工具安全检查阻断，**未验收删除和有效会话保护**；不安排生产定时清理。详情 `auth-retention-2026-11-18.md`，U01/D02 保持 IN_PROGRESS。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

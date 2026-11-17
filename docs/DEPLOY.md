@@ -2,6 +2,9 @@
 ## CI
 GitHub Actions 使用 Node 22 + MySQL 8，依次执行 Prisma validate、版本化 migrate deploy（含复跑与 status 校验）、seed、类型检查、单元测试、生产构建、首页和后台匿名拦截 smoke test。若连接器不允许 workflow 文件写入，将模板复制到 .github/workflows/ci.yml。
 当前未提交 lockfile，依赖安装使用 npm install；首次 CI 后应在本地生成、检查并提交 package-lock.json，改用 npm ci。
+## 认证数据保留期维护
+- `npm run auth:retention` 默认仅预览过期 Session/AuthAttempt 数量；不会删除。需运维人工批准，确认隔离库与备份有效后，才可能通过 `AUTH_RETENTION_APPLY_APPROVED=true npm run auth:retention -- --apply` 执行有界清理。**当前没有实际删除验收，禁止在生产启用**。见 `docs/goal/mvp/auth-retention-2026-11-18.md`。
+
 ## 容器
 docker build -t job-board-next .
 使用独立 MySQL、独立低权限数据库账号，通过安全环境文件注入运行配置。容器内数据库地址不能使用 127.0.0.1 指向宿主数据库。发布前先备份数据库并执行受控迁移；db:push 仅适用于开发/空库，不建议在生产运行。当前有 `prisma/migrations/20261117000100_baseline/migration.sql` 候选基线，由 Prisma migrate diff 生成但 **已在本项目独立空库成功进行首次 migrate deploy**（见 `docs/goal/mvp/migration-uat-2026-11-18.md`），但旧库基线登记、重复部署与生产迁移仍未验收，不可当作生产就绪。另有 `20261117000200_tool_order_reconcile` 增量候选迁移用于审计表，开发库已 db push，独立空库首次 migrate deploy 已应用，但旧库及生产迁移仍未单独验收；不要将 db push 当作迁移演练。全新库应先在独立预发布容器验证 `prisma migrate deploy` 和幂等复跑；已存在表的旧库必须先备份、核对 schema 并制定 migrate resolve 基线登记方案，禁止直接重放全量 CREATE TABLE。
