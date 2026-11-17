@@ -35,6 +35,12 @@
 - `app/actions/auth.ts` 新增可选可信代理 IP 双维度限流；仅接受配置的 `x-real-ip` 或 `cf-connecting-ip`，默认不启用，真实代理 UAT 未完成。
 - 新增单元/集成测试；隔离库集成 12/12 PASS，单元 10/10 PASS，TypeScript 0 错、Next.js 生产 build exit 0；详情 `trusted-ip-limit-2026-11-18.md`。U01 保持 IN_PROGRESS，邮箱验证/注销及真实代理验证仍缺。
 
+## 2026-11-18 P0 退款账务只读预检
+
+- 新增 `lib/career/refund-preflight.ts`：仅订单用户/管理员可检查冻结状态、在途 RESERVED、已用 SUCCEEDED、退款历史和账本一致性；返回人工审核/核账建议，`automaticallyRefundable=false`。
+- 新增 `tests/integration/refund-preflight.test.ts`：2/2 PASS；全量隔离 MySQL 集成 14/14 PASS、单元 10/10 PASS、Prisma validate/TypeScript/Next.js build exit 0。
+- 此处仅为时点只读数据，不涉及商户真实资金申请、成功退款证据或原子撤销次数。B06 继续 IN_PROGRESS，详情 `refund-preflight-2026-11-18.md`；下一优先级为持久退款请求号和幂等渠道申请。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

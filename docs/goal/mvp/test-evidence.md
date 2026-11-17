@@ -43,6 +43,12 @@
 - 全量 MySQL 集成 12/12 PASS；单元 10/10 PASS；TypeScript exit 0；Next.js 生产 build exit 0。详情 `trusted-ip-limit-2026-11-18.md`。
 - IP 头信任依赖实际反向代理强制覆盖与源站防护；未进行真实预发布代理联调，U01 维持 IN_PROGRESS，不能宣称正式上线级限流验收。
 
+## 2026-11-18：退款账务只读预检
+
+- 新增 `refund-preflight.test.ts` 2/2 PASS：订单用户/管理员隔离、退款冻结、在途 AI、失败返还、已消费、错误账本，以及预检前后财务状态不变。
+- 全量 MySQL 集成 14/14 PASS；全量单元 10/10 PASS；Prisma validate、TypeScript、Next.js 生产 build 均 exit 0。测试库 `jobs_mvp_migrate_20261118_8f72`，未发起真实退款。
+- 详见 `refund-preflight-2026-11-18.md`。B06 整体仍 IN_PROGRESS：预检是只读时点快照，不是渠道到账证明或原子资金事务。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
