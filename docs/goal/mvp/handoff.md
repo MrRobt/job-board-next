@@ -142,6 +142,13 @@
 - GREEN：两条结算路径互查交易号并使用 MySQL SERIALIZABLE 事务；顺序双向及 6 组并发竞争测试 1/1 PASS，所有冲突只能至多放行一个结算，失败不发额外权益。完整单元 38/38、MySQL 集成 18/18、TS 和 Next build PASS。见 `docs/goal/mvp/cross-product-trade-isolation-2026-11-18.md`。
 - 后续仍应设计全局支付交易登记表、冲突/死锁告警及真实商户重试 UAT；B05/B06 未完成。其他 Agent 退款 Schema/页面/迁移未经本轮修改，不混提交。
 
+## 2026-11-18 P0 跨业务重复交易历史只读核账
+
+- 新增 `lib/payment/cross-product-trade-audit.ts` + `scripts/payment-trade-audit.ts`，只读 JOIN `Order`/`ToolOrder` 的相同渠道交易号，返回总数和最多 50 条状态/订单号/哈希指纹样本；CLI 未设置 `PAYMENT_TRADE_AUDIT_APPROVED=true` 时拒绝执行，不修改订单/资金/权益。
+- 新增 `tests/integration/cross-product-trade-audit.test.ts` 合成冲突 1/1 PASS，专用测试库运维只读执行 `count=0`/`sample=[]`，全量单元 38/38、MySQL 19/19、TS/build exit 0。详细见 `docs/goal/mvp/cross-product-trade-audit-2026-11-18.md`。
+- 已核实前一提交 `308f084` 的 GitHub Actions run `44230355739` success。远端 CI 对本核账子包需待提交 push 后单独确认。
+- 优先级仍 B06 退款持久化/终态撤权；其他 Agent 的未提交 Schema/迁移/页面不得混提交，不开启真实收款。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

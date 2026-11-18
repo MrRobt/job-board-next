@@ -130,6 +130,13 @@
 - `lib/payment/settlement.ts` 新增反向检查另一订单表；与 `lib/career/billing.ts` 同时采用 SERIALIZABLE 交互式事务和有界等待，冲突、死锁、超时失败关闭。新增顺序和 6 组并发交叉竞争测试，GREEN 1/1；全量单元 **38/38**、MySQL 集成 **18/18**、TS 和 Next.js build exit 0。
 - 详情 `cross-product-trade-isolation-2026-11-18.md`。尚无真实商户、全局交易唯一登记表与生产压力测试，B05/B06 保持 IN_PROGRESS；其他 Agent 退款 Schema/页面未提交文件保持不变。
 
+## 2026-11-18 P0 历史跨业务重复交易只读核账
+
+- 新增 `lib/payment/cross-product-trade-audit.ts` 用只读 SQL 找出旧订单与 AI 次数包相同商户交易号，返回异常总数、两个订单 ID、状态与 SHA-256 交易指纹，不返回完整商户交易号或用户邮箱。
+- 新增显式授权 CLI `scripts/payment-trade-audit.ts`（默认拒绝、只读、冲突 exit 2），专项隔离 MySQL 集成 1/1 PASS。手工在测试库执行已授权只读扫描：`count=0`、`sample=[]`；绝不代表生产库无异常。
+- 全量单元 **38/38 PASS**、MySQL 集成 **19/19 PASS**、TS/build exit 0。详情 `cross-product-trade-audit-2026-11-18.md`；生产数据/运维权限/商户真实交易核对未验收，B04/B05/B06 继续 IN_PROGRESS。
+- 本轮前一代码提交 `308f084` 的 GitHub Actions run `44230355739` 已确认 completed/success，仅代表已提交 Git 树的远端 CI。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
