@@ -90,6 +90,11 @@
 - 全量 MySQL 集成：**7/14 PASS，7/14 FAIL（均为 Windows 宿主到本项目 MySQL 端口不可达）**。容器 `job-board-next-db-1` healthy、绑定 127.0.0.1:3306，容器内 `SELECT 1` exit 0；宿主 `prisma migrate status` 超时。未修改任何 Docker DB 或凭据，**不能声称 P0 全量集成通过**。
 - 此结果弥补此前 HTTP 字节上限模块被安全检查阻断的单元/构建测试缺口，但 MySQL 完整回归、商户 UAT、CI 和真实资金仍 BLOCKED/IN_PROGRESS。详见 `payment-origin-gate-2026-11-18.md`。
 
+## 2026-11-18：P0 微信 Native 下单重定向与回包回归
+
+- 新增 `tests/integration/wechat-native-gateway.test.ts` 2/2 PASS（临时 RSA 签名回包、APP_ORIGIN 回调、非期望重定向、缺签名/错 serial/超大正文拒绝，不发真实商户请求）。
+- 全量单元 30/30 PASS、TS exit 0、Next.js 生产 build exit 0。宿主连接 MySQL 仍阻断，完整集成不能宣称通过，见 `wechat-native-redirect-2026-11-18.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

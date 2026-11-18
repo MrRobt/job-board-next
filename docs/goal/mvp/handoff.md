@@ -95,6 +95,12 @@
 - `docs/goal/mvp/payment-origin-gate-2026-11-18.md` 记录详细证据；支付 HTTP 流式加固的单元和生产构建均已补验，但 DB/商户联调仍缺。
 - 其他 Agent 的退款申请、Schema、页面、lockfile 等未提交变更全部保持，不与本包混提交。
 
+## 2026-11-18 P0 微信 Native 下单网关重定向防护
+
+- `createWechatUrl` 显式拒绝 HTTP 重定向，防止商户签名下单跟随意外 3xx；新增 2/2 离线 RSA 签名与危险回包测试，完整单元 30/30、TS/Next.js build PASS。
+- 详见 `docs/goal/mvp/wechat-native-redirect-2026-11-18.md`；无商户真实调用。数据库宿主网络阻断不变，不可将全量 MySQL、商户或资金验收标为通过。
+- 其他 Agent 的退款申请/Schema 等原未提交工作保留，继续从最高优先级资金账务或独立 P0 恢复。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

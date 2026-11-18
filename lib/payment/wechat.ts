@@ -15,7 +15,7 @@ export async function createWechatUrl(order:{id:string;amountFen:number;paymentE
  const body=JSON.stringify({appid:env("WECHAT_APP_ID"),mchid,description:order.tool?"职讯集求职工具调用次数包":"职讯集历史招聘信息服务",out_trade_no:order.id,time_expire:order.paymentExpiresAt?.toISOString().replace(/\.\d{3}Z$/,"+00:00"),notify_url:origin()+(order.tool?"/api/tool-payment/wechat/notify":"/api/payment/wechat/notify"),amount:{total:order.amountFen,currency:"CNY"}});
  const signature=sign("POST\n"+path+"\n"+timestamp+"\n"+nonce+"\n"+body+"\n",env("WECHAT_PRIVATE_KEY"));
  const authorization='WECHATPAY2-SHA256-RSA2048 mchid="'+mchid+'",nonce_str="'+nonce+'",timestamp="'+timestamp+'",serial_no="'+env("WECHAT_MERCHANT_SERIAL")+'",signature="'+signature+'"';
- const res=await fetch("https://api.mch.weixin.qq.com"+path,{method:"POST",headers:{Authorization:authorization,Accept:"application/json","Content-Type":"application/json"},body,cache:"no-store",signal:AbortSignal.timeout(15000)});
+ const res=await fetch("https://api.mch.weixin.qq.com"+path,{method:"POST",headers:{Authorization:authorization,Accept:"application/json","Content-Type":"application/json"},body,cache:"no-store",redirect:"error",signal:AbortSignal.timeout(15000)});
  if(!res.ok)throw new Error("WeChat order request failed");
  const raw=await readBoundedHttpText(res,100_000);
  verifyMessage(res.headers,raw);
