@@ -23,7 +23,7 @@ export async function login(form:FormData){
  if(!input.success)redirect("/login?error=1");
  if(!await authenticationAllowed("login",input.data.email,8,60,15))redirect("/login?error=1");
  const user=await db.user.findUnique({where:{email:input.data.email}});
- if(!user||!verifyPassword(input.data.password,user.passwordHash))redirect("/login?error=1");
+ if(!user||!await verifyPassword(input.data.password,user.passwordHash))redirect("/login?error=1");
  await startSession(user.id); redirect("/");
 }
 export async function register(form:FormData){
@@ -33,7 +33,7 @@ export async function register(form:FormData){
  const existing=await db.user.findUnique({where:{email:input.data.email}});
  if(existing)redirect("/register?error=1");
  let id:string;
- try {const user=await db.user.create({data:{email:input.data.email,passwordHash:hashPassword(input.data.password)}});id=user.id;}catch{redirect("/register?error=1");}
+ try {const user=await db.user.create({data:{email:input.data.email,passwordHash:await hashPassword(input.data.password)}});id=user.id;}catch{redirect("/register?error=1");}
  await startSession(id);redirect("/");
 }
 export async function logout(){await endSession();redirect("/");}

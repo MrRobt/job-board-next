@@ -95,6 +95,12 @@
 - 修复后独立并发 1/1 PASS、完整 MySQL **17/17 连续两轮 PASS**、单元 30/30、TS/build exit 0；详细见 `rate-limit-concurrency-2026-11-18.md`。
 - 该子包解决本地连接池竞争，不代表真实 CDN、生产压力、商户 UAT 或资金退款闭环验收；U01/B04/D02 继续 IN_PROGRESS。
 
+## 2026-11-18 P0 异步密码散列与旧哈希兼容
+
+- `lib/password.ts` 从阻塞事件循环的 `scryptSync` 改为 Promise 异步 scrypt，保留随机 16B salt + 64B scrypt 摘要原格式，旧用户无需重置密码；拒绝损坏哈希及新建不符合 12～128 字符长度的密码。
+- 已将 `app/actions/auth.ts` 登录、注册与 `prisma/seed.ts` 管理员散列更新为 `await`，避免 Promise 被写入 DB。
+- 专项 3/3、全单元 **32/32 PASS**、MySQL 集成 **17/17 PASS**、TS/Next.js build exit 0；详情 `async-password-2026-11-18.md`。U01 仍 IN_PROGRESS（邮箱验证、密码找回、注销、真实代理与浏览器 E2E 缺口）。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

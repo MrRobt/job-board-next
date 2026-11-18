@@ -107,6 +107,12 @@
 - `lib/rate-limit.ts` 保留原 SQL 原子计数，新增交互式事务 `maxWait:10_000, timeout:15_000` 与数据库错误 fail closed；修复后独立 1/1、完整 MySQL 两次 **17/17 PASS**、单元 30/30、TS/Next.js build PASS。
 - `docs/goal/mvp/rate-limit-concurrency-2026-11-18.md` 保存根因与实测。原有退款 Schema/UI 和 lockfile 等他人未提交文件保持不变；生产商户/高压/真实代理 UAT 仍待完成。
 
+## 2026-11-18 P0 密码 scrypt 异步非阻塞转换
+
+- `lib/password.ts` 使用 Promise 异步 scrypt，**与原同步 scrypt 存储格式及参数完全兼容**；`app/actions/auth.ts` 和 `prisma/seed.ts` 也已等待异步结果，无 Schema 改动。
+- 新增 3 项专项测试含从旧同步 scrypt 生成的真实哈希兼容、6 并发注册散列与非法格式；完整单元 32/32、MySQL 集成 17/17、TS/Next.js build exit 0，见 `docs/goal/mvp/async-password-2026-11-18.md`。
+- 仍缺邮箱验证、账户删除、密码找回、生产代理及登录浏览器 E2E；其他 Agent 未提交退款和 Schema 仍保持不变。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

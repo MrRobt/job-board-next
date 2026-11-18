@@ -9,7 +9,7 @@ async function main() {
   const password = process.env.ADMIN_PASSWORD;
   if (email && password && password.length >= 12) {
     const exists = await db.user.findUnique({ where: { email } });
-    if (!exists) await db.user.create({ data: { email, passwordHash: hashPassword(password), role: "ADMIN" } });
+    if (!exists) await db.user.create({ data: { email, passwordHash: await hashPassword(password), role: "ADMIN" } });
     else if (exists.role !== "ADMIN") throw new Error("Existing non-admin account; refusing privilege escalation");
   } else console.info("Set ADMIN_EMAIL and ADMIN_PASSWORD (>=12 chars) to initialize admin.");
 }

@@ -10,4 +10,5 @@
 - 支付回调 `APP_ORIGIN` 启用检查和回调 URL 生成使用同一公共 HTTPS 源校验，避免 HTTPS 协议检查过宽；仍须核定 DNS、TLS、回调可达性和商户侧设置，见 `docs/goal/mvp/payment-origin-gate-2026-11-18.md`。
 - 微信 Native 创建支付订单网络请求明确禁止自动跟随 3xx 重定向，离线验证签名回包与拒绝危险响应；尚未真实商户联调，见 `docs/goal/mvp/wechat-native-redirect-2026-11-18.md`。
 - 认证与应用使用的数据库限流在 Prisma 连接池压力下采用有界事务等待，并在数据库异常时拒绝请求，保证不会因事务超时放行；仍需生产负载、代理 UAT 与告警，见 `docs/goal/mvp/rate-limit-concurrency-2026-11-18.md`。
+- 用户密码散列与验证采用异步 scrypt，保留原盐和哈希格式并通过旧密码哈希兼容测试；仍需生产认证压测及邮箱验证，见 `docs/goal/mvp/async-password-2026-11-18.md`。
 - 不得提交生产用户数据及商户证书。
