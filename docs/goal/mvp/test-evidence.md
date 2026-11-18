@@ -114,6 +114,11 @@
 - 全单元 **36/36 PASS**、隔离 MySQL 集成 **17/17 PASS**、TypeScript exit 0、Next.js 16.4.6 build exit 0。使用内存注入网关，没有真实支付/退款 HTTP 或资金操作。
 - 依赖的完整退款出款持久化 Schema、资金幂等、最终状态/撤权尚未交付，B06 保持 IN_PROGRESS；详见 `refund-inquiry-bridge-2026-11-18.md`。
 
+## 2026-11-18：B07 版本化迁移重复部署补验
+
+- 在专用本地 MySQL 隔离库执行第二次 `prisma migrate deploy --schema prisma/schema.prisma`，exit 0，`No pending migrations to apply`；随后 `prisma migrate status` exit 0，3 个迁移均 up to date。
+- 该证据补上此前本地第二次迁移被工具阻断的缺口，见 `migration-repeat-2026-11-18.md`。退款迁移文件仍未提交，不能替代 GitHub CI、旧库 baseline 或生产迁移/回滚 UAT。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

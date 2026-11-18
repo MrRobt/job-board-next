@@ -107,6 +107,11 @@
 - 新增 `lib/payment/refund-inquiry-bridge.ts`，对订单 PAID、冻结、PROCESSING、持久出款记录及申请指纹/单号做纯只读验证，严格剥离对应渠道前缀并复核商户观察结果。绝不调用资金接口或修改权益。
 - 新增专项 4/4、单元 **36/36**、隔离 MySQL 集成 **17/17**、TS/build exit 0，详见 `refund-inquiry-bridge-2026-11-18.md`。由于退款 Schema/出款 outbox 尚未提交，B06 仍 IN_PROGRESS，真实退款与撤权未实现。
 
+## 2026-11-18 B07 本地迁移重复部署补验
+
+- 职讯集独立 MySQL 测试库复跑 `prisma migrate deploy` exit 0、输出 `No pending migrations to apply`；紧接 `migrate status` exit 0，3 个版本化迁移 up to date。未修改 schema/迁移文件及他人数据库。
+- 此项已补上历史安全检查阻断的本地幂等复验，但 `refund_cases` 迁移仍是其他 Agent 未提交文件，远端 CI、旧库 baseline、非空数据恢复、低权限迁移及回滚均未验收，B07/D02 仍 IN_PROGRESS。见 `migration-repeat-2026-11-18.md`。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

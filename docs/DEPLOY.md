@@ -21,6 +21,9 @@ GitHub Actions 使用 Node 22 + MySQL 8，依次执行 Prisma validate、版本�
 ## 认证密码存储兼容
 - 密码哈希从阻塞式 scryptSync 改为异步 scrypt，仍兼容现有 16 字节随机 salt + 64 字节摘要格式。注册、登录及初始化管理员均已异步等待；部署不需要重哈希已有密码或执行 Schema 迁移。新管理员密码需 12～128 字符。见 `docs/goal/mvp/async-password-2026-11-18.md`。
 
+## 本地数据库迁移重复部署验收
+- 当前职讯集专用 MySQL 隔离库已补验第二次 `prisma migrate deploy`，返回 `No pending migrations to apply`，随后 `migrate status` 3 个迁移均 up to date；见 `docs/goal/mvp/migration-repeat-2026-11-18.md`。**仅代表本地独立库**，退款迁移仍属其他 Agent 未提交变更，旧库迁移、远端 CI、非空数据恢复和生产回滚都必须独立验收。
+
 ## 容器
 docker build -t job-board-next .
 使用独立 MySQL、独立低权限数据库账号，通过安全环境文件注入运行配置。容器内数据库地址不能使用 127.0.0.1 指向宿主数据库。发布前先备份数据库并执行受控迁移；db:push 仅适用于开发/空库，不建议在生产运行。当前有 `prisma/migrations/20261117000100_baseline/migration.sql` 候选基线，由 Prisma migrate diff 生成但 **已在本项目独立空库成功进行首次 migrate deploy**（见 `docs/goal/mvp/migration-uat-2026-11-18.md`），但旧库基线登记、重复部署与生产迁移仍未验收，不可当作生产就绪。另有 `20261117000200_tool_order_reconcile` 增量候选迁移用于审计表，开发库已 db push，独立空库首次 migrate deploy 已应用，但旧库及生产迁移仍未单独验收；不要将 db push 当作迁移演练。全新库应先在独立预发布容器验证 `prisma migrate deploy` 和幂等复跑；已存在表的旧库必须先备份、核对 schema 并制定 migrate resolve 基线登记方案，禁止直接重放全量 CREATE TABLE。

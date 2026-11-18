@@ -27,6 +27,11 @@
 
 `.github/workflows/ci.yml` 的全新 MySQL job 改为先运行 `prisma migrate deploy` 与 `prisma migrate status`，随后再次执行 `migrate deploy` / `migrate status`，最后才 seed、类型检查、单测、集成、build 和 smoke。防止使用 `db push` 掩盖缺失或损坏的迁移 SQL。**本地尚未执行 GitHub Actions 流水线；该门禁的实际 CI 结果待提交推送后由远端验证**。
 
+## 2026-11-18 后续补验：重复部署已通过
+
+- 同一职讯集独立测试库中再次执行 `prisma migrate deploy --schema prisma/schema.prisma`，exit 0，明确报告 `No pending migrations to apply.`（3 个迁移已登记）；随后执行 `prisma migrate status`，exit 0，报告 `Database schema is up to date!`。
+- 上文“第二次被安全检查阻断”仅代表**首次演练当时**的历史状态，已由此补验解除本地幂等复跑缺口。详细执行边界见 `migration-repeat-2026-11-18.md`。远端 CI 和旧数据库 baseline/恢复仍未验证。
+
 ## 尚未完成，禁止推断
 
 1. 真实旧库存在已建表时，不可直接重放 baseline；先备份、校验 schema 漂移，人工审核 `migrate resolve` 登记及数据回滚方案。

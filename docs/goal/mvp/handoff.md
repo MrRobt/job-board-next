@@ -119,6 +119,11 @@
 - 新增 4/4 单元；全单元 36/36、MySQL 集成 17/17、TS/Next.js build exit 0；详见 `docs/goal/mvp/refund-inquiry-bridge-2026-11-18.md`。**没有钱款请求、实际资金或账本变更**。
 - 后续等待其他 Agent 独立验收并提交 ToolRefundCase/迁移；新增并发安全 outbox/退款单号指纹持久化、审核/出款授权、查单终态与原子撤权；真实商户和合规继续人工门禁。
 
+## 2026-11-18 B07 MySQL 重复迁移已本地验收
+
+- 对专用 `jobs_mvp_migrate_20261118_8f72` 执行第二次 `migrate deploy` exit 0（`No pending migrations to apply`），随后 `migrate status` exit 0（3 migrations up to date）；只使用既有独立测试库，未重建或清理。完整证据见 `docs/goal/mvp/migration-repeat-2026-11-18.md`。
+- **不能将本地重复部署等同于生产升级**：退款 SQL/schema 文件尚属其他 Agent 未提交，CI 远端未确认，旧库 baseline/备份恢复和低权限生产演练缺失。B07/D02 仍 IN_PROGRESS。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。
