@@ -75,6 +75,13 @@
 - 4 个支付回调以及微信/支付宝商户查询、只读退款查询和微信 Native 下单回包由先整体 `.text()` 后检查改为按字节流式限额，已通过 5/5 新增单测、2/2 渠道验签集成、TS exit 0。
 - 尝试执行最终全量测试和生产 build 的调用被工具安全检查阻断；**不能宣称完整验收**。需预发布代理/CDN 大报文回归、商户 UAT；见 `payment-body-bounds-2026-11-18.md`，B05/B06/D02 继续 IN_PROGRESS。
 
+## 2026-11-18 P0 支付来源域名一致性与回归补验
+
+- 修复 `lib/payment/config.ts` 中支付渠道启用检查与实际回调 URL 生成策略不一致：统一使用严格 `validatedPaymentOrigin`。拒绝 IP、本地/内网、含凭据、端口、额外路径、查询及非规范 HTTPS 域名。
+- 新增支付来源策略单元 2/2、渠道配置离线测试 1/1；全部单元 30/30 PASS、TypeScript exit 0、Next.js build exit 0。对应 `payment-origin-gate-2026-11-18.md`。
+- 当前本地 MySQL 14 项集成 7 PASS/7 FAIL，失败均为 Windows 宿主 `127.0.0.1:3306` 不可达；专属 Docker 容器 healthy、容器内 SELECT 1 成功。不得宣称集成通过；没有重启容器、迁移或操作其他数据库。
+- 上轮支付 HTTP 流式上限的单元与构建证据已补验；商户 UAT、退回资金与权益、真实 CI 仍未完成，B05/B06 保持 IN_PROGRESS。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

@@ -88,6 +88,13 @@
 - 新增单测 5/5、原微信/支付宝商户验签集成 2/2、TypeScript exit 0。最终全量回归/build 被执行工具安全检查阻断，不能认定已验证完整支付闭环；详见 `docs/goal/mvp/payment-body-bounds-2026-11-18.md`。
 - 不修改任何资金账本或真实密钥；其他 Agent 原有退款 Schema、页面及 lockfile 未提交改动继续原样保留。后续优先完整回归与支付/退款资金 P0。
 
+## 2026-11-18 P0 支付来源域名门禁与宿主数据库阻断
+
+- `lib/payment/origin-policy.ts` 为纯规则；`lib/payment/config.ts` 统一 `enabled`/`origin` 使用公共 HTTPS 回调源验证；新增单元 2/2、离线配置 1/1。全量单元 30/30 PASS、TS/Next.js build exit 0。
+- 完整 MySQL 集成 7/14：7 项 DB 访问失败，容器 `job-board-next-db-1` healthy、映射 `127.0.0.1:3306`、容器内 `SELECT 1` 正常；Windows 宿主 Prisma 连接超时。保留现场，后续必须排查端口代理/网络并复验，不可标 VERIFIED。
+- `docs/goal/mvp/payment-origin-gate-2026-11-18.md` 记录详细证据；支付 HTTP 流式加固的单元和生产构建均已补验，但 DB/商户联调仍缺。
+- 其他 Agent 的退款申请、Schema、页面、lockfile 等未提交变更全部保持，不与本包混提交。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

@@ -84,6 +84,12 @@
 - 新增 `tests/http-body-limit.test.ts`：5/5 PASS（请求/响应按字节上限、伪造 Content-Length、UTF-8 多字节、超限拒绝及无效正文）。现有 `tests/integration/merchant-gateway.test.ts` 2/2 PASS，TypeScript exit 0。
 - **最终全量集成、单元与生产 build 未运行成功**：组合调用被工具安全检查阻断，没有绕过。该小包仅记录部分验证，不能宣称 B05/B06 已验收；详情 `payment-body-bounds-2026-11-18.md`。
 
+## 2026-11-18：P0 支付回调域名策略 + 上轮 HTTP 安全补验
+
+- 新增 `tests/payment-origin-policy.test.ts` 2/2 PASS、`tests/integration/payment-origin-config.test.ts` 1/1 PASS（含无密钥、畸形回调地址拒绝）。完整单元套件 **30/30 PASS**、TypeScript exit 0、Next.js 16.4.6 生产 build exit 0。
+- 全量 MySQL 集成：**7/14 PASS，7/14 FAIL（均为 Windows 宿主到本项目 MySQL 端口不可达）**。容器 `job-board-next-db-1` healthy、绑定 127.0.0.1:3306，容器内 `SELECT 1` exit 0；宿主 `prisma migrate status` 超时。未修改任何 Docker DB 或凭据，**不能声称 P0 全量集成通过**。
+- 此结果弥补此前 HTTP 字节上限模块被安全检查阻断的单元/构建测试缺口，但 MySQL 完整回归、商户 UAT、CI 和真实资金仍 BLOCKED/IN_PROGRESS。详见 `payment-origin-gate-2026-11-18.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
