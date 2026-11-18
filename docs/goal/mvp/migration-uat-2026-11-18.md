@@ -32,6 +32,11 @@
 - 同一职讯集独立测试库中再次执行 `prisma migrate deploy --schema prisma/schema.prisma`，exit 0，明确报告 `No pending migrations to apply.`（3 个迁移已登记）；随后执行 `prisma migrate status`，exit 0，报告 `Database schema is up to date!`。
 - 上文“第二次被安全检查阻断”仅代表**首次演练当时**的历史状态，已由此补验解除本地幂等复跑缺口。详细执行边界见 `migration-repeat-2026-11-18.md`。远端 CI 和旧数据库 baseline/恢复仍未验证。
 
+## 2026-11-18 后续远端 CI 核验
+
+- 使用 GitHub connector 读取实际 push run：`27824d9` 对应 `44225639694` completed/success，`validate` 作业中首次 migrate、迁移状态、重复 migrate、seed、TS/测试、构建和 smoke 步骤均 success，详见 `ci-remote-verification-2026-11-18.md`。
+- 该远端运行是 GitHub checkout **已经提交的仓库**，不包括当前其他 Agent 未提交的退款 Schema/迁移；不能把远端迁移成功当作该未提交版本的验收。
+
 ## 尚未完成，禁止推断
 
 1. 真实旧库存在已建表时，不可直接重放 baseline；先备份、校验 schema 漂移，人工审核 `migrate resolve` 登记及数据回滚方案。

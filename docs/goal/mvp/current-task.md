@@ -112,6 +112,12 @@
 - 职讯集独立 MySQL 测试库复跑 `prisma migrate deploy` exit 0、输出 `No pending migrations to apply`；紧接 `migrate status` exit 0，3 个版本化迁移 up to date。未修改 schema/迁移文件及他人数据库。
 - 此项已补上历史安全检查阻断的本地幂等复验，但 `refund_cases` 迁移仍是其他 Agent 未提交文件，远端 CI、旧库 baseline、非空数据恢复、低权限迁移及回滚均未验收，B07/D02 仍 IN_PROGRESS。见 `migration-repeat-2026-11-18.md`。
 
+## 2026-11-18 D02/B07 真实 GitHub Actions CI 查验
+
+- 通过 GitHub 仓库连接器直接查询 `MrRobt/job-board-next` 的 push workflow runs，确认 `main` 提交 `27824d936e85754596ab25733de92526dc351c57` 的 CI run `44225639694` completed/success。
+- 查验 validate job `134538015677` 各步骤 success：全新 MySQL migrate deploy、status、重复部署、seed、typecheck、unit、MySQL integration、Next.js build、smoke。B06 桥接先前提交 `0270b41` 的 push run `44225197207` 也 success。
+- 这是干净 checkout 的真实远端 CI 证据；**不包含其他 Agent 尚未提交的 refund_cases Schema/迁移**，也不代表真实商户、生产部署/恢复。详情 `ci-remote-verification-2026-11-18.md`，D02/B07 仍 IN_PROGRESS。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

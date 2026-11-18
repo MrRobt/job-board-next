@@ -124,6 +124,12 @@
 - 对专用 `jobs_mvp_migrate_20261118_8f72` 执行第二次 `migrate deploy` exit 0（`No pending migrations to apply`），随后 `migrate status` exit 0（3 migrations up to date）；只使用既有独立测试库，未重建或清理。完整证据见 `docs/goal/mvp/migration-repeat-2026-11-18.md`。
 - **不能将本地重复部署等同于生产升级**：退款 SQL/schema 文件尚属其他 Agent 未提交，CI 远端未确认，旧库 baseline/备份恢复和低权限生产演练缺失。B07/D02 仍 IN_PROGRESS。
 
+## 2026-11-18 GitHub Actions 已确认远端 CI 通过
+
+- 使用 GitHub connector fetch Actions push runs，实际查得 `27824d9` CI run `44225639694` completed/success；`validate` job 及迁移初次/重复、Prisma validate/status、seed、TS、单测、集成、build、smoke 均 success。`0270b41` push run `44225197207` 也 success。
+- 证据：`docs/goal/mvp/ci-remote-verification-2026-11-18.md`，run 链接 `https://github.com/MrRobt/job-board-next/actions/runs/44225639694`。先前 commit-status 空列表不代表 CI 未通过。
+- CI 验证的是已提交快照，**其他 Agent 未提交的退款申请/Schema/迁移、未提交 package-lock** 未进入 run；旧库、非空备份恢复、商户资金/AI/资质仍 BLOCKED，不能将 D02/B07 全部标 VERIFIED。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。
