@@ -88,6 +88,13 @@
 - 新增 `tests/integration/wechat-native-gateway.test.ts`：临时 RSA、mock fetch，不联网，覆盖签名有效回包、严格来源回调、302、签名错误、公钥标识、非微信链接和超大回包，2/2 PASS。全单元 30/30 PASS、TS/Next.js build exit 0。
 - 宿主 MySQL 网络仍未恢复，不能宣称 DB 集成成功；真实商户审批与支付/退款 UAT 仍 BLOCKED，详情 `wechat-native-redirect-2026-11-18.md`。
 
+## 2026-11-18 P0 并发限流事务等待与完整 MySQL 复验
+
+- Windows 宿主对专用 DB 3306 的连接恢复，`prisma migrate status` exit 0，3 个版本化迁移 up to date，未操作其他项目容器。
+- 完整集成首轮 16/17 PASS，`trusted-ip-limit` 因 Prisma 交互式事务等候连接超时；修复 `lib/rate-limit.ts` 增加事务有界 `maxWait=10s`、`timeout=15s`，数据库压力/故障返回拒绝请求（fail closed），不跳过限流。
+- 修复后独立并发 1/1 PASS、完整 MySQL **17/17 连续两轮 PASS**、单元 30/30、TS/build exit 0；详细见 `rate-limit-concurrency-2026-11-18.md`。
+- 该子包解决本地连接池竞争，不代表真实 CDN、生产压力、商户 UAT 或资金退款闭环验收；U01/B04/D02 继续 IN_PROGRESS。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

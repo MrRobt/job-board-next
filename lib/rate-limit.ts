@@ -14,7 +14,10 @@ export async function allowAttempt(scope: string, identity: string, limit: numbe
   const window = Math.floor(Date.now() / windowMs);
   const resetAt = new Date((window + 1) * windowMs);
   const key = createHash("sha256").update(scope + ":" + identity + ":" + window).digest("hex");
-  return db.$transaction(async tx => {
+  // Authentication must fail closed during database outages or transaction-pool
+  // pressure; never silently skip a throttle or surface an uncaught 500.
+  try {
+    return await db.$transaction(async tx => {
     await tx.$executeRaw`
       INSERT INTO \`AuthAttempt\` (\`key\`, \`count\`, \`resetAt\`)
       VALUES (${key}, 1, ${resetAt})
@@ -26,5 +29,8 @@ export async function allowAttempt(scope: string, identity: string, limit: numbe
       where: { key }, select: { count: true },
     });
     return record !== null && record.count <= limit;
-  });
+    }, { maxWait: 10_000, timeout: 15_000 });
+  } catch {
+    return false;
+  }
 }

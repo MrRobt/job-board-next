@@ -95,6 +95,13 @@
 - 新增 `tests/integration/wechat-native-gateway.test.ts` 2/2 PASS（临时 RSA 签名回包、APP_ORIGIN 回调、非期望重定向、缺签名/错 serial/超大正文拒绝，不发真实商户请求）。
 - 全量单元 30/30 PASS、TS exit 0、Next.js 生产 build exit 0。宿主连接 MySQL 仍阻断，完整集成不能宣称通过，见 `wechat-native-redirect-2026-11-18.md`。
 
+## 2026-11-18：P0 MySQL 完整集成恢复及可信 IP 并发修复
+
+- 先前 Docker 宿主连接失败现已恢复：专用 `job-board-next-db-1` healthy，宿主 TCP 检查成功，Prisma migrate status exit 0，3 个迁移 up to date；没有重建/清空数据库。
+- 全量 MySQL 初次 16/17 PASS：`trusted-ip-limit` 事务池在并行测试压力下启动超时。为 `allowAttempt` 增加有界 Prisma 事务等待与数据库故障 fail closed，修复后独立测试 1/1 PASS、全量 MySQL **连续两次 17/17 PASS**。
+- 全量单元 **30/30 PASS**、TypeScript exit 0、Next.js 生产 build exit 0。第二次全量执行时曾误填 Node 路径造成 exit 127，纠正后正常 17/17。
+- 注意这些是本机隔离 UAT；不等于真实支付/退款、合规模型、生产压力、网络代理及远端 CI 验收。详见 `rate-limit-concurrency-2026-11-18.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

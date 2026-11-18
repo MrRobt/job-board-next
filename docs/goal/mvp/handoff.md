@@ -101,6 +101,12 @@
 - 详见 `docs/goal/mvp/wechat-native-redirect-2026-11-18.md`；无商户真实调用。数据库宿主网络阻断不变，不可将全量 MySQL、商户或资金验收标为通过。
 - 其他 Agent 的退款申请/Schema 等原未提交工作保留，继续从最高优先级资金账务或独立 P0 恢复。
 
+## 2026-11-18 P0 并发限流连接等待稳定性修复
+
+- 宿主 Windows→Docker MySQL 连接恢复，`prisma migrate status` 3/3 上线迁移记录一致。初次完整 17 项测试 16/17，其中限流 7 并发在综合测试负载下报 Prisma 事务启动超时。
+- `lib/rate-limit.ts` 保留原 SQL 原子计数，新增交互式事务 `maxWait:10_000, timeout:15_000` 与数据库错误 fail closed；修复后独立 1/1、完整 MySQL 两次 **17/17 PASS**、单元 30/30、TS/Next.js build PASS。
+- `docs/goal/mvp/rate-limit-concurrency-2026-11-18.md` 保存根因与实测。原有退款 Schema/UI 和 lockfile 等他人未提交文件保持不变；生产商户/高压/真实代理 UAT 仍待完成。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。
