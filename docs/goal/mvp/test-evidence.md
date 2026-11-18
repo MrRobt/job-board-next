@@ -125,6 +125,11 @@
 - 前次 commit `0270b41...` run `44225197207` 也 completed/success。详见 `ci-remote-verification-2026-11-18.md`，该远端验证**只覆盖已提交 Git 树**。
 - refund_cases Schema/迁移、其他 Agent 页面仍未提交，无法据此标真实资金退款/生产发布、旧库升级与非空备份恢复 VERIFIED。
 
+## 2026-11-18：D02 HTTP 响应头安全策略
+
+- `tests/security-headers.test.ts` 2/2 PASS（全局硬化、私有敏感路由禁止缓存且静态缓存不受全局影响）。全量单元 38/38 PASS、隔离 MySQL 集成 17/17 PASS、TS exit 0、Next.js build exit 0。
+- 首次 TS 测试类型推断错误，新增显式类型后已复测。远端 CI 尚未验证这次新增策略；尝试改 CI 以检查真实 HTTP Header 时被安全检查阻断，**没有真实 HTTPS/网关响应头验收**。详见 `http-security-headers-2026-11-18.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

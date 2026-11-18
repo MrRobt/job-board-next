@@ -130,6 +130,12 @@
 - 证据：`docs/goal/mvp/ci-remote-verification-2026-11-18.md`，run 链接 `https://github.com/MrRobt/job-board-next/actions/runs/44225639694`。先前 commit-status 空列表不代表 CI 未通过。
 - CI 验证的是已提交快照，**其他 Agent 未提交的退款申请/Schema/迁移、未提交 package-lock** 未进入 run；旧库、非空备份恢复、商户资金/AI/资质仍 BLOCKED，不能将 D02/B07 全部标 VERIFIED。
 
+## 2026-11-18 D02 Next.js HTTP 安全头部
+
+- `next.config.ts` 全路由 nosniff、禁止 iframe、no-referrer、浏览器硬件权限禁用、HSTS 180 天无 preload/includeSubDomains；私有账户、管理员、AI/支付路由禁用 HTTP 缓存，不影响静态资源。新增 `tests/security-headers.test.ts` 2/2。
+- 全量单元 38/38、MySQL 集成 17/17、TypeScript 和 Next build 均成功。尝试向 CI 追加运行时 header smoke 被敏感内容工具保护阻断，未绕过；CI 尚无此项新校验，需预发布真实 HTTPS/代理联调。见 `docs/goal/mvp/http-security-headers-2026-11-18.md`。
+- 不修改退款资金/其他 Agent 的未提交内容，不启用真实商户和 AI。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

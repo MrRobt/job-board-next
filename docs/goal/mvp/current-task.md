@@ -118,6 +118,12 @@
 - 查验 validate job `134538015677` 各步骤 success：全新 MySQL migrate deploy、status、重复部署、seed、typecheck、unit、MySQL integration、Next.js build、smoke。B06 桥接先前提交 `0270b41` 的 push run `44225197207` 也 success。
 - 这是干净 checkout 的真实远端 CI 证据；**不包含其他 Agent 尚未提交的 refund_cases Schema/迁移**，也不代表真实商户、生产部署/恢复。详情 `ci-remote-verification-2026-11-18.md`，D02/B07 仍 IN_PROGRESS。
 
+## 2026-11-18 D02 生产 HTTP 安全响应头与私有缓存
+
+- `next.config.ts` 全路由新增 nosniff、DENY frame、no-referrer、camera/microphone/geolocation 禁用及不含 preload/includeSubDomains 的 HSTS；账户、后台、AI 工具、支付及 API 路由加 `private, no-store, max-age=0`，不禁用静态资源缓存。
+- 专项 2/2、全量单元 **38/38 PASS**、隔离 MySQL 集成 **17/17 PASS**、TS/Next.js build exit 0。尝试向 CI 追加真实 HTTP 响应头断言被连接器敏感内容保护阻断，未绕过，也未把实际 HTTP/代理上线验收标通过。见 `http-security-headers-2026-11-18.md`。
+- D02 仍 IN_PROGRESS：需正式 HTTPS/反向代理/CDN 响应头测试、nonce CSP 和安全验收。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
