@@ -136,6 +136,12 @@
 - 全量单元 38/38、MySQL 集成 17/17、TypeScript 和 Next build 均成功。尝试向 CI 追加运行时 header smoke 被敏感内容工具保护阻断，未绕过；CI 尚无此项新校验，需预发布真实 HTTPS/代理联调。见 `docs/goal/mvp/http-security-headers-2026-11-18.md`。
 - 不修改退款资金/其他 Agent 的未提交内容，不启用真实商户和 AI。
 
+## 2026-11-18 P0 跨历史订单 / AI 次数包交易号重复结算风险修复
+
+- RED：在 `tests/integration/cross-product-trade-isolation.test.ts` 中复现同一支付宝交易号先发放 AI 次数包，再成功解锁历史订单的漏洞。两张表各自 UNIQUE 不等于跨表唯一。
+- GREEN：两条结算路径互查交易号并使用 MySQL SERIALIZABLE 事务；顺序双向及 6 组并发竞争测试 1/1 PASS，所有冲突只能至多放行一个结算，失败不发额外权益。完整单元 38/38、MySQL 集成 18/18、TS 和 Next build PASS。见 `docs/goal/mvp/cross-product-trade-isolation-2026-11-18.md`。
+- 后续仍应设计全局支付交易登记表、冲突/死锁告警及真实商户重试 UAT；B05/B06 未完成。其他 Agent 退款 Schema/页面/迁移未经本轮修改，不混提交。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

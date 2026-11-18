@@ -124,6 +124,12 @@
 - 专项 2/2、全量单元 **38/38 PASS**、隔离 MySQL 集成 **17/17 PASS**、TS/Next.js build exit 0。尝试向 CI 追加真实 HTTP 响应头断言被连接器敏感内容保护阻断，未绕过，也未把实际 HTTP/代理上线验收标通过。见 `http-security-headers-2026-11-18.md`。
 - D02 仍 IN_PROGRESS：需正式 HTTPS/反向代理/CDN 响应头测试、nonce CSP 和安全验收。
 
+## 2026-11-18 P0 跨业务支付交易号重复结算修复
+
+- 检查发现独立 `Order` / `ToolOrder` 两表的 UNIQUE 交易号无法避免同一渠道交易号跨产品使用。先写 `cross-product-trade-isolation.test.ts` 在专用 MySQL 复现 RED：AI 次数包已付后同一交易号仍能结算历史订单（`Missing expected rejection`）。
+- `lib/payment/settlement.ts` 新增反向检查另一订单表；与 `lib/career/billing.ts` 同时采用 SERIALIZABLE 交互式事务和有界等待，冲突、死锁、超时失败关闭。新增顺序和 6 组并发交叉竞争测试，GREEN 1/1；全量单元 **38/38**、MySQL 集成 **18/18**、TS 和 Next.js build exit 0。
+- 详情 `cross-product-trade-isolation-2026-11-18.md`。尚无真实商户、全局交易唯一登记表与生产压力测试，B05/B06 保持 IN_PROGRESS；其他 Agent 退款 Schema/页面未提交文件保持不变。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

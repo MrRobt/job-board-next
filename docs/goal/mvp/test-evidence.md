@@ -130,6 +130,12 @@
 - `tests/security-headers.test.ts` 2/2 PASS（全局硬化、私有敏感路由禁止缓存且静态缓存不受全局影响）。全量单元 38/38 PASS、隔离 MySQL 集成 17/17 PASS、TS exit 0、Next.js build exit 0。
 - 首次 TS 测试类型推断错误，新增显式类型后已复测。远端 CI 尚未验证这次新增策略；尝试改 CI 以检查真实 HTTP Header 时被安全检查阻断，**没有真实 HTTPS/网关响应头验收**。详见 `http-security-headers-2026-11-18.md`。
 
+## 2026-11-18：跨业务商户交易号唯一结算 P0 修复
+
+- 新增 `tests/integration/cross-product-trade-isolation.test.ts`，修复前 **RED**：同一支付宝交易号可先结算 AI 次数包再结算历史订单（`Missing expected rejection`）。
+- 修复后专项 1/1 PASS：双向顺序拒绝重复结算，扩展 **6 组并发争用**，最多一个订单/权益会被授予。全量单元 **38/38 PASS**、隔离 MySQL 集成 **18/18 PASS**、TypeScript exit 0、Next.js 生产 build exit 0。
+- 通过给已提交的两条结算路径增加对侧交易号查询及 SERIALIZABLE 事务实现，不改变其他 Agent 未提交 Schema、迁移、页面。还须生产级压力/商户 UAT、全局登记表/审计/告警和退款撤权。详细见 `cross-product-trade-isolation-2026-11-18.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
