@@ -101,6 +101,12 @@
 - 已将 `app/actions/auth.ts` 登录、注册与 `prisma/seed.ts` 管理员散列更新为 `await`，避免 Promise 被写入 DB。
 - 专项 3/3、全单元 **32/32 PASS**、MySQL 集成 **17/17 PASS**、TS/Next.js build exit 0；详情 `async-password-2026-11-18.md`。U01 仍 IN_PROGRESS（邮箱验证、密码找回、注销、真实代理与浏览器 E2E 缺口）。
 
+## 2026-11-18 B06 退款数据库交易号到商户查单桥接
+
+- 发现 `settleToolPayment` 把原交易号持久化为 `WECHAT:<id>` / `ALIPAY:<id>`，现有退款查询要求**未加本地前缀**的渠道原始交易号；直接传数据库值会造成真实渠道签名正确仍报交易号不一致。
+- 新增 `lib/payment/refund-inquiry-bridge.ts`，对订单 PAID、冻结、PROCESSING、持久出款记录及申请指纹/单号做纯只读验证，严格剥离对应渠道前缀并复核商户观察结果。绝不调用资金接口或修改权益。
+- 新增专项 4/4、单元 **36/36**、隔离 MySQL 集成 **17/17**、TS/build exit 0，详见 `refund-inquiry-bridge-2026-11-18.md`。由于退款 Schema/出款 outbox 尚未提交，B06 仍 IN_PROGRESS，真实退款与撤权未实现。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

@@ -113,6 +113,12 @@
 - 新增 3 项专项测试含从旧同步 scrypt 生成的真实哈希兼容、6 并发注册散列与非法格式；完整单元 32/32、MySQL 集成 17/17、TS/Next.js build exit 0，见 `docs/goal/mvp/async-password-2026-11-18.md`。
 - 仍缺邮箱验证、账户删除、密码找回、生产代理及登录浏览器 E2E；其他 Agent 未提交退款和 Schema 仍保持不变。
 
+## 2026-11-18 B06 退款查询渠道原始交易号桥接
+
+- 新增独立纯/只读 `lib/payment/refund-inquiry-bridge.ts`，解决支付已结算 `providerTradeId=WECHAT:/ALIPAY:` 本地前缀与商户退款查询原始交易 ID 不相等的问题，保护已持久化退款单号、指纹、状态、订单及渠道身份一致性；显式注入只读网关，不依赖其他 Agent 的退款 Prisma 模型。
+- 新增 4/4 单元；全单元 36/36、MySQL 集成 17/17、TS/Next.js build exit 0；详见 `docs/goal/mvp/refund-inquiry-bridge-2026-11-18.md`。**没有钱款请求、实际资金或账本变更**。
+- 后续等待其他 Agent 独立验收并提交 ToolRefundCase/迁移；新增并发安全 outbox/退款单号指纹持久化、审核/出款授权、查单终态与原子撤权；真实商户和合规继续人工门禁。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

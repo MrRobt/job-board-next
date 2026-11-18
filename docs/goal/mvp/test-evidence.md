@@ -108,6 +108,12 @@
 - 全单元 **32/32 PASS**，隔离 MySQL 集成 **17/17 PASS**，TypeScript exit 0、Next.js 16.4.6 build exit 0。
 - 已同步修改注册、登录和管理员 seed，保留旧格式、不更改用户数据库 Schema；未验收真实浏览器登录与高压 worker pool 性能，见 `async-password-2026-11-18.md`。
 
+## 2026-11-18：B06 已存交易号退款只读查询适配
+
+- `tests/refund-inquiry-bridge.test.ts` **4/4 PASS**：微信/支付宝 `provider:rawId` → 渠道原始交易号转换、确定性申请号/指纹一致、未发送/未冻结/非 PROCESSING 拒绝、错商户渠道/交易/金额/状态拒绝。
+- 全单元 **36/36 PASS**、隔离 MySQL 集成 **17/17 PASS**、TypeScript exit 0、Next.js 16.4.6 build exit 0。使用内存注入网关，没有真实支付/退款 HTTP 或资金操作。
+- 依赖的完整退款出款持久化 Schema、资金幂等、最终状态/撤权尚未交付，B06 保持 IN_PROGRESS；详见 `refund-inquiry-bridge-2026-11-18.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
