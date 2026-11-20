@@ -151,6 +151,15 @@
 - 本地两个退款申请/交接提交 `1f93e84`、`96a6fef` 已完成，但 `git push origin main` 返回 **Host key verification failed**，不能声称远端已同步。保持 Git SSH 严格主机校验，不禁用信任检查；待核实远端指纹/本机 SSH 配置再非强推。
 - 下项仍为退款资金意图持久化、审批/指纹幂等、商户结果终态和权益撤销；合法支付资质与人工合规门禁仍 BLOCKED。
 
+## 2026-11-20 B06 不可变退款意图持久化（本轮）
+
+- 代码工作包已本地提交 `2306aab`。新增独立 `ToolRefundIntent` 表（同一退款申请、订单和渠道请求号唯一），状态 `PREPARED` 明确表示**只准备、不发款**，保存管理员、金额、理由、确定性渠道请求号和请求指纹。
+- 只允许管理员在确认最新 OPEN 工单、真实 PAID/冻结、有效商户交易号、服务端 SKU 金额与权益一致、无成功/在途消费且账本一致时准备；再次相同请求幂等，改变参数拒绝。进入 PREPARED 后不允许旧驳回逻辑解冻；用户和管理员页面均标「未发款」。
+- 职讯集隔离 MySQL `jobs_mvp_migrate_20261118_8f72` 已成功应用第 4 个迁移 `20261120000100_refund_intents`，重复 deploy 返回 `No pending migrations`。专项测试 1/1、全量单元 **38/38**、MySQL 集成 **22/22**、TS 与 Next.js build exit 0。见 `refund-intent-preparation-2026-11-20.md`。
+- SSH 诊断：原默认执行器读取不到正确的主机信任配置；GitHub Ed25519 公钥与官方一致，Windows OpenSSH 成功认证。使用 `GIT_SSH='C:/Windows/System32/OpenSSH/ssh.exe'` **非强制推送**已成功将先前积压 4 个提交同步到 `origin/main`（`9299b51..ab1c1d0`）。
+- 下一最高优先级仍是 **B06 已准备意图的独立审批、持久调度/渠道退款幂等请求、验签查询最终成功及原子撤销权益**。任何外部商户调用、实际退款、模型启用及法律合规继续设为人工门禁；本轮不是生产上线完成。
+- `requirement-matrix.md`、`risk-register.md`、`release-checklist.md` 已有其他 Agent 未提交修改，不合并提交；本轮新增独立 B06 状态增量说明，待对应所有者合并。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

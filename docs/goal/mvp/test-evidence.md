@@ -160,6 +160,15 @@
 - 初次类型检查发现测试使用非法 `"interview"` Kind，已修改为 `"questions"` 并重新通过类型/构建；不把初次失败掩盖。
 - Git 本地提交已成功，SSH 主机校验失败导致远端推送尚未完成，远端 CI 没有本包结果。未禁用主机身份校验。
 
+## 2026-11-20 B06 退款意图持久化验收
+
+- `prisma validate` exit 0；对隔离库执行第四个迁移 `20261120000100_refund_intents` exit 0，`migrate status` exit 0，`migrate deploy` 再执行返回 `No pending migrations to apply`。
+- `prisma generate` exit 0；新 `tests/integration/refund-intents.test.ts` **1/1 PASS**，覆盖权限、唯一持久请求、相同参数幂等、不同参数拒绝、已经消费次数拒绝、不得解冻和不得提前改为 REFUNDED。
+- 全量单元 **38/38** PASS、MySQL 集成 **22/22** PASS、TypeScript exit 0、Next.js 16.4.6 生产 build exit 0。
+- 初次 TypeScript 检查报告管理员 JSX 语法错误，修复后重测通过；不将初次失败标记为成功。
+- GitHub 非强推恢复：SSH 通过 Windows OpenSSH 与可信 `known_hosts` 验证，历史积压本地 4 个提交正常推送 `9299b51..ab1c1d0`；本轮代码/文档提交及远端 CI 应在后续推送后核实。
+- 所有验证仅在本机独立 MySQL 和模拟支付接口完成，**没有真实商户资金退款、终态权益撤权和法律审批**。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

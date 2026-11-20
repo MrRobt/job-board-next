@@ -163,6 +163,14 @@
 - 本地已有 `1f93e84` 和 `96a6fef`。推送失败：`Host key verification failed`。当前 Git remote 为 `git@github.com:MrRobt/job-board-next.git`，Git for Windows 的 SSH 使用 `C:\\Users\\djs\\.ssh\\known_hosts`，且 `StrictHostKeyChecking ask`；必须在受信任环境核实 GitHub 公钥指纹，不能临时禁用校验。未取得成功的远端 push/CI 证据。
 - 保留其它 Agent financial-risk-audit 文件、package-lock 和 `.data/.omc/.dsh-meow`，本轮只精确暂存自身变更。
 
+## 2026-11-20 B06 退款意图 + SSH 恢复
+
+- `ToolRefundCase.status` 增加 PREPARED，`ToolRefundIntent` 唯一约束 `caseId/orderId/outRefundNo`；已记录整数分、确定性指纹、操作人、时间，不存储原用户敏感简历，不对商户发送出款请求。
+- `prepareReviewedRefund` 在 SERIALIZABLE MySQL 事务内强制 ADMIN、SKU/金额、最新工单、无在途/成功调用、账本完整性；Prepared 状态阻止原驳回解冻。管理员新增准备按钮/记录清单，用户状态明确未发款。独立集成测试验证同参数幂等、改参数冲突、已使用服务阻断、订单保持 PAID/冻结。
+- 专用隔离 MySQL 新迁移 `20261120000100_refund_intents` 执行 exit 0；四个迁移 status up to date、重复 migrate deploy 无 pending；38/38 单元、22/22 集成、TS 与 build 通过。对应文件 `refund-intent-preparation-2026-11-20.md`。
+- SSH 阻断已通过系统安装的 Windows OpenSSH 恢复。已验证 GitHub 公钥和 `ssh -T` 账户，`GIT_SSH='C:/Windows/System32/OpenSSH/ssh.exe' /e/Program\\ Files/Git/cmd/git.exe push origin main` 推送成功（无需禁用 StrictHostKeyChecking），上轮 4 个提交已抵达 origin/main。
+- 不接触其它 Agent 尚未提交的财务风险扫描和本机工具数据，且不混提交当前他人改动的主需求矩阵、风险登记与上线门禁。下一包按 B06 依赖，先补离线可测资金结算终态流程再做商户 UAT。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。
