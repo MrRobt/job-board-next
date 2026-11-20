@@ -6,7 +6,7 @@ import {price,product} from "@/lib/career/catalog";
 import {submitRefundCase} from "@/app/actions/refund-cases";
 
 const statuses={PENDING:"待支付",PAID:"已支付",CLOSED:"已关闭",REFUNDED:"已退款"};
-const refundLabels={OPEN:"待人工核查",REJECTED:"已答复",PROCESSING:"处理中",SUCCEEDED:"渠道已确认退款",FAILED:"处理失败"};
+const refundLabels={OPEN:"待人工核查",PREPARED:"退款资料已准备（未发款）",REJECTED:"已答复",PROCESSING:"处理中",SUCCEEDED:"渠道已确认退款",FAILED:"处理失败"};
 export default async function Account({searchParams}:{searchParams:Promise<{refundRequested?:string;refundError?:string}>}){
  const u=await requireUser();await trial(u.id);
  const {refundRequested,refundError}=await searchParams;

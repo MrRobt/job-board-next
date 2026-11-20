@@ -26,7 +26,7 @@ export type RefundPreflight = {
   reservedRuns: number;
   failedRuns: number;
   refundHold: boolean;
-  requestStatus: "OPEN" | "REJECTED" | "PROCESSING" | "SUCCEEDED" | "FAILED" | null;
+  requestStatus: "OPEN" | "PREPARED" | "REJECTED" | "PROCESSING" | "SUCCEEDED" | "FAILED" | null;
   issues: RefundPreflightIssue[];
   review: "NEEDS_RECONCILIATION" | "READY_FOR_MANUAL_REVIEW";
   automaticallyRefundable: false;
@@ -65,7 +65,7 @@ export function assessRefundSnapshot(orderId: string, order: RefundSnapshot): Re
 
   const latest = order.refundCases[0]?.status ?? null;
   if (latest !== "OPEN") add("NO_OPEN_REQUEST");
-  if (order.refundCases.some(c => c.status === "PROCESSING" || c.status === "SUCCEEDED")) {
+  if (order.refundCases.some(c => c.status === "PREPARED" || c.status === "PROCESSING" || c.status === "SUCCEEDED")) {
     add("PREVIOUS_REFUND_UNRESOLVED");
   }
   // A local trade reference is NOT proof of merchant payment authenticity.

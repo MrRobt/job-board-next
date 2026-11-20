@@ -6,12 +6,12 @@ import {staleCreditReservations} from "@/lib/career/audit";
 import {confirmCreditRefund} from "@/app/actions/credit-audit";
 import {reconcilePayment} from "@/app/actions/payment-reconciliation";
 import {reconciliationEnabled} from "@/lib/career/payment-reconciliation";
-import {rejectRefundCase} from "@/app/actions/refund-cases";
+import {rejectRefundCase,prepareRefundCase} from "@/app/actions/refund-cases";
 
-export default async function ToolOrders({searchParams}:{searchParams:Promise<{error?:string;ok?:string;paymentError?:string;paymentResult?:string;refundError?:string;refundRejected?:string}>}){
+export default async function ToolOrders({searchParams}:{searchParams:Promise<{error?:string;ok?:string;paymentError?:string;paymentResult?:string;refundError?:string;refundRejected?:string;refundPrepared?:string;refundPrepareError?:string}>}){
  await requireAdmin();
- const {error,ok,paymentError,paymentResult,refundError,refundRejected}=await searchParams;
- const [orders,paid,runs,stale,pendingOrders,openRefundCases]=await Promise.all([
+ const {error,ok,paymentError,paymentResult,refundError,refundRejected,refundPrepared,refundPrepareError}=await searchParams;
+ const [orders,paid,runs,stale,pendingOrders,openRefundCases,preparedIntents]=await Promise.all([
   db.toolOrder.findMany({
    orderBy:{createdAt:"desc"},take:100,
    include:{user:{select:{email:true}},grant:{select:{remaining:true}}}
@@ -20,7 +20,8 @@ export default async function ToolOrders({searchParams}:{searchParams:Promise<{e
   db.toolRun.groupBy({by:["status"],_count:{_all:true}}),
   staleCreditReservations(),
   db.toolOrder.findMany({where:{status:"PENDING",provider:{in:["ALIPAY","WECHAT"]}},orderBy:{createdAt:"asc"},take:30}),
-  db.toolRefundCase.findMany({where:{status:"OPEN"},orderBy:{createdAt:"asc"},take:30,include:{user:{select:{email:true}},order:{select:{sku:true,grant:{select:{total:true,remaining:true}}}}}})
+  db.toolRefundCase.findMany({where:{status:"OPEN"},orderBy:{createdAt:"asc"},take:30,include:{user:{select:{email:true}},order:{select:{sku:true,grant:{select:{total:true,remaining:true}}}}}}),
+  db.toolRefundIntent.findMany({orderBy:{createdAt:"desc"},take:30,include:{order:{select:{status:true,refundHold:true}},refundCase:{select:{user:{select:{email:true}}}}}})
  ]);
  return <>
   <h1>AI 工具经营概览</h1>
@@ -29,6 +30,8 @@ export default async function ToolOrders({searchParams}:{searchParams:Promise<{e
   {paymentResult&&<p role="status">商户对账结果：{paymentResult}。以渠道验签结果和订单最终状态为准。</p>}
   {paymentError&&<p className="error" role="alert">商户对账未完成。请核查渠道配置、订单状态或外部服务，订单不会被默认关闭。</p>}
   {refundRejected&&<p role="status">退款申请已作出审核答复，该次数包恢复可用；没有发生资金退款。</p>}
+  {refundPrepared&&<p role="status">退款意图已持久化准备，等待独立商户/合规审批；未发起资金退款。</p>}
+  {refundPrepareError&&<p className="error" role="alert">无法准备退款：请检查无在途、无已消费、账本正常、请求尚未准备及审核说明。</p>}
   {refundError&&<p className="error" role="alert">退款审核未完成，请确认申请仍处于待核查状态，填写不少于 10 字依据。</p>}
   <section className="card">
    <h2>真实支付累计（未扣除成本） ¥{price(paid._sum.amountFen??0)}</h2>
@@ -47,8 +50,26 @@ export default async function ToolOrders({searchParams}:{searchParams:Promise<{e
      <label>审核说明<input name="reason" minLength={10} maxLength={500} required/></label>
      <label><input type="checkbox" name="confirmed" value="yes" required/> 已核对情况，同意驳回并解冻本次数包</label>
      <button type="submit" className="quiet">驳回申请并解冻</button>
+    </form>
+    <form action={prepareRefundCase.bind(null,c.id)}>
+      <label>内部预备退款依据（不发款，10–80 字）<input name="reason" minLength={10} maxLength={80} required/></label>
+      <label><input type="checkbox" name="confirmed" value="yes" required/> 已核查未消费、无在途请求；仅准备退款记录，不调用商户</label>
+      <button type="submit" className="quiet">仅准备退款意图</button>
     </form></td>
    </tr>)}</tbody></table></div>}
+  </section>
+  <section className="card">
+   <h2>已准备的退款意图：{preparedIntents.length} 条（仅显示最近 30 条）</h2>
+   <p className="muted">此处为内部准备记录，未向支付宝或微信申请退款。记录的退款请求号和指纹不可更改，必须经过独立商户审批、渠道执行/查询与资金权益核对。</p>
+   {preparedIntents.length===0?<p>暂无已准备的退款记录。</p>:<div className="scroll"><table>
+     <thead><tr><th>退款请求号</th><th>用户</th><th>金额</th><th>订单</th><th>状态</th><th>核查</th></tr></thead>
+     <tbody>{preparedIntents.map(p=><tr key={p.id}>
+       <td>{p.outRefundNo}</td><td>{p.refundCase.user.email}</td>
+       <td>¥{price(p.amountFen)}</td><td>{p.orderId}</td>
+       <td>{p.state} · 未发款 · 权益{p.order.refundHold?"冻结":"异常未冻结"}</td>
+       <td><Link href={"/admin/refunds/"+p.orderId}>查看账务</Link></td>
+     </tr>)}</tbody>
+   </table></div>}
   </section>
   <section className="card">
    <h2>待支付订单查询与安全关单</h2>

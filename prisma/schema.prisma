@@ -41,6 +41,7 @@ model User {
   toolRunAdjustments ToolRunAdjustment[]
   toolOrderReconcileEvents ToolOrderReconcileEvent[]
   refundCases ToolRefundCase[]
+  preparedRefunds ToolRefundIntent[]
 }
 model Session {
   tokenHash String @id @db.Char(64)
@@ -164,6 +165,7 @@ model ToolOrder {
   grant ToolGrant?
   reconciliationEvents ToolOrderReconcileEvent[]
   refundCases ToolRefundCase[]
+  refundIntent ToolRefundIntent?
   @@index([userId,createdAt])
 }
 model ToolGrant {
@@ -202,6 +204,7 @@ model ToolRun {
 
 enum RefundCaseStatus {
   OPEN
+  PREPARED
   REJECTED
   PROCESSING
   SUCCEEDED
@@ -219,9 +222,31 @@ model ToolRefundCase {
   reviewReason String? @db.VarChar(500)
   createdAt DateTime @default(now())
   reviewedAt DateTime?
+  intent ToolRefundIntent?
   @@index([orderId,createdAt])
   @@index([status,createdAt])
 }
+enum RefundIntentState {
+  PREPARED
+}
+
+model ToolRefundIntent {
+  id String @id @default(cuid())
+  caseId String @unique
+  refundCase ToolRefundCase @relation(fields:[caseId],references:[id])
+  orderId String @unique @db.VarChar(32)
+  order ToolOrder @relation(fields:[orderId],references:[id])
+  operatorId String
+  operator User @relation(fields:[operatorId],references:[id])
+  outRefundNo String @unique @db.VarChar(32)
+  fingerprint String @db.Char(64)
+  amountFen Int
+  reason String @db.VarChar(80)
+  state RefundIntentState @default(PREPARED)
+  createdAt DateTime @default(now())
+  @@index([operatorId,createdAt])
+}
+
 model ToolOrderReconcileEvent {
   id String @id @default(cuid())
   orderId String @db.VarChar(32)

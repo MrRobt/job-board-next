@@ -5,6 +5,7 @@ import {revalidatePath} from "next/cache";
 import {requireUser,requireAdmin} from "@/lib/auth";
 import {allowAttempt} from "@/lib/rate-limit";
 import {requestToolRefund,rejectToolRefund} from "@/lib/career/refund-cases";
+import {prepareReviewedRefund} from "@/lib/career/refund-intents";
 
 export async function submitRefundCase(orderId:string,form:FormData){
  const user=await requireUser();
@@ -25,4 +26,18 @@ export async function rejectRefundCase(caseId:string,form:FormData){
  catch{redirect("/admin/tool-orders?refundError=1");}
  revalidatePath("/account");revalidatePath("/admin/tool-orders");
  redirect("/admin/tool-orders?refundRejected=1");
+}
+export async function prepareRefundCase(caseId:string,form:FormData){
+ const admin=await requireAdmin();
+ const reason=z.string().trim().min(10).max(80).safeParse(form.get("reason"));
+ if(!reason.success||form.get("confirmed")!=="yes")
+  redirect("/admin/tool-orders?refundPrepareError=1");
+ try{
+  await prepareReviewedRefund(caseId,admin.id,reason.data);
+ }catch{
+  redirect("/admin/tool-orders?refundPrepareError=1");
+ }
+ revalidatePath("/admin/tool-orders");
+ revalidatePath("/account");
+ redirect("/admin/tool-orders?refundPrepared=1");
 }
