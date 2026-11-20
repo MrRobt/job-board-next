@@ -171,6 +171,14 @@
 - SSH 阻断已通过系统安装的 Windows OpenSSH 恢复。已验证 GitHub 公钥和 `ssh -T` 账户，`GIT_SSH='C:/Windows/System32/OpenSSH/ssh.exe' /e/Program\\ Files/Git/cmd/git.exe push origin main` 推送成功（无需禁用 StrictHostKeyChecking），上轮 4 个提交已抵达 origin/main。
 - 不接触其它 Agent 尚未提交的财务风险扫描和本机工具数据，且不混提交当前他人改动的主需求矩阵、风险登记与上线门禁。下一包按 B06 依赖，先补离线可测资金结算终态流程再做商户 UAT。
 
+## 2026-11-20 本地运行恢复与交付核对
+
+- 正常非强制推送完成：`2306aab`（代码）、`e4fdcc7`（Goal 文档）已经到 `origin/main`；上轮积压的四个提交也已在此前正常推送。
+- 职讯集**自身**开发数据库 `127.0.0.1:3306/jobs` 已执行 `prisma db push --skip-generate` 并返回 `database is now in sync`；只为本机开发环境，不代表生产迁移验收，不执行 `--force-reset` 或 `--accept-data-loss`。
+- Next.js 本地生产服务已恢复，`http://127.0.0.1:3000` 返回 200；`/pricing`、`/login`、`/register` 为 200，未登录的 `/account`、`/admin/tool-orders`、`/admin/refunds/[id]` 返回 307 到登录页。
+- 服务启动时显式设置 `ENABLE_REAL_PAYMENT=false`、`ENABLE_TOOL_PAYMENTS=false`、`ENABLE_PAYMENT_RECONCILIATION=false`、`ENABLE_REFUND_QUERY=false`、`ENABLE_LIVE_AI=false`。
+- GitHub connector 的 `fetch_commit_workflow_runs` 对 push 提交没有返回运行（此动作只检索 PR 触发），`get_commit_combined_status` 返回空列表，**无法据此确认本轮 GitHub Actions CI 结果**；后续需以实际 run/jobs 信息补验，不能假称远端 CI 成功。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。
