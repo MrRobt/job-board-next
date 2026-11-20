@@ -44,6 +44,7 @@ model User {
   preparedRefunds ToolRefundIntent[] @relation("RefundIntentPreparer")
   approvedRefunds ToolRefundIntent[] @relation("RefundIntentApprover")
   claimedRefundDispatches ToolRefundDispatch[]
+  refundInquiryEvents ToolRefundInquiryEvent[]
 }
 model Session {
   tokenHash String @id @db.Char(64)
@@ -259,6 +260,7 @@ model ToolRefundIntent {
 enum RefundDispatchState {
   READY
   IN_DOUBT
+  SUCCEEDED
 }
 
 model ToolRefundDispatch {
@@ -272,7 +274,22 @@ model ToolRefundDispatch {
   claimedAt DateTime?
   claimantId String?
   claimant User? @relation(fields:[claimantId],references:[id],onDelete:Restrict)
+  confirmedAt DateTime?
+  inquiryEvents ToolRefundInquiryEvent[]
   @@index([state,createdAt])
+}
+
+model ToolRefundInquiryEvent {
+  id String @id @default(cuid())
+  dispatchId String
+  dispatch ToolRefundDispatch @relation(fields:[dispatchId],references:[id],onDelete:Restrict)
+  operatorId String
+  operator User @relation(fields:[operatorId],references:[id],onDelete:Restrict)
+  observed String @db.VarChar(16)
+  outcome String @db.VarChar(24)
+  createdAt DateTime @default(now())
+  @@index([dispatchId,createdAt])
+  @@index([operatorId,createdAt])
 }
 
 model ToolOrderReconcileEvent {
