@@ -179,6 +179,15 @@
 - 服务启动时显式设置 `ENABLE_REAL_PAYMENT=false`、`ENABLE_TOOL_PAYMENTS=false`、`ENABLE_PAYMENT_RECONCILIATION=false`、`ENABLE_REFUND_QUERY=false`、`ENABLE_LIVE_AI=false`。
 - GitHub connector 的 `fetch_commit_workflow_runs` 对 push 提交没有返回运行（此动作只检索 PR 触发），`get_commit_combined_status` 返回空列表，**无法据此确认本轮 GitHub Actions CI 结果**；后续需以实际 run/jobs 信息补验，不能假称远端 CI 成功。
 
+## 2026-11-20 B06 双人审批交接
+
+- 已新增 `lib/career/refund-approvals.ts`，只允许与准备者不同的 ADMIN 进行独立审批；在 SERIALIZABLE MySQL 事务内再核对订单、冻结、最新工单、原 SKU/金额/签名指纹、已用与在途次数；记录 `approvedById/approvedAt/approvalReason`，状态从 PREPARED 到 APPROVED，不给商户发款。
+- 增加管理员服务端 action、后台已准备意图审批入口、用户清晰的「双人内部审批完成（未发款）」状态，避免误认成退款到账。
+- 新增迁移 `20261120000200_refund_second_approval` 和 `20261120000300_refund_approval_audit_fkey`；两项均在隔离 MySQL `jobs_mvp_migrate_20261118_8f72` 执行成功，总计 6 项迁移。因第一项已执行，外键删除规则改动采用第二项增量迁移而非改写原迁移历史。
+- 验证：TypeScript exit 0、38/38 单元、审批专项 1/1、全量集成**首轮 22/23，重跑 23/23**、生产 build exit 0。二次 migrate deploy 初次曾超时，重试 exit 0、`No pending migrations to apply`，本包幂等复跑已补验；详见 `refund-second-approval-2026-11-20.md`。
+- 保护 `next-env.d.ts`、`package-lock.json`、`.tmp-cdp-diag*.ps1`、`financial-risk-audit` 相关文件及原有三份 Goal 变更；不 reset/clean、不强推；Git 通过经过验证的 Windows OpenSSH 正常推送。
+- 下一包优先 B06 商户派发幂等/未知态与原子撤权；真实商户、合法资质、用户隐私、生产部署均保留人工门禁，所有付款开关仍关闭。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

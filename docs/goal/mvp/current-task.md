@@ -160,6 +160,15 @@
 - 下一最高优先级仍是 **B06 已准备意图的独立审批、持久调度/渠道退款幂等请求、验签查询最终成功及原子撤销权益**。任何外部商户调用、实际退款、模型启用及法律合规继续设为人工门禁；本轮不是生产上线完成。
 - `requirement-matrix.md`、`risk-register.md`、`release-checklist.md` 已有其他 Agent 未提交修改，不合并提交；本轮新增独立 B06 状态增量说明，待对应所有者合并。
 
+## 2026-11-20 B06 第二名管理员独立审批（本轮）
+
+- 代码：`RefundIntentState.APPROVED`、`approvedById/approvedAt/approvalReason` 审计；`approveRefundIntent` 强制第二名 ADMIN，确认 PAID、冻结、SKU/金额、原退款请求指纹、无在途/成功消费与完整余额，使用 SERIALIZABLE 事务、原子状态更新。已批准请求同参数幂等，不同审批依据拒绝；**无商户退款接口及资金变动**。
+- 前台用户/后台只区分内部准备、双人内部审批，均明确「未发款」。详细文件 `docs/goal/mvp/refund-second-approval-2026-11-20.md`。
+- 迁移 `20261120000200_refund_second_approval` 与 `20261120000300_refund_approval_audit_fkey` 已在**独立** MySQL 库实际执行成功，合计 6 项迁移。后者保证删除审批管理员时不会自动抹去其审计记录。首次重复 deploy 调用超时，随后再次执行 exit 0、`No pending migrations to apply`，幂等复跑已补验。
+- TypeScript exit 0；单元 **38/38 PASS**；新审批专项 **1/1 PASS**；全量集成首轮 **22/23**（新审批用例偶发失败），专项再验 **1/1**、全量复验 **23/23 PASS**；Next.js 生产构建 exit 0。不要隐藏并发不稳定的第一次失败。
+- **下一 P0：**独立审批后持久的资金退款派发/崩溃未知态处理、只读验签查单、最终成功后的订单/权益原子撤销与对账；商户 UAT/资质/隐私和生产安全仍是人工硬门禁。B06 保持 IN_PROGRESS，不能宣称正式商业上线就绪。
+- 主需求矩阵、风险登记、release-checklist 及其他 Agent 的 financial-risk-audit 等尚有未提交内容，本轮不覆盖；以本轮新证据增量文档交接。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

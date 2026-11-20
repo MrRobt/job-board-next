@@ -177,6 +177,15 @@
 - 服务真实 AI/支付/商户退款查询开关保持关闭，未连接外部商户；本机 Next 进程可随系统重启而终止，正式进程托管、监控、TLS 另需预发布 UAT。
 - Github 上代码/交接提交已通过 Windows OpenSSH 正常 push；对应 push CI 运行仍**无可核验结果**，不误报通过。
 
+## 2026-11-20 B06 第二名管理员内部审批
+
+- Prisma `validate` exit 0。独立 MySQL `jobs_mvp_migrate_20261118_8f72` 上 `prisma migrate deploy` 分别应用 `20261120000200_refund_second_approval`、`20261120000300_refund_approval_audit_fkey` exit 0。
+- Prisma Client generate 首次因本机网站进程占用 Windows DLL 而 EPERM；精确确认并只停止该工作区 3000 端口 Next 进程后，generate exit 0。其他 Node/Docker/Agent 未终止。
+- `tests/integration/refund-approvals.test.ts` 专项 1/1 PASS，校验第二名管理员与制单人分离、普通用户拒绝、余额与冻结异常拒绝、审批后不得改资金账本、相同复审幂等、不同依据拒绝。
+- 全量单元 **38/38 PASS**；MySQL 全量第一次 **22/23**（新增审批用例受并行环境影响失败）、专项单独再次 **1/1 PASS**、全量复验 **23/23 PASS**；TypeScript `tsc --noEmit` exit 0；Next.js 16.4.6 生产构建 exit 0。
+- 全量多工具并行执行曾超时、一次 TypeScript 重试成功，后台 JSX 初次少闭合花括号，修复后复测 TypeScript/build exit 0；**不隐藏首次失败**。
+- 一次二次 migrate deploy 返回连接器超时；重新执行 `migrate deploy` exit 0、`No pending migrations to apply`，本地隔离库幂等复跑已补验。未发生真实支付渠道退款，也未实际撤销权益或执行法律/生产认证。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
