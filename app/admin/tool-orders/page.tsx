@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {requireAdmin} from "@/lib/auth";
 import {db} from "@/lib/db";
 import {price} from "@/lib/career/catalog";
@@ -41,7 +42,7 @@ export default async function ToolOrders({searchParams}:{searchParams:Promise<{e
    </thead><tbody>{openRefundCases.map(c=><tr key={c.id}>
     <td>{c.createdAt.toISOString()}</td><td>{c.user.email}</td>
     <td>{c.order.sku} / {c.order.grant?.remaining??"—"} 剩余，原 {c.order.grant?.total??"—"} 次</td>
-    <td>{c.reason}</td>
+    <td>{c.reason}<p><Link href={"/admin/refunds/"+c.orderId}>查看只读账务预检</Link></p></td>
     <td><form action={rejectRefundCase.bind(null,c.id)}>
      <label>审核说明<input name="reason" minLength={10} maxLength={500} required/></label>
      <label><input type="checkbox" name="confirmed" value="yes" required/> 已核对情况，同意驳回并解冻本次数包</label>
