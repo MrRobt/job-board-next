@@ -220,6 +220,12 @@
 - 本轮为了生成 Prisma Client，先核实 localhost:3000 本项目 Next PID 20348 并仅停止该进程；最后应以全部真实业务开关 false 重启服务并验证 HTTP，但不得误称管理员已登录的数据库操作通过。正常开发库 `jobs` 尚未同步这些增量迁移（先前被安全检查阻断），不得绕过/清库；请使用已授权预发布流程。
 - 保留其他 Agent 未提交的三份主 Goal 矩阵、财务风险扫描、本机缓存和 package-lock。接下来 B06 仍需明确合法商户资质及人审后真实退款发送/回查 UAT、异常资金对账、E2E、生产迁移/备份与监控，不擅自开启收费。
 
+## 2026-11-20 B06 远端及本地 HTTP 收口
+
+- `0f1a88f`（原子退款结算代码）、`b2b3b5c`（Goal 记录）已正常非强推至 GitHub `main`，GitHub 返回的最新 commit 顺序一致。commit status 列表为空，不意味着 Actions 通过；需以实际 GitHub run/job 结果补验。
+- 本机 Next.js 生产构建成功后，用 `ENABLE_REAL_PAYMENT=false`、`ENABLE_TOOL_PAYMENTS=false`、`ENABLE_LIVE_AI=false`、`ENABLE_PAYMENT_RECONCILIATION=false`、`ENABLE_REFUND_QUERY=false`、`ENABLE_REFUND_DISPATCH_CLAIM=false` 启动；`curl` 实测 `/`、`/pricing`、`/login`、`/register` 全部 HTTP 200；匿名 `/admin/refund-dispatch` 返回 307 到 /login。
+- 这些 HTTP 状态不是管理员登录态 E2E，也不证明正常开发库 `jobs` 已具备第 8 次迁移。该库之前同步受安全检查拦截；下一轮应按授权的非破坏性迁移流程验收，不允许修改别的数据库或清库。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

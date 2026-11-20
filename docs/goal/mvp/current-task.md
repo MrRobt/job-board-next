@@ -184,6 +184,12 @@
 - 第 8 个版本迁移 `20261120000500_refund_inquiry_settlement` 在独立 MySQL 部署及幂等复跑成功；专项 1/1 PASS，单元 **38/38**、MySQL 串行文件全量 **25/25**、TypeScript/Next build exit 0。详细 `refund-inquiry-finalization-2026-11-20.md`。
 - **B06 未完成且不能上线收费：**真实商户发送网关、小额实付/退款查询、生产/正常开发库更新、非空恢复、全浏览器 E2E、模型与法规审批仍有阻断。主需求矩阵/风险登记/上线清单及财务扫描为其他 Agent 改动，不覆盖，另留增量文档。
 
+## 2026-11-20 B06 本轮提交与网站恢复
+
+- 独立代码提交 `0f1a88f`、Goal/证据提交 `b2b3b5c` 已正常非强推至 GitHub main，远端已读取核实；最新 commit 的 GitHub Actions status 返回空列表，**没有取得可确认的远端 CI 成功证据**。
+- Windows Next.js 生产服务器以真实 AI/收款/查单/退款领取全部 false 的环境变量重新启动，`/`、`/pricing`、`/login`、`/register` 均 HTTP 200；匿名访问 `/admin/refund-dispatch` 为 307 重定向到登录。正常开发库 `jobs` 仍可能缺少第 8 个迁移，**没有后台登录态 E2E 通过证据**。
+- 保持其他 Agent 原有三个 Goal 主矩阵文件改动、财务风险扫描、package-lock、工具缓存和临时脚本不变；不混提交。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
