@@ -212,6 +212,14 @@
 - 服务以 `ENABLE_REAL_PAYMENT=false`、`ENABLE_TOOL_PAYMENTS=false`、`ENABLE_LIVE_AI=false`、`ENABLE_PAYMENT_RECONCILIATION=false`、`ENABLE_REFUND_QUERY=false`、`ENABLE_REFUND_DISPATCH_CLAIM=false` 启动，无真实发款渠道/模型调用。
 - 下一步 B06 商户退款发送/验签查询与原子撤权仍需人工商户审批；CI 对最新提交的远端实测结果未确认，不能标记生产上线就绪。
 
+## 2026-11-20 B06 退款渠道最终态原子对账交接
+
+- 当前仓库（下一轮重查真实 Git）新实现 `lib/career/refund-finalization.ts`、`app/actions/refund-finalization.ts`、管理员 `/admin/refund-dispatch` 验签查询入口；第 8 个迁移新增 `ToolRefundInquiryEvent` 和 `ToolRefundDispatch.SUCCEEDED/confirmedAt`。仅 `IN_DOUBT` + 独立 ADMIN 审批 + 冻结且账本完全未使用的退款可向签名渠道查询，查询成功后单个事务将支付订单 REFUNDED、工单 SUCCEEDED、派发 SUCCEEDED、剩余次数归零并写审计。不在渠道未知或失败时自动重试发款。
+- 对账只通过已有 `liveRefundInquiryGateway` 的签名与渠道金额身份校验；测试注入网关仅允许隔离集成且非 production。所有真实 API/支付/模型开关保持关闭，不对真实商户进行任何网络请求。
+- 隔离 MySQL `jobs_mvp_migrate_20261118_8f72` 已执行 **8** 个迁移且重复 `migrate deploy` 无 pending。专项 **1/1**，全量单元 **38/38**，全量 MySQL 集成（文件串行）**25/25**，TS/Next 生产构建通过；记录见 `refund-inquiry-finalization-2026-11-20.md`。
+- 本轮为了生成 Prisma Client，先核实 localhost:3000 本项目 Next PID 20348 并仅停止该进程；最后应以全部真实业务开关 false 重启服务并验证 HTTP，但不得误称管理员已登录的数据库操作通过。正常开发库 `jobs` 尚未同步这些增量迁移（先前被安全检查阻断），不得绕过/清库；请使用已授权预发布流程。
+- 保留其他 Agent 未提交的三份主 Goal 矩阵、财务风险扫描、本机缓存和 package-lock。接下来 B06 仍需明确合法商户资质及人审后真实退款发送/回查 UAT、异常资金对账、E2E、生产迁移/备份与监控，不擅自开启收费。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

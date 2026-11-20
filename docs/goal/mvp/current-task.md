@@ -177,6 +177,13 @@
 - **下一最高优先级 B06：**实际渠道发送与出款结果管理仍须合法商户、人工授权和默认禁用的独立开关；先做签名查询与人工核账，再做确认成功后的原子撤权。正式生产/法律门禁未解除。
 - 主 `requirement-matrix`、`risk-register`、`release-checklist` 尚有其他 Agent 未提交变更，本轮使用独立增量证据，禁止覆盖或混提交。
 
+## 2026-11-20 B06 渠道查单最终态与原子撤权
+
+- 在双人审批与 Outbox `IN_DOUBT` 之后，新建 `reconcileDispatchedRefund`：仅管理员、仅带实际渠道验签的已知退款结果触发；确认 `SUCCEEDED` 且原订单/退款号/交易号/金额和账本一致后，单个 SERIALIZABLE 事务将订单/售后工单/派发状态改为退款成功并把剩余次数归零，审计每次安全查询。未经确认的状态仍冻结，不重发商户退款。
+- 仅限隔离测试的伪商户接口允许依赖注入；正常运行中的 liveGateway 需显式 `ENABLE_REAL_PAYMENT`、`ENABLE_REFUND_QUERY` 和真实凭据，UI 无发款/重发入口。开发/生产仍未验证实际交易。
+- 第 8 个版本迁移 `20261120000500_refund_inquiry_settlement` 在独立 MySQL 部署及幂等复跑成功；专项 1/1 PASS，单元 **38/38**、MySQL 串行文件全量 **25/25**、TypeScript/Next build exit 0。详细 `refund-inquiry-finalization-2026-11-20.md`。
+- **B06 未完成且不能上线收费：**真实商户发送网关、小额实付/退款查询、生产/正常开发库更新、非空恢复、全浏览器 E2E、模型与法规审批仍有阻断。主需求矩阵/风险登记/上线清单及财务扫描为其他 Agent 改动，不覆盖，另留增量文档。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

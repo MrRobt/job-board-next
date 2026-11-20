@@ -209,6 +209,13 @@
 - 停止原 Next 进程以便重新生成 Prisma Client/完成构建后，本轮按明确关闭真实 AI、支付、退款查询及退款领取开关重新启动 Next.js；HTTP 实测：`/`、`/pricing`、`/login`、`/register` 均 200；无会话 `/admin/refund-dispatch` 为 307 到登录。
 - 已登录管理员的派发台账及生产旧库迁移仍 **BLOCKED/UNVERIFIED**。远端 Git push 已成功，但尚未取得最新 GitHub Actions 完整验证和生产环境运行证据。
 
+## 2026-11-20 B06 最终验签查单及事务撤权
+
+- 第 8 条独立版本迁移 `20261120000500_refund_inquiry_settlement` 在专用隔离 MySQL `jobs_mvp_migrate_20261118_8f72` 上首次 deploy exit 0、status up to date、重复 deploy `No pending migrations to apply`。
+- Prisma validate、generate 和 TypeScript exit 0；专项 `refund-finalization.test.ts` **1/1 PASS**；单元全量 **38/38 PASS**、串行测试文件 MySQL 集成全量 **25/25 PASS**、Next.js 16.4.6 生产 build exit 0。
+- 测试覆盖：普通用户无法确认、未领取禁止查单、真实商户门禁默认关闭、伪造金额拒绝、处理中/未知/失败只写审计并冻结、账本异常拒绝成功、匹配成功后单事务四项状态/余额调整、重复确认幂等且不重复成功事件。
+- 初次 `migrate status` 用错 node/Prisma 可执行文件路径（exit 127），已用正确路径复验 exit 0，非数据库迁移失败。无需真实支付渠道即可验证本地安全逻辑，但**真实商户退款及到账、登录态和浏览器 E2E、生产数据升级仍未验收**。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
