@@ -143,6 +143,16 @@
 - 全量单元 **38/38 PASS**，MySQL 集成 **19/19 PASS**，TypeScript exit 0、Next.js 16.4.6 生产 build exit 0；首次 SQL tagged template 编译问题已修复并复测，见 `cross-product-trade-audit-2026-11-18.md`。
 - 本轮前一提交 `308f084` GitHub Actions run `44230355739` completed/success；当前核账扫描工作包的远端 CI 未取得结果。B04/B05/B06 仍 IN_PROGRESS。
 
+## 2026-11-20 退款冻结独立收口回归
+
+- `tsc --noEmit -p F:/code/job-board-next/tsconfig.json`: exit 0。
+- `tsx --test tests/*.test.ts`：38/38 PASS，exit 0。
+- 退款申请专项 `INTEGRATION_TEST_DATABASE=true node --conditions=react-server --import tsx --test tests/integration/refund-cases.test.ts`：1/1 PASS。
+- 职讯集专属 MySQL 从已停止状态恢复启动；隔离库 `prisma migrate status` 为 3 migrations up to date。
+- 全量 MySQL 集成首轮 19/20，复跑 **20/20 PASS**，不能隐去首轮异常。
+- `next build F:/code/job-board-next`：exit 0、compiled successfully、TypeScript 与页面构建成功。
+- 仅验收退款申请/冻结/驳回事务；不验收真实资金退款、终态撤销和外部商户/模型/法律审批。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

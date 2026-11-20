@@ -137,6 +137,13 @@
 - 全量单元 **38/38 PASS**、MySQL 集成 **19/19 PASS**、TS/build exit 0。详情 `cross-product-trade-audit-2026-11-18.md`；生产数据/运维权限/商户真实交易核对未验收，B04/B05/B06 继续 IN_PROGRESS。
 - 本轮前一代码提交 `308f084` 的 GitHub Actions run `44230355739` 已确认 completed/success，仅代表已提交 Git 树的远端 CI。
 
+## 2026-11-20 退款申请/次数冻结收口
+
+- 检查到 2026-11-18 多 Agent 已推进独立支付安全、CI、数据库恢复等工作，不重复已提交/验收项；本轮聚焦之前未提交的退款工单子包。
+- `ToolRefundCase` + `refundHold`、申请与管理员驳回逻辑、账户/后台页面、权益查询/预留冻结保护、增量迁移及 `tests/integration/refund-cases.test.ts` 已独立提交 `1f93e84`；未提交其他 Agent 的 `financial-risk-audit` 文件。
+- 专用 MySQL 容器由 Exited 状态恢复启动，隔离库 3 个迁移 status up to date。退款专项 1/1 PASS；全量集成首轮 19/20 有一次非确定性失败，复跑 **20/20 PASS**；全量单元 38/38、TypeScript 0 错、Next.js build exit 0。仅为本机代码/数据库测试，不证明退款资金渠道正常。
+- **B06 仍 IN_PROGRESS**：只完成申请、冻结、驳回，不可标 REFUNDED。后续优先持久化退款单号/原单/指纹、商户幂等申请与只读查询结果、终态权益撤回和并发恢复；真实商户与法律批准继续 BLOCKED。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
