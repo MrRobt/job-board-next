@@ -222,6 +222,14 @@
 - 本机生产服务以真实 AI/支付/商户退款开关均 false 启动后，HTTP `/`、`/pricing`、`/login`、`/register` 全为 200；未登录的 `/admin/refund-dispatch` 为 307 到登录页。
 - 开发数据库 `jobs` 未执行本轮迁移验收，完整登录态、真实商户和浏览器 E2E 仍未通过。该 HTTP smoke 仅是局部入口验收。
 
+## 2026-11-20 B06 退款发送请求安全子包
+
+- 新 `tests/integration/refund-submission.test.ts`：**3/3 PASS**，使用本地随机 RSA 钥匙与模拟 HTTP 验证微信 v3 原文签名/验签、支付宝 RSA2 响应验证、错误退款号/伪造签名/缺开关拒绝、管理员权限、崩溃或超时后只能查单、绝不重复 POST。
+- 完整单元 `38/38` PASS；完整 MySQL 集成（测试文件串行）`28/28` PASS；TS 类型检查 exit 0；Next.js 16.4.6 build exit 0（最新管理员退款入口已编译）。
+- 职讯集独立 MySQL `jobs_mvp_migrate_20261118_8f72` 的 `prisma migrate status` exit 0、8 个迁移 up to date；本轮不新增迁移、不碰正常开发/生产数据库。
+- 新增财务发送开关 `ENABLE_REFUND_SEND` 默认禁用，必须与 `ENABLE_REAL_PAYMENT`、`ENABLE_REFUND_DISPATCH_CLAIM`、合法商户密钥同时显式满足。构建和测试过程中**没有任何真实商户网络请求/财务退款**。
+- 不能以本机模拟渠道成功、匿名页面 200 或 Git 推送成功认定真实支付/退款、资金对账、远端 CI、浏览器管理员登录态及正式上线通过。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

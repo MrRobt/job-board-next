@@ -190,6 +190,13 @@
 - Windows Next.js 生产服务器以真实 AI/收款/查单/退款领取全部 false 的环境变量重新启动，`/`、`/pricing`、`/login`、`/register` 均 HTTP 200；匿名访问 `/admin/refund-dispatch` 为 307 重定向到登录。正常开发库 `jobs` 仍可能缺少第 8 个迁移，**没有后台登录态 E2E 通过证据**。
 - 保持其他 Agent 原有三个 Goal 主矩阵文件改动、财务风险扫描、package-lock、工具缓存和临时脚本不变；不混提交。
 
+## 2026-11-20 B06 一次性真实退款发送技术子包
+
+- 新增 `lib/payment/refund-submit.ts`：微信支付 API v3/支付宝 `alipay.trade.refund` 对原请求签名、对渠道响应验签和订单/渠道金额身份校验；只认 `ACKNOWLEDGED` 代表发送回包可识别，绝不代表资金退回。
+- 新增 `lib/career/refund-sender.ts`：经过双人审批的唯一 Outbox 先在事务中 `READY→IN_DOUBT`，再允许唯一一次商户 POST，超时或异常留下需独立渠道验签查询的审计，不自动重新发送。新增管理员 Server Action，在真实商户+独立 `ENABLE_REFUND_SEND` 等三项开关显式启用时才允许第一次发送，需手动复核退款单号并再次确认。当前真实支付/退款发送所有开关保持**关闭**。
+- `tests/integration/refund-submission.test.ts` 3/3 PASS；TS、单元全量 **38/38**、隔离 MySQL 全量 **28/28**、Next.js 16.4.6 生产构建 exit 0；`prisma migrate status` 8 个迁移最新。本轮所有渠道返回均为模拟 HTTP，**无真实资金变动**。
+- B06 仍 IN_PROGRESS：商户人工授权、小额退款发送与查询、断网/崩溃恢复、退款争议/部分退款、正式资金对账、正常开发/生产库升级、管理员浏览器 E2E 等门禁仍需验收。交接 `refund-submission-one-shot-2026-11-20.md` 与独立需求增量 `requirement-delta-b06-send-2026-11-20.md`；主需求矩阵和 `handoff.md` 有其他 Agent 未提交内容，未覆盖。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
