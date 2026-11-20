@@ -26,6 +26,7 @@ export default async function ToolOrders({searchParams}:{searchParams:Promise<{e
  ]);
  return <>
   <h1>AI 工具经营概览</h1>
+  <p><Link href="/admin/refund-dispatch">查看退款派发账本（只读 / 未发款）</Link></p>
   {ok&&<p role="status">人工核查记录已提交，单次预留次数已返还。</p>}
   {error&&<p className="error" role="alert">核查操作未完成：请确认异常超过十分钟、填写依据并勾选确认；若已处理请刷新。</p>}
   {paymentResult&&<p role="status">商户对账结果：{paymentResult}。以渠道验签结果和订单最终状态为准。</p>}

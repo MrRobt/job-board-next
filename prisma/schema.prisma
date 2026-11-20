@@ -43,6 +43,7 @@ model User {
   refundCases ToolRefundCase[]
   preparedRefunds ToolRefundIntent[] @relation("RefundIntentPreparer")
   approvedRefunds ToolRefundIntent[] @relation("RefundIntentApprover")
+  claimedRefundDispatches ToolRefundDispatch[]
 }
 model Session {
   tokenHash String @id @db.Char(64)
@@ -250,8 +251,28 @@ model ToolRefundIntent {
   reason String @db.VarChar(80)
   state RefundIntentState @default(PREPARED)
   createdAt DateTime @default(now())
+  dispatch ToolRefundDispatch?
   @@index([operatorId,createdAt])
   @@index([approvedById,approvedAt])
+}
+
+enum RefundDispatchState {
+  READY
+  IN_DOUBT
+}
+
+model ToolRefundDispatch {
+  id String @id @default(cuid())
+  intentId String @unique
+  intent ToolRefundIntent @relation(fields:[intentId],references:[id],onDelete:Restrict)
+  outRefundNo String @unique @db.VarChar(32)
+  fingerprint String @db.Char(64)
+  state RefundDispatchState @default(READY)
+  createdAt DateTime @default(now())
+  claimedAt DateTime?
+  claimantId String?
+  claimant User? @relation(fields:[claimantId],references:[id],onDelete:Restrict)
+  @@index([state,createdAt])
 }
 
 model ToolOrderReconcileEvent {
