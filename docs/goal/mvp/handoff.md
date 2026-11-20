@@ -195,6 +195,15 @@
 - 本机 Next.js `http://127.0.0.1:3000` 已重新启动，公开首页 HTTP 200；但后台双人审批路径依赖尚未同步的开发表结构，**未在开发库验收**。真实 AI、支付和商户退款查询均明确关闭。
 - 下一轮先在得到允许的测试/开发数据库变更执行权限后，安全完成开发库增量 schema 同步并验证后台双人审批登录态；其后继续 B06 派发/商户结果/原子权益撤销。不要把独立测试库误用作正常开发或生产库。
 
+## 2026-11-20 B06 退款派发 Outbox 工作交接
+
+- 另一 Agent 的双人审批工作已合并到当前仓库，基于其 `RefundIntentState.APPROVED` 继续，**未重复开发**。
+- 新增独立 `lib/career/refund-dispatch-outbox.ts`、Prisma 第 7 条迁移、`tests/integration/refund-dispatch-outbox.test.ts`；`queueApprovedRefund` 持久排队且唯一，`claimRefundDispatchOnce` 在显式两个开关下只变更为 IN_DOUBT，不发送商户请求。任何未知状态必须人工签名查单，禁止自动重复出款。
+- 迁移在职讯集隔离 MySQL `jobs_mvp_migrate_20261118_8f72` 已应用，`migrate status` up to date，重复 deploy 无 pending；Prisma generate、TypeScript、单元 38/38、Next build 均通过。并行 MySQL 全量曾 24/24，但新 UI/防篡改测试后两轮并行分别 23/24（跨业务交易隔离、career 测试），该风险仍需监测；改用 `--test-concurrency=1` 对测试文件串行执行 24/24，全文件内部并发争用场景保留。
+- Windows Prisma Client 初次生成 EPERM，精确定位并停止本工作区 localhost:3000 的 Next.js PID 25776，后续生成与构建成功；没有停其他 Node/Agent 进程。正常本地运行服务需在构建之后以支付/真实 AI 关闭的配置重新启动并验证。
+- `docs/goal/mvp/requirement-matrix.md`、`risk-register.md`、`release-checklist.md`、财务风险扫描及 `package-lock.json`、`next-env.d.ts`、`.data/.omc/.dsh-meow` 等均属于其他 Agent 或工具的原有未提交改动，禁止混入本包提交。
+- 真实渠道商户退款请求、查询/出款结果、原子撤销、真实 UAT、生产部署/合规仍未完成；B06 继续 IN_PROGRESS。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

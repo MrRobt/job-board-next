@@ -193,6 +193,15 @@
 - 服务重新启动后 `curl http://127.0.0.1:3000` HTTP **200**，仅证明公开首页可用；登录后台双人审批 E2E 未验证，可能因开发库缺列失败。
 - 未删除数据库、未执行 `--force-reset`/`--accept-data-loss`、未绕过安全检查，也未影响其他 Agent 的未提交文件。
 
+## 2026-11-20 B06 持久 Outbox 和防重复领取验证
+
+- `prisma validate` exit 0；独立测试 MySQL `jobs_mvp_migrate_20261118_8f72` 新增第 7 条 `20261120000400_refund_dispatch_outbox` migration，`migrate status` up to date，重复 `migrate deploy` exit 0 且无待迁移。
+- Windows Prisma generate 第一次 EPERM（工作区 Next.js 占用 DLL），仅停监听 localhost:3000 的对应 PID，第二次 generate exit 0；其他工作负载未中止。
+- `tests/integration/refund-dispatch-outbox.test.ts` 专项 **1/1 PASS**，涵盖未审批/普通用户拒绝、同意图幂等、开关默认关闭、并发只有一个领取者、未知态不能自动重领、拒绝篡改余额、订单和权益不变。
+- 全量单元 **38/38 PASS**，`tsc --noEmit` exit 0、Next.js 16.4.6 生产 build exit 0（包含 `/admin/refund-dispatch` 路由）。
+- 新增后台只读账本和请求篡改断言后，MySQL 并行全量两轮各 **23/24**：第一轮跨业务交易号隔离失败（单独复跑 1/1 PASS），第二轮原 career 测试失败；不能视作全量稳定通过。按 `--test-concurrency=1` 串行执行不同测试文件后 **24/24 PASS**（文件内并发测试不变）。本轮 `package.json` 的 `test:integration` 脚本同步设为该方式。生产真实高并发与测试池争用风险仍未完成验收。
+- 此包不含任何真实商户 HTTP 请求、后台资金退款、权益撤回和法律审批；也不等于恢复了本地运行网站/真实浏览器验收。详细说明见 `refund-dispatch-outbox-2026-11-20.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

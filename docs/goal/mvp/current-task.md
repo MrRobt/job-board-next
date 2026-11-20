@@ -169,6 +169,14 @@
 - **下一 P0：**独立审批后持久的资金退款派发/崩溃未知态处理、只读验签查单、最终成功后的订单/权益原子撤销与对账；商户 UAT/资质/隐私和生产安全仍是人工硬门禁。B06 保持 IN_PROGRESS，不能宣称正式商业上线就绪。
 - 主需求矩阵、风险登记、release-checklist 及其他 Agent 的 financial-risk-audit 等尚有未提交内容，本轮不覆盖；以本轮新证据增量文档交接。
 
+## 2026-11-20 B06 退款 Outbox 只记账不发款
+
+- 新增 `ToolRefundDispatch` 唯一 `intentId/outRefundNo` 的待派发账本，`READY` 与 `IN_DOUBT` 区分“尚未领取”和“可能已尝试，需渠道查询”。双人审批后才能入队；默认关闭领取开关，领取事务只允许一次，崩溃未知状态**不自动重试**。
+- 入队和领取均重新核对订单 PAID、退款冻结、SKU/金额/原商户交易指纹、次数账本与在途调用；操作不发 HTTP、不变更订单退款状态、不撤销或发放次数。
+- 第 7 项 Prisma 增量迁移隔离库成功，幂等复跑无 pending；退款 Outbox 专项 1/1、全量单元 **38/38**、隔离 MySQL 串行文件执行 **24/24**、TypeScript 与 Next.js build 通过。并行全量复验发生两次 **23/24** 非确定性失败（分别是跨业务交易隔离、career 用例），单独交易隔离 1/1 PASS；不得将串行通过宣称生产并发稳定。修复执行配置为文件串行，但文件内并发场景仍测试。代码提交 `0237606`，测试脚本提交 `3e00ea7`。详见 `refund-dispatch-outbox-2026-11-20.md`。
+- **下一最高优先级 B06：**实际渠道发送与出款结果管理仍须合法商户、人工授权和默认禁用的独立开关；先做签名查询与人工核账，再做确认成功后的原子撤权。正式生产/法律门禁未解除。
+- 主 `requirement-matrix`、`risk-register`、`release-checklist` 尚有其他 Agent 未提交变更，本轮使用独立增量证据，禁止覆盖或混提交。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
