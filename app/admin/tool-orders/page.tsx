@@ -7,10 +7,11 @@ import {confirmCreditRefund} from "@/app/actions/credit-audit";
 import {reconcilePayment} from "@/app/actions/payment-reconciliation";
 import {reconciliationEnabled} from "@/lib/career/payment-reconciliation";
 import {rejectRefundCase,prepareRefundCase} from "@/app/actions/refund-cases";
+import {approveRefundAction} from "@/app/actions/refund-approvals";
 
-export default async function ToolOrders({searchParams}:{searchParams:Promise<{error?:string;ok?:string;paymentError?:string;paymentResult?:string;refundError?:string;refundRejected?:string;refundPrepared?:string;refundPrepareError?:string}>}){
+export default async function ToolOrders({searchParams}:{searchParams:Promise<{error?:string;ok?:string;paymentError?:string;paymentResult?:string;refundError?:string;refundRejected?:string;refundPrepared?:string;refundPrepareError?:string;refundApproved?:string;refundApprovalError?:string}>}){
  await requireAdmin();
- const {error,ok,paymentError,paymentResult,refundError,refundRejected,refundPrepared,refundPrepareError}=await searchParams;
+ const {error,ok,paymentError,paymentResult,refundError,refundRejected,refundPrepared,refundPrepareError,refundApproved,refundApprovalError}=await searchParams;
  const [orders,paid,runs,stale,pendingOrders,openRefundCases,preparedIntents]=await Promise.all([
   db.toolOrder.findMany({
    orderBy:{createdAt:"desc"},take:100,
@@ -32,6 +33,8 @@ export default async function ToolOrders({searchParams}:{searchParams:Promise<{e
   {refundRejected&&<p role="status">退款申请已作出审核答复，该次数包恢复可用；没有发生资金退款。</p>}
   {refundPrepared&&<p role="status">退款意图已持久化准备，等待独立商户/合规审批；未发起资金退款。</p>}
   {refundPrepareError&&<p className="error" role="alert">无法准备退款：请检查无在途、无已消费、账本正常、请求尚未准备及审核说明。</p>}
+  {refundApproved&&<p role="status">第二名管理员已完成内部审批，资金尚未发起退款。</p>}
+  {refundApprovalError&&<p className="error" role="alert">双人审核失败：准备人与审批人不得相同；订单冻结、金额、次数和审核记录必须完整有效。</p>}
   {refundError&&<p className="error" role="alert">退款审核未完成，请确认申请仍处于待核查状态，填写不少于 10 字依据。</p>}
   <section className="card">
    <h2>真实支付累计（未扣除成本） ¥{price(paid._sum.amountFen??0)}</h2>
@@ -66,8 +69,13 @@ export default async function ToolOrders({searchParams}:{searchParams:Promise<{e
      <tbody>{preparedIntents.map(p=><tr key={p.id}>
        <td>{p.outRefundNo}</td><td>{p.refundCase.user.email}</td>
        <td>¥{price(p.amountFen)}</td><td>{p.orderId}</td>
-       <td>{p.state} · 未发款 · 权益{p.order.refundHold?"冻结":"异常未冻结"}</td>
-       <td><Link href={"/admin/refunds/"+p.orderId}>查看账务</Link></td>
+       <td>{p.state==="APPROVED"?"双人内部审批通过":p.state==="PREPARED"?"待另一名管理员审批":p.state} · 未发款 · 权益{p.order.refundHold?"冻结":"异常未冻结"}</td>
+       <td><Link href={"/admin/refunds/"+p.orderId}>查看账务</Link>
+       {p.state==="PREPARED"&&<form action={approveRefundAction.bind(null,p.id)}>
+        <label>独立审批依据（10–500字）<input name="reason" minLength={10} maxLength={500} required/></label>
+        <label><input name="confirmed" value="yes" type="checkbox" required/> 我不是退款准备人，已二次核验账本，仅内部审批，不发款</label>
+        <button type="submit" className="quiet">双人内部审批</button>
+       </form>}</td>
      </tr>)}</tbody>
    </table></div>}
   </section>

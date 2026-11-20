@@ -41,7 +41,8 @@ model User {
   toolRunAdjustments ToolRunAdjustment[]
   toolOrderReconcileEvents ToolOrderReconcileEvent[]
   refundCases ToolRefundCase[]
-  preparedRefunds ToolRefundIntent[]
+  preparedRefunds ToolRefundIntent[] @relation("RefundIntentPreparer")
+  approvedRefunds ToolRefundIntent[] @relation("RefundIntentApprover")
 }
 model Session {
   tokenHash String @id @db.Char(64)
@@ -228,6 +229,7 @@ model ToolRefundCase {
 }
 enum RefundIntentState {
   PREPARED
+  APPROVED
 }
 
 model ToolRefundIntent {
@@ -237,7 +239,11 @@ model ToolRefundIntent {
   orderId String @unique @db.VarChar(32)
   order ToolOrder @relation(fields:[orderId],references:[id])
   operatorId String
-  operator User @relation(fields:[operatorId],references:[id])
+  operator User @relation("RefundIntentPreparer",fields:[operatorId],references:[id])
+  approvedById String?
+  approvedBy User? @relation("RefundIntentApprover",fields:[approvedById],references:[id],onDelete:Restrict)
+  approvalReason String? @db.VarChar(500)
+  approvedAt DateTime?
   outRefundNo String @unique @db.VarChar(32)
   fingerprint String @db.Char(64)
   amountFen Int
@@ -245,6 +251,7 @@ model ToolRefundIntent {
   state RefundIntentState @default(PREPARED)
   createdAt DateTime @default(now())
   @@index([operatorId,createdAt])
+  @@index([approvedById,approvedAt])
 }
 
 model ToolOrderReconcileEvent {

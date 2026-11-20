@@ -13,7 +13,7 @@ export default async function Account({searchParams}:{searchParams:Promise<{refu
  const [credits,orders,runs,legacy]=await Promise.all([
   available(u.id),
   db.toolOrder.findMany({where:{userId:u.id},orderBy:{createdAt:"desc"},take:100,
-   include:{refundCases:{orderBy:{createdAt:"desc"},take:1}}}),
+   include:{refundCases:{orderBy:{createdAt:"desc"},take:1,include:{intent:{select:{state:true}}}}}}),
   db.toolRun.findMany({where:{userId:u.id},orderBy:{createdAt:"desc"},take:50}),
   db.order.findMany({where:{userId:u.id},select:{id:true,amountFen:true,status:true,jobId:true,unlock:{select:{orderId:true}}},orderBy:{createdAt:"desc"},take:100})
  ]);
@@ -26,7 +26,7 @@ export default async function Account({searchParams}:{searchParams:Promise<{refu
     const last=o.refundCases[0];
     return <div className="card" key={o.id}>
      <div className="row"><strong>{product(o.sku)?.title??o.sku}</strong><span>{o.credits} 次 · ¥{price(o.amountFen)}</span><span>{statuses[o.status]}{o.provider==="MOCK"?"（模拟）":""}</span><Link href={"/tool-pay/"+o.id}>详情</Link></div>
-     {last&&<p className="muted">售后申请：{refundLabels[last.status]}（申请不代表退款完成）</p>}
+     {last&&<p className="muted">售后申请：{last.intent?.state==="APPROVED"?"内部双人审批完成（尚未向渠道发起退款）":refundLabels[last.status]}（申请不代表退款完成）</p>}
      {o.refundHold&&<p className="muted">该次数包因退款审核暂时冻结新的 AI 调用，免费试用及其他有效次数包不受影响。</p>}
      {o.status==="PAID"&&o.provider!=="MOCK"&&!o.refundHold&&<form className="form" action={submitRefundCase.bind(null,o.id)}>
       <label>申请售后/退款（10～500 字）<textarea name="reason" rows={2} required minLength={10} maxLength={500} placeholder="请描述服务问题和希望处理的方式，勿包含身份证、银行卡等敏感信息"/></label>
