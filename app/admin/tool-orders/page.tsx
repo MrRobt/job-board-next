@@ -5,11 +5,12 @@ import {staleCreditReservations} from "@/lib/career/audit";
 import {confirmCreditRefund} from "@/app/actions/credit-audit";
 import {reconcilePayment} from "@/app/actions/payment-reconciliation";
 import {reconciliationEnabled} from "@/lib/career/payment-reconciliation";
+import {rejectRefundCase} from "@/app/actions/refund-cases";
 
-export default async function ToolOrders({searchParams}:{searchParams:Promise<{error?:string;ok?:string;paymentError?:string;paymentResult?:string}>}){
+export default async function ToolOrders({searchParams}:{searchParams:Promise<{error?:string;ok?:string;paymentError?:string;paymentResult?:string;refundError?:string;refundRejected?:string}>}){
  await requireAdmin();
- const {error,ok,paymentError,paymentResult}=await searchParams;
- const [orders,paid,runs,stale,pendingOrders]=await Promise.all([
+ const {error,ok,paymentError,paymentResult,refundError,refundRejected}=await searchParams;
+ const [orders,paid,runs,stale,pendingOrders,openRefundCases]=await Promise.all([
   db.toolOrder.findMany({
    orderBy:{createdAt:"desc"},take:100,
    include:{user:{select:{email:true}},grant:{select:{remaining:true}}}
@@ -17,7 +18,8 @@ export default async function ToolOrders({searchParams}:{searchParams:Promise<{e
   db.toolOrder.aggregate({where:{status:"PAID",provider:{not:"MOCK"}},_sum:{amountFen:true}}),
   db.toolRun.groupBy({by:["status"],_count:{_all:true}}),
   staleCreditReservations(),
-  db.toolOrder.findMany({where:{status:"PENDING",provider:{in:["ALIPAY","WECHAT"]}},orderBy:{createdAt:"asc"},take:30})
+  db.toolOrder.findMany({where:{status:"PENDING",provider:{in:["ALIPAY","WECHAT"]}},orderBy:{createdAt:"asc"},take:30}),
+  db.toolRefundCase.findMany({where:{status:"OPEN"},orderBy:{createdAt:"asc"},take:30,include:{user:{select:{email:true}},order:{select:{sku:true,grant:{select:{total:true,remaining:true}}}}}})
  ]);
  return <>
   <h1>AI 工具经营概览</h1>
@@ -25,9 +27,27 @@ export default async function ToolOrders({searchParams}:{searchParams:Promise<{e
   {error&&<p className="error" role="alert">核查操作未完成：请确认异常超过十分钟、填写依据并勾选确认；若已处理请刷新。</p>}
   {paymentResult&&<p role="status">商户对账结果：{paymentResult}。以渠道验签结果和订单最终状态为准。</p>}
   {paymentError&&<p className="error" role="alert">商户对账未完成。请核查渠道配置、订单状态或外部服务，订单不会被默认关闭。</p>}
+  {refundRejected&&<p role="status">退款申请已作出审核答复，该次数包恢复可用；没有发生资金退款。</p>}
+  {refundError&&<p className="error" role="alert">退款审核未完成，请确认申请仍处于待核查状态，填写不少于 10 字依据。</p>}
   <section className="card">
    <h2>真实支付累计（未扣除成本） ¥{price(paid._sum.amountFen??0)}</h2>
    <p>{runs.map(r=>r.status+" "+r._count._all).join(" · ")||"暂无调用"}</p>
+  </section>
+  <section className="card">
+   <h2>待核查退款申请：{openRefundCases.length}</h2>
+   <p className="muted">申请提交仅冻结次数包新增调用，不代表资金已退。请核对交易、已消费次数、服务争议及消费者权益法规。未完成支付渠道退款接口联调前，本后台不能标记实际退款成功。</p>
+   {openRefundCases.length===0?<p>暂无待审核申请。</p>:<div className="scroll"><table><thead>
+    <tr><th>申请</th><th>用户</th><th>订单 / 次数</th><th>申请理由</th><th>处理</th></tr>
+   </thead><tbody>{openRefundCases.map(c=><tr key={c.id}>
+    <td>{c.createdAt.toISOString()}</td><td>{c.user.email}</td>
+    <td>{c.order.sku} / {c.order.grant?.remaining??"—"} 剩余，原 {c.order.grant?.total??"—"} 次</td>
+    <td>{c.reason}</td>
+    <td><form action={rejectRefundCase.bind(null,c.id)}>
+     <label>审核说明<input name="reason" minLength={10} maxLength={500} required/></label>
+     <label><input type="checkbox" name="confirmed" value="yes" required/> 已核对情况，同意驳回并解冻本次数包</label>
+     <button type="submit" className="quiet">驳回申请并解冻</button>
+    </form></td>
+   </tr>)}</tbody></table></div>}
   </section>
   <section className="card">
    <h2>待支付订单查询与安全关单</h2>

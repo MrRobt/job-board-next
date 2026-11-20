@@ -40,6 +40,7 @@ model User {
   toolRuns ToolRun[]
   toolRunAdjustments ToolRunAdjustment[]
   toolOrderReconcileEvents ToolOrderReconcileEvent[]
+  refundCases ToolRefundCase[]
 }
 model Session {
   tokenHash String @id @db.Char(64)
@@ -158,9 +159,11 @@ model ToolOrder {
   codeUrl String? @db.VarChar(2048)
   paymentExpiresAt DateTime?
   paidAt DateTime?
+  refundHold Boolean @default(false)
   createdAt DateTime @default(now())
   grant ToolGrant?
   reconciliationEvents ToolOrderReconcileEvent[]
+  refundCases ToolRefundCase[]
   @@index([userId,createdAt])
 }
 model ToolGrant {
@@ -197,6 +200,28 @@ model ToolRun {
   @@index([userId,createdAt])
 }
 
+enum RefundCaseStatus {
+  OPEN
+  REJECTED
+  PROCESSING
+  SUCCEEDED
+  FAILED
+}
+model ToolRefundCase {
+  id String @id @default(cuid())
+  orderId String @db.VarChar(32)
+  order ToolOrder @relation(fields:[orderId],references:[id])
+  userId String
+  user User @relation(fields:[userId],references:[id])
+  reason String @db.VarChar(500)
+  status RefundCaseStatus @default(OPEN)
+  reviewerId String?
+  reviewReason String? @db.VarChar(500)
+  createdAt DateTime @default(now())
+  reviewedAt DateTime?
+  @@index([orderId,createdAt])
+  @@index([status,createdAt])
+}
 model ToolOrderReconcileEvent {
   id String @id @default(cuid())
   orderId String @db.VarChar(32)
