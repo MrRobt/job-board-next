@@ -156,6 +156,13 @@
 - 特别保护并保留其它工作：`lib/career/financial-risk-audit.ts`、`scripts/financial-risk-audit.ts`、相应集成测试及其文档未提交；`next-env.d.ts`、`package-lock.json`、`.data/`、`.dsh-meow/`、`.omc/` 也未混入。
 - 下包应优先 B06 真实退款的**可离线验证**持久化幂等与终态确认机制；仅在有合法商户、真实接口验签与人工批准后才允许资金操作。无需密钥的工单与账本工作可继续，真实 AI/支付默认关闭。
 
+## 2026-11-20 B06 只读预检与 Git 阻断
+
+- 新增经 ADMIN 鉴权的数据库快照预检、页面 `/admin/refunds/[id]` 与工单入口，无资金操作，超限历史不返回不完整建议；`refund-db-preflight-2026-11-20.md` 留有验收细节。
+- 测试：专项 1/1、全量 MySQL 21/21、TypeScript exit 0、Next build exit 0。使用项目隔离库，不触发真实商户。
+- 本地已有 `1f93e84` 和 `96a6fef`。推送失败：`Host key verification failed`。当前 Git remote 为 `git@github.com:MrRobt/job-board-next.git`，Git for Windows 的 SSH 使用 `C:\\Users\\djs\\.ssh\\known_hosts`，且 `StrictHostKeyChecking ask`；必须在受信任环境核实 GitHub 公钥指纹，不能临时禁用校验。未取得成功的远端 push/CI 证据。
+- 保留其它 Agent financial-risk-audit 文件、package-lock 和 `.data/.omc/.dsh-meow`，本轮只精确暂存自身变更。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

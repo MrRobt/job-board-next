@@ -144,6 +144,13 @@
 - 专用 MySQL 容器由 Exited 状态恢复启动，隔离库 3 个迁移 status up to date。退款专项 1/1 PASS；全量集成首轮 19/20 有一次非确定性失败，复跑 **20/20 PASS**；全量单元 38/38、TypeScript 0 错、Next.js build exit 0。仅为本机代码/数据库测试，不证明退款资金渠道正常。
 - **B06 仍 IN_PROGRESS**：只完成申请、冻结、驳回，不可标 REFUNDED。后续优先持久化退款单号/原单/指纹、商户幂等申请与只读查询结果、终态权益撤回和并发恢复；真实商户与法律批准继续 BLOCKED。
 
+## 2026-11-20 B06 授权数据库账务预检
+
+- `lib/career/refund-preflight-db.ts` 将既有纯规则接入经管理员鉴权的 MySQL 一致性只读快照；超过历史读取上限则拒绝不完整判断。新增 `/admin/refunds/[id]` 页面和工具订单后台入口，明确“预检不授权资金退款”。
+- 新集成测试 1/1 PASS、全量 MySQL **21/21 PASS**、TypeScript 和 Next.js 生产构建 exit 0。详情 `refund-db-preflight-2026-11-20.md`。B06 仍 IN_PROGRESS。
+- 本地两个退款申请/交接提交 `1f93e84`、`96a6fef` 已完成，但 `git push origin main` 返回 **Host key verification failed**，不能声称远端已同步。保持 Git SSH 严格主机校验，不禁用信任检查；待核实远端指纹/本机 SSH 配置再非强推。
+- 下项仍为退款资金意图持久化、审批/指纹幂等、商户结果终态和权益撤销；合法支付资质与人工合规门禁仍 BLOCKED。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

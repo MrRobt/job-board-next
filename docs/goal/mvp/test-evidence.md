@@ -153,6 +153,13 @@
 - `next build F:/code/job-board-next`：exit 0、compiled successfully、TypeScript 与页面构建成功。
 - 仅验收退款申请/冻结/驳回事务；不验收真实资金退款、终态撤销和外部商户/模型/法律审批。
 
+## 2026-11-20 B06 只读数据库预检与后台详情
+
+- 新增 `tests/integration/refund-preflight-db.test.ts`：非管理员拒绝、未冻结/未申请风险、在途/已消费及账本一致性、检查不修改支付状态/余额，**1/1 PASS**。
+- 全量 MySQL 集成 **21/21 PASS**；TypeScript `tsc --noEmit` exit 0；Next.js build exit 0 且新增 `/admin/refunds/[id]` 路由。
+- 初次类型检查发现测试使用非法 `"interview"` Kind，已修改为 `"questions"` 并重新通过类型/构建；不把初次失败掩盖。
+- Git 本地提交已成功，SSH 主机校验失败导致远端推送尚未完成，远端 CI 没有本包结果。未禁用主机身份校验。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
