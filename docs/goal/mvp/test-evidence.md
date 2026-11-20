@@ -230,6 +230,13 @@
 - 新增财务发送开关 `ENABLE_REFUND_SEND` 默认禁用，必须与 `ENABLE_REAL_PAYMENT`、`ENABLE_REFUND_DISPATCH_CLAIM`、合法商户密钥同时显式满足。构建和测试过程中**没有任何真实商户网络请求/财务退款**。
 - 不能以本机模拟渠道成功、匿名页面 200 或 Git 推送成功认定真实支付/退款、资金对账、远端 CI、浏览器管理员登录态及正式上线通过。
 
+## 2026-11-21 B07 隔离库恢复前检查
+
+- 既有专用测试 MySQL `job-board-next-db-1` healthy、MySQL 8.0.46 / mysqldump 8.0.46 可用，`prisma migrate status` exit 0、8 migrations up to date。
+- 显式只读批准前 `b07-recovery-preflight.mjs` exit 2（拒绝）；只读批准后 exit 0、PASS：8/8 迁移 SHA-256 与数据库记录完全一致、无待迁移/失败/未知/漂移，关键财务表与字段齐全、金额字段为整数。0 个 IN_DOUBT、RESERVED、PAID 冻结订单仅代表该隔离库。
+- `tests/b07-recovery-preflight.test.ts` 权限与目标范围的拒绝用例 **2/2 PASS**；修正测试辅助函数类型后全量单元 **40/40 PASS**、MySQL 集成（文件串行）**28/28 PASS**、TypeScript exit 0、Next.js build exit 0。初次 TS 检查曾因测试类型不匹配失败，不隐藏此错误。
+- 非空备份/目标库恢复被工作区高权限凭据安全约束阻断，**没有执行数据库备份、恢复、创建/删除库，也没有实际 RPO/RTO/生产恢复验收**。B07 整体不标 VERIFIED；见 `b07-recovery-preflight-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

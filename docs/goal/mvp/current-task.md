@@ -197,6 +197,14 @@
 - `tests/integration/refund-submission.test.ts` 3/3 PASS；TS、单元全量 **38/38**、隔离 MySQL 全量 **28/28**、Next.js 16.4.6 生产构建 exit 0；`prisma migrate status` 8 个迁移最新。本轮所有渠道返回均为模拟 HTTP，**无真实资金变动**。
 - B06 仍 IN_PROGRESS：商户人工授权、小额退款发送与查询、断网/崩溃恢复、退款争议/部分退款、正式资金对账、正常开发/生产库升级、管理员浏览器 E2E 等门禁仍需验收。交接 `refund-submission-one-shot-2026-11-20.md` 与独立需求增量 `requirement-delta-b06-send-2026-11-20.md`；主需求矩阵和 `handoff.md` 有其他 Agent 未提交内容，未覆盖。
 
+## 2026-11-21 B07 数据恢复前置只读检查
+
+- 选择 B07 中不依赖真实商户、也不触碰其他项目数据库的子包。已完成 `scripts/b07-recovery-preflight.mjs`：仅对本地具名隔离库、显式只读批准进行迁移文件/登记 checksum、关键财务表列/金额类型和聚合异常核查；无 SQL 写入、无账号或交易号输出，失败关闭。
+- 原定非空备份/恢复自动演练程序因高权限凭据传递涉及的安全检查阻断，**未绕过、未创建库或执行任何备份/恢复**；另有被授权运维在新建独立预发布库执行的手工验收步骤，见 `b07-recovery-preflight-2026-11-21.md`。
+- 真实隔离 MySQL `jobs_mvp_migrate_20261118_8f72`：明确批准只读执行 `PASS`；本地迁移 8 与库中登记 8 完全相符，缺失/失败/校验和不一致/关键财务列不一致均为 0；未授权时 exit 2。仅表示**测试库**无发现异常。
+- 专项保护测试 2/2 PASS；全量单元 **40/40**、MySQL 集成 **28/28**、TS 与 Next build exit 0。第一次 TS 校验发现新测试辅助函数类型过窄，修复后复验通过。
+- B07 **IN_PROGRESS**：缺真实非空备份/异库恢复演练、旧库迁移基线、权限/回滚、生产 RPO/RTO 和告警；其他 Agent 的 `handoff.md`、三份主矩阵及财务扫描原有未提交改动不合并，独立增量与交接文件记录。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
