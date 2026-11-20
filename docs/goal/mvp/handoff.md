@@ -204,6 +204,14 @@
 - `docs/goal/mvp/requirement-matrix.md`、`risk-register.md`、`release-checklist.md`、财务风险扫描及 `package-lock.json`、`next-env.d.ts`、`.data/.omc/.dsh-meow` 等均属于其他 Agent 或工具的原有未提交改动，禁止混入本包提交。
 - 真实渠道商户退款请求、查询/出款结果、原子撤销、真实 UAT、生产部署/合规仍未完成；B06 继续 IN_PROGRESS。
 
+## 2026-11-20 本地恢复与生产上线门禁（B06/D02）
+
+- GitHub `origin/main` 已正常非强推同步至 `9f327a5`（代码 `0237606`、串行 MySQL 测试脚本 `3e00ea7`、Goal 证据 `9f327a5`）。其他 Agent 的财务风险扫描与三份主矩阵原有未提交修改完全保留。
+- 隔离库 `jobs_mvp_migrate_20261118_8f72` 共 7 个 Prisma 迁移验证成功；**正常开发库 `jobs` 的 `db push --skip-generate` 调用被安全检查阻断**，没有尝试绕过，也没有执行强制同步、清库或直接 SQL。开发库后台 Outbox 登录态及新表读写**未验收**。
+- 本机 Next.js 生产启动进程已恢复，显示 `/ /pricing /login /register` 均 HTTP 200；未经登录的 `/admin/refund-dispatch` 为 307 跳转 `/login`。仅能说明公开页面和基础未登录保护可用；实际管理员/订单业务闭环仍需在授权迁移完成后浏览器 UAT。
+- 服务以 `ENABLE_REAL_PAYMENT=false`、`ENABLE_TOOL_PAYMENTS=false`、`ENABLE_LIVE_AI=false`、`ENABLE_PAYMENT_RECONCILIATION=false`、`ENABLE_REFUND_QUERY=false`、`ENABLE_REFUND_DISPATCH_CLAIM=false` 启动，无真实发款渠道/模型调用。
+- 下一步 B06 商户退款发送/验签查询与原子撤权仍需人工商户审批；CI 对最新提交的远端实测结果未确认，不能标记生产上线就绪。
+
 ## 续跑
 
 从 `current-task.md` 中的 P0 退款权益设计开始；先读真实源码和检查凭据/门禁，缺外部材料保留 BLOCKED、推进可离线验证的内部账务模块。下一次 Git 操作仅提交本包文件，保护其他 Agent 的变更。

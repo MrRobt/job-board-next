@@ -202,6 +202,13 @@
 - 新增后台只读账本和请求篡改断言后，MySQL 并行全量两轮各 **23/24**：第一轮跨业务交易号隔离失败（单独复跑 1/1 PASS），第二轮原 career 测试失败；不能视作全量稳定通过。按 `--test-concurrency=1` 串行执行不同测试文件后 **24/24 PASS**（文件内并发测试不变）。本轮 `package.json` 的 `test:integration` 脚本同步设为该方式。生产真实高并发与测试池争用风险仍未完成验收。
 - 此包不含任何真实商户 HTTP 请求、后台资金退款、权益撤回和法律审批；也不等于恢复了本地运行网站/真实浏览器验收。详细说明见 `refund-dispatch-outbox-2026-11-20.md`。
 
+## 2026-11-20 本地网站与开发 DB 阻断核验
+
+- 独立测试库（非正常开发库）7 个 Prisma 迁移：`migrate status` up-to-date、第二次 `migrate deploy` 无 pending，均 exit 0。
+- 正常开发库 `jobs` 的 `prisma db push --skip-generate` 被安全检查阻断，**未执行成功**；不能将隔离库迁移证明替代日常开发/生产数据升级。
+- 停止原 Next 进程以便重新生成 Prisma Client/完成构建后，本轮按明确关闭真实 AI、支付、退款查询及退款领取开关重新启动 Next.js；HTTP 实测：`/`、`/pricing`、`/login`、`/register` 均 200；无会话 `/admin/refund-dispatch` 为 307 到登录。
+- 已登录管理员的派发台账及生产旧库迁移仍 **BLOCKED/UNVERIFIED**。远端 Git push 已成功，但尚未取得最新 GitHub Actions 完整验证和生产环境运行证据。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
