@@ -450,7 +450,7 @@
 
 - 已验证第一小包 `89fbe7a` run `44884812385` **SUCCESS**：125/125 单元、34/34 MySQL 集成、0 FAIL/0 SKIP；离线通知计划器通过。
 - 新增第十迁移队列表 `OpsIncidentNotificationIntent` 唯一 64 字节 hash 主键、事故 FK、QUEUED 状态；`queueInitialOpsNotificationIntent` 对实际轮次/OPEN 状态重新验证，Serializable + skipDuplicates 幂等只入队；测试覆盖重复、ACK/RESOLVED、错轮次与恶意 hash/等级，单独 MySQL 集成 CI 必须真实执行。
-- 本地 npm test、独立 tsc、Next build、`prisma validate` exit 0；`prisma generate` 遇已有进程锁住 Windows query_engine.dll 的 EPERM，非 schema 校验失败，须由 CI 重生 client。历史专用 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`，旧库缺第九/第十迁移，**不代表新表入队已经数据库验收**。详见 `b04-notification-durable-queue-candidate-2026-11-21.md`。
+- 本地 npm test、独立 tsc、Next build、`prisma validate` exit 0；`prisma generate` 遇已有进程锁住 Windows query_engine.dll 的 EPERM，非 schema 校验失败，须由 CI 重生 client。历史专用 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`，旧库缺第九/第十迁移，新表本地仍未验收，但已核验 `853d20b` GitHub Actions run `44885639216` **success**：第十迁移全新 MySQL8、129/129 单元、35/35 集成、0 FAIL/0 SKIP，测试 `B04/U03 migrated MySQL: durable notification queue is unique per episode, stale queue refused` 明确 PASS；生产构建及 smoke 成功。详见 `b04-notification-durable-queue-candidate-2026-11-21.md`。
 - 当前无自动发送/领取/重试/投递回执，也不允许开启真实通知；B04/U03 仍 IN_PROGRESS，整体 NOT READY。
 
 ## 保留的局限

@@ -15,7 +15,7 @@
 ## 实测及已知阻断
 - `npm test` exit 0；带占位数据库连接 URL 的 `prisma validate` exit 0；独立 `tsc --noEmit` exit 0；Next.js build exit 0。
 - 机器上 `npm run typecheck` 内的 `prisma generate` 曾遇到 Windows 占用 `query_engine-windows.dll.node` 的 `EPERM rename`，不是 schema 验证不通过；没有终止其他 Agent/服务。全新 CI 环境会执行 Prisma generate / typecheck。
-- 旧独立 MySQL `36 total /31 PASS /0 FAIL /5 SKIP`：旧库缺第九、第十迁移；不能声称本机验证新增真实入队。必须以本提交全新 CI MySQL 真实结果为准。
+- 旧独立 MySQL `36 total /31 PASS /0 FAIL /5 SKIP`：旧库缺第九、第十迁移；不能声称本机验证新增真实入队。已核验 `853d20b` GitHub Actions [run 44885639216](https://github.com/MrRobt/job-board-next/actions/runs/44885639216) **success**：第十迁移全新 MySQL8 apply/repeatable、129/129 单元、35/35 集成、0 FAIL/0 SKIP，真实测试 `B04/U03 migrated MySQL: durable notification queue is unique per episode, stale queue refused` 明确 PASS；Next build 与 HTTP smoke 通过。该结果仅证明 QUEUED 入队存储与唯一约束，不证明真实通知可送达。
 
 ## 严禁虚报完成
 - 此阶段只创建 **QUEUED 意图**，不提供发送、确认、领取租约、过期重试或自动升级；队列在事故已解决后仍需后续 Worker **重新检查事故轮次/状态**才能决定是否发送。不得称可靠消息已送达或 Exactly-once。

@@ -425,7 +425,7 @@
 
 - 已核实上一小包 `89fbe7a` GitHub Actions run `44884812385` success：125/125 单元、34/34 集成、0 FAIL/0 SKIP。新增第十 Prisma 迁移 `OpsIncidentNotificationIntent`，以 SHA256 轮次/NOTIFY 幂等主键记录持久化 QUEUED 意图，外键关联事故；不改资金表、不启动通知。
 - 新增 `queueInitialOpsNotificationIntent` 和 Serializable Prisma Adapter：仅首通知，校验真实 hash、事故 key/等级/轮次/非零数量；事务内重新检查事故必须 OPEN 且轮次匹配，DB 唯一键 + skipDuplicates 使重复请求仅一个 QUEUED，ACK/RESOLVED/旧轮次拒绝。单元覆盖伪造/重复/错轮次、数据库适配；新增迁移 MySQL 集成测试，CI 缺表 FAIL。
-- 本地 npm test、独立 TS、Next build、Prisma schema validate exit 0；`npm run typecheck` 内 `prisma generate` 因 Windows DLL 正被其他进程占用触发 EPERM，**未杀进程**，须 CI 全新 Client 验收。历史 MySQL **36 total/31 PASS/0 FAIL/5 SKIP**（旧库无第九/第十迁移），新真实入队待本提交 CI。独立 `b04-notification-durable-queue-candidate-2026-11-21.md`。尚无领取/发送/确认/崩溃恢复、保持 NOT READY。
+- 本地 npm test、独立 TS、Next build、Prisma schema validate exit 0；`npm run typecheck` 内 `prisma generate` 因 Windows DLL 正被其他进程占用触发 EPERM，**未杀进程**，须 CI 全新 Client 验收。历史 MySQL **36 total/31 PASS/0 FAIL/5 SKIP**（旧库无第九/第十迁移），新真实入队已通过 `853d20b` GitHub Actions run `44885639216` **success**：第十迁移全新 MySQL8 apply/repeatable、129/129 单元、35/35 集成、0 FAIL/0 SKIP，真实队列唯一/重复幂等/已解决禁止再次入队明确 PASS，生产 build/smoke 通过。独立 `b04-notification-durable-queue-candidate-2026-11-21.md`。尚无领取/发送/确认/崩溃恢复、保持 NOT READY。
 
 ## Git 安全
 
