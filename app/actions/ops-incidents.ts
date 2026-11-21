@@ -16,7 +16,7 @@ import {createPrismaOpsIncidentStore,type OpsPrismaClientPort} from "@/lib/caree
 export async function confirmOpsIncident(form:FormData){
  const admin=await requireAdmin();
  if(process.env.ENABLE_OPS_INCIDENT_ACK!=="true")
-  redirect("/admin?incidentError=disabled");
+  redirect("/admin/incidents?incidentError=disabled");
  let outcome:"ACKNOWLEDGED"|"ALREADY_ACKNOWLEDGED";
  try{
   if(!await allowAttempt("ops-incident-acknowledge",admin.id,5,60))
@@ -27,8 +27,8 @@ export async function confirmOpsIncident(form:FormData){
    {...command,operatorId:admin.id}
   );
  }catch{
-  redirect("/admin?incidentError=1");
+  redirect("/admin/incidents?incidentError=1");
  }
- revalidatePath("/admin");
- redirect("/admin?incidentOutcome="+encodeURIComponent(outcome));
+ revalidatePath("/admin/incidents");
+ redirect("/admin/incidents?incidentOutcome="+encodeURIComponent(outcome));
 }

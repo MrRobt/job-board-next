@@ -355,6 +355,12 @@
 - 新增 `ops-ack-form.ts` 白名单及严格发生轮次/理由解析，`confirmOpsIncident` Server Action：requireAdmin 取服务器身份、独立开关 `ENABLE_OPS_INCIDENT_ACK=true`（默认关闭）、5 次/小时 DB 限流、事务确认与审计，统一错误重定向；**未开放 UI/真实通知/资金操作**。新单测校验非法类别、伪造管理员、过期/格式错误与确认勾选。
 - 首轮测试 helper 类型不匹配已修；最终 npm test/TS/Next build exit 0，旧历史隔离 MySQL 31 PASS/1 SKIP（库未迁第 9 项，不能混同 CI 已成功新库）。本动作 HTTP E2E 和预发布迁移未验收，B04/U03 继续 IN_PROGRESS。详见 `b04-admin-incident-action-candidate-2026-11-21.md`；保护其他 Agent 脏文件。
 
+## 2026-11-21 B04/U03 受控管理员事故面板（独立子包）
+
+- 核对 `1837f7e` GitHub Actions run `44872780536` 已 success；不重复之前 CI 全新 MySQL8 的第 9 项迁移/事故确认事务验收。
+- 新增 `/admin/incidents` 页面、只读汇总投影和导航，要求 `requireAdmin`；独立开关未开启时绝不查询新事故表。启用后最多展示最近 25 条事故状态，仅 OPEN 可提交事故类别 + openedAt + 理由 + 人工确认，复用现有管理员身份/限流/事务 CAS 审计。调整 Server Action 重定向到新页面；禁止资金、AI 和通知动作。
+- 新增三个只读安全投影测试；本地 npm 单元、TypeScript、Next build exit 0；旧历史隔离 MySQL 32 total/31 PASS/1 SKIP（旧库缺第 9 项迁移），不作为页面 E2E。管理员已登录提交、CSRF/越权、预发布迁移仍未验收，B04/U03 继续 IN_PROGRESS。见 `b04-admin-incidents-panel-2026-11-21.md`。保留其他 Agent 脏文件。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

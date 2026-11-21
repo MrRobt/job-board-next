@@ -380,6 +380,12 @@
 - 新增管理员确认 Server Action 独立禁用开关、服务端鉴权和限流、轮次/理由安全表单校验。新增表单单元覆盖，首次 TypeScript 类型错误修复后本地单元、tsc 和 Next build exit 0；老本地隔离库 MySQL **31 PASS/1 SKIP**，新表未落库所以明确跳过。
 - 不宣称管理员 HTTP 真实登录态、CSRF、页面或独立开关启用已完成；需预发布迁移、浏览器及权限 E2E。证据 `b04-admin-incident-action-candidate-2026-11-21.md`；B04/U03 整体 IN_PROGRESS。
 
+## 2026-11-21 B04/U03 管理员告警面板和只读投影
+
+- 核验 GitHub Actions `1837f7e` run `44872780536` success；此前 CI 新 MySQL8 全量迁移和告警确认真实事务已通过。这不是本次管理员页面登录态 E2E。
+- 新增仅管理员可访问、开关关闭时不读取新表的事故面板；仅 OPEN 允许明确人工提交，提交绑定 key/openedAt 并使用已实现的事务审计。新增纯只读投影三项安全单测；独立 npm test、tsc 和 Next.js build exit 0。
+- 旧专用 MySQL：32 total / 31 PASS / 1 SKIP / 0 FAIL，唯一 SKIP 因历史库缺第 9 项迁移。未启用事故管理开关，尚无真实浏览器已登录权限/CSRF/表单提交验收；详细证据 `b04-admin-incidents-panel-2026-11-21.md`，B04/U03 整体仍 IN_PROGRESS。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
