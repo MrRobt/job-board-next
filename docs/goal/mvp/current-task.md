@@ -337,6 +337,12 @@
 - TDD 发现 `expectedState/expectedOpenedAt` 错传给 Prisma 字段的实际缺陷并修复为 `state/openedAt`。全量单元 exit 0、直接 TS exit 0、Next.js build exit 0；现有隔离 MySQL 回归第一次 30/31 失败，第二次 31/31 PASS，保留测试稳定性风险。
 - 此为注入委托候选，不读取真实新告警表；第 9 项迁移、Prisma Client 生成、真 MySQL 事务/审计与权限 HTTP E2E 尚未验收，B04/U03 仍 IN_PROGRESS。独立证据 `b04-prisma-incident-adapter-candidate-2026-11-21.md`；其它 Agent 的共享文档与财务审计均不混提交。
 
+## 2026-11-21 B04/U03 新事故表 MySQL 集成回归 CI 门禁
+
+- 接续 `8145fd2`，新增真正调用 Prisma 事务适配器的 `tests/integration/ops-incident-mysql.test.ts`：核验已迁移双表、服务器管理员角色、事故轮次 CAS、审计落库、重复确认幂等、重开后旧轮次拒绝以及双管理员竞争。该文件由既有 CI 全量 `test:integration` 自动纳入；CI=true 缺第 9 项迁移时抛错，绝不隐性跳过。
+- 本地历史专用隔离 MySQL 仍只有旧迁移，新测试明确 SKIP；集成结果 **32 total / 31 PASS / 1 SKIP / 0 FAIL**，不能解释为新告警确认 MySQL 已通过。独立 TS exit 0、npm 单元 exit 0、Next 构建 exit 0。CI=true 单独演练调用受安全门禁影响，没有有效通过证据。
+- 独立证据 `b04-incident-ci-mysql-gate-2026-11-21.md`；第 9 项迁移、真实 Prisma Client、GitHub Actions 实际结果及 B04/U03 总体验收仍 IN_PROGRESS；其他 Agent 未提交文件均保护不动。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

@@ -362,6 +362,12 @@
 - 历史专用隔离 MySQL 原有集成第一轮 30/31 PASS、exit 1；原样复跑 31/31 PASS、exit 0。首轮偶发失败原因仍待进一步捕获与排查，不能视为稳定性已验证。
 - 新事故表第 9 项迁移、真实 Prisma Client 委托、数据库 CAS 并发/回滚、管理员身份 HTTP 接口与生产通知尚无验收；只将纯适配器模拟器子包标本地 VERIFIED，B04/U03 整体 IN_PROGRESS。独立证据 `b04-prisma-incident-adapter-candidate-2026-11-21.md`。
 
+## 2026-11-21 B04/U03 真实 MySQL 事故确认集成 CI 测试候选
+
+- 新增经现有 `test:integration` 收录的 Prisma 新事故表集成测试：权限隔离、同轮次确认与幂等、审计落库、旧轮次拒绝和双管理员并发 CAS。GitHub Actions 的 `CI=true` 在缺表时强制失败，旧本地专用库仅允许明确 SKIP。CI 实际工作流尚未取得验收结果。
+- 本地独立 TS exit 0、npm 单元 exit 0、Next build exit 0；旧隔离 MySQL **32 total / 31 PASS / 1 SKIP / 0 FAIL / exit 0**，唯一 SKIP 是第 9 项迁移必需的新事故表测试，不是新功能的 MySQL PASS。本地模拟 CI 门禁演练被工具安全检查阻断，未宣称已通过。
+- 未对正常开发或生产库执行迁移/写入。B04/U03、B07、D02 继续 IN_PROGRESS；独立证据 `b04-incident-ci-mysql-gate-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
