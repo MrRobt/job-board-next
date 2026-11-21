@@ -1,6 +1,6 @@
 # B06 退款查单期间领取人变更防护 — 2026-11-21
 
-状态：VERIFIED（本地子包测试通过；尚未提交/推送。B06 整体仍 IN_PROGRESS）
+状态：VERIFIED（本地测试通过；代码与证据已提交/推送。B06 整体仍 IN_PROGRESS）
 
 ## 本轮只涉及文件
 - `lib/career/refund-finalization.ts`：在已验签渠道查询后的 SERIALIZABLE 原子结算事务内，复核 Outbox 的领取人 ID 和领取时间未在网络查询间隙发生变化，不一致拒绝改账。
@@ -20,4 +20,4 @@
 - TypeScript 直接检查 exit 0、单元测试 exit 0、Next.js 生产 build exit 0（上一轮已执行）；Prisma generate 曾 EPERM，不能宣称完整 `npm run typecheck` 通过。
 
 ## 后续门禁
-仅在精确 review 后提交两处代码、独立证据和必要增量交接，并正常 push/核实远端 CI。测试只证明离线事务安全，不等于真实支付/商户退款成功；外部审批和正式部署仍 BLOCKED。其他 Agent 的主矩阵、主 handoff、财务审计、工具缓存和锁文件保持原样。
+已精确 review 并仅提交本包五个文件，commit `79efcb8`；普通 SSH 推送因 Host key verification failed 阻断后，按此前已验证的 GitHub SSH 443、`StrictHostKeyChecking=yes` 正常非强推成功（`93e6e9b..79efcb8`，`main -> origin/main`）。GitHub connector 的 PR-only workflow runs 与 commit statuses 均为空，不能声称本次远端 Actions 通过。测试只证明离线事务安全，不等于真实支付/商户退款成功；外部审批和正式部署仍 BLOCKED。其他 Agent 的主矩阵、主 handoff、财务审计、工具缓存和锁文件保持原样。
