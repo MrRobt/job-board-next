@@ -2,6 +2,8 @@ import {test} from "node:test";
 import assert from "node:assert/strict";
 import {db} from "../../lib/db";
 import {claimOpsNotificationIntent} from "../../lib/career/ops-notification-claim";
+import {preflightOpsNotification} from "../../lib/career/ops-notification-preflight";
+import {createPrismaOpsNotificationPreflightStore,type OpsNotificationPreflightPrismaPort} from "../../lib/career/ops-notification-preflight-prisma-store";
 import {createPrismaOpsNotificationLeaseStore,type OpsNotificationClaimPrismaPort} from "../../lib/career/ops-notification-claim-prisma-store";
 import {planOpsNotificationIntents} from "../../lib/career/ops-notification-intents";
 import {queueInitialOpsNotificationIntent} from "../../lib/career/ops-notification-queue";
@@ -51,11 +53,16 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
   const lease=createPrismaOpsNotificationLeaseStore(db as unknown as OpsNotificationClaimPrismaPort);
   const first=await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(openedAt.getTime()+2200));
   assert.equal(first.status,"CLAIMED");
+  const preflight=createPrismaOpsNotificationPreflightStore(db as unknown as OpsNotificationPreflightPrismaPort);
+  if(first.status!=="CLAIMED")throw Error("Expected first claim");
+  assert.equal(await preflightOpsNotification(preflight,intent.idempotencyKey,first.claimToken,new Date(openedAt.getTime()+2250)),"READY");
   assert.equal((await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(openedAt.getTime()+2300))).status,"BUSY");
   const recovered=await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(openedAt.getTime()+302200));
   assert.equal(recovered.status,"CLAIMED");
-  if(first.status==="CLAIMED"&&recovered.status==="CLAIMED")
-   assert.notEqual(first.claimToken,recovered.claimToken);
+  if(recovered.status!=="CLAIMED")throw Error("Expected recovery claim");
+  assert.notEqual(first.claimToken,recovered.claimToken);
+  assert.equal(await preflightOpsNotification(preflight,intent.idempotencyKey,first.claimToken,new Date(openedAt.getTime()+302250)),"FENCED");
+  assert.equal(await preflightOpsNotification(preflight,intent.idempotencyKey,recovered.claimToken,new Date(openedAt.getTime()+302250)),"READY");
   const claimRow=await db.opsIncidentNotificationIntent.findUniqueOrThrow({
    where:{idempotencyKey:intent.idempotencyKey}
   });
@@ -63,6 +70,7 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
   assert.equal((claimRow as unknown as {attemptCount:number}).attemptCount,2);
   const resolved=await syncOpsIncidentWithStore(sync,key,0,new Date(openedAt.getTime()+303000));
   assert.equal(resolved.event,"RESOLVED");
+  assert.equal(await preflightOpsNotification(preflight,intent.idempotencyKey,recovered.claimToken,new Date(openedAt.getTime()+303100)),"STALE");
   assert.equal((await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(openedAt.getTime()+602200))).status,"STALE");
   assert.equal(await queueInitialOpsNotificationIntent(queue,intent,new Date(openedAt.getTime()+304000)),"STALE");
   assert.equal(await db.opsIncidentNotificationIntent.count({where:{incidentKey:key}}),1);

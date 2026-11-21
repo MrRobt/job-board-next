@@ -433,6 +433,12 @@
 - `claimOpsNotificationIntent` 只对符合当前 OPEN 轮次的 QUEUED/过期 CLAIMED 任务使用 Serializable CAS 领取；有效租约 BUSY、已解决/已确认/旧轮次 STALE；最长 15 分钟，5 次尝试封顶。测试覆盖竞争、超期更换 token、上限、参数及事故状态；扩展原有第十迁移集成测试加入真实 MySQL 租约闭环，CI 缺表 FAIL。
 - 本地 npm 单元、tsc、Next build、Prisma validate 均 exit 0；旧隔离 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`（缺第九至十一迁移），新真实事务已核验 `7ae462f` GitHub Actions run `44886846171` **success**：第十一迁移及重复 deploy 全新 MySQL8、133/133 单元、35/35 集成、0 FAIL/0 SKIP，入队→首次 CLAIMED→有效租约 BUSY→租约过期更换 token→事故解决 STALE 的真实测试 PASS，Prisma generate/typecheck、build/smoke 均成功。详情 `b04-notification-claim-lease-2026-11-21.md`。没有外部通知发送/确认/续租/失败重试与生产部署验收，B04/U03 继续 IN_PROGRESS，整体 NOT READY。
 
+## 2026-11-21 B04/U03 通知领取后只读 preflight 校验
+
+- 已核实 `1ab2428` GitHub CI run `44887201687` success，上一轮领取租约验收不重复。新增 `preflightOpsNotification` + Serializable 只读 Prisma 适配，在任何将来的外部处理前查询当前 CLAIMED 任务、匹配 UUID fencing token、有效租约和对应 OPEN 事故轮次；过期/旧令牌/已解决/已确认/新轮次分别 fail-closed。**READY 只是只读时点快照，不授权外部发送**。
+- 新增 5 项单元测试与既有真实 MySQL 领取集成测试中的 READY/FENCED/STALE 检查，未新增 DB 表或真实通知 Worker；npm 单元、独立 tsc、Next build exit 0；历史 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`（缺第九至十一迁移），扩展的真库 preflight 待新 CI 验证。详见 `b04-notification-preflight-2026-11-21.md`，B04/U03 IN_PROGRESS、整体 NOT READY。
+- 保持真实支付、AI、通知开关关闭；未触碰其他 Agent 的 handoff、矩阵、风险、发布清单、财务审计和缓存。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

@@ -459,6 +459,12 @@
 - 新单元测试验证有效租约 BUSY、租约到期换 token、5 次上限、旧轮次和非 OPEN 状态拒绝、错误参数 fail-closed、CAS 端口；原 MySQL 入队测试追加真领取→有效租约拒绝→超期重领→事故解决拒领，防止跨文件使用同一个事故 key 的并行冲突。
 - 本地 npm test、独立 tsc、Next build、Prisma validate exit 0；旧隔离 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`，旧库缺事故/通知新迁移不可算真实 DB 验收。已核验 `7ae462f` GitHub Actions run `44886846171` **success**：第十一迁移全新 MySQL8、133/133 单元、35/35 集成、0 FAIL/0 SKIP，实际租约 CLAIMED/BUSY/超期恢复/事故关闭拒领测试 PASS；生成 Client、typecheck、Next build、smoke 均成功。见 `b04-notification-claim-lease-2026-11-21.md`。CLAIMED 不表示已投递；真实 sender、ack、失败回收和人工合规门禁仍未完成，NOT READY。
 
+## 2026-11-21 B04/U03 通知任务发送前只读校验（未发送）
+
+- `1ab2428` CI run `44887201687` success，已验证的领取租约不重做。新增 `preflightOpsNotification`：只读 Serializable 快照校验 CLAIMED、当前 UUID claimToken、严格剩余租约、同轮次事故仍 OPEN/有告警；返 READY/MISSING/FENCED/EXPIRED/STALE，不能视为实际送达或发送许可。
+- 新增 5 项单元用例核对旧 token、期限、失效事故与重开轮次；原 MySQL 队列测试扩展为首次 READY、重领取旧 token FENCED/新 token READY、事故解决 STALE。全套 `npm test`、tsc、Next build exit 0；历史隔离 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`，因缺迁移，扩展真实 DB 用例须远端 CI 实际完成。独立 `b04-notification-preflight-2026-11-21.md`。
+- 缺真实 sender、外部渠道幂等、投递回执、崩溃重试与安全接收人审批；不允许直接使用 READY 作为网络发送授权。B04/U03 IN_PROGRESS，整体 NOT READY。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
