@@ -6,17 +6,15 @@ import { startSession,endSession } from "@/lib/auth";
 import { allowAttempt } from "@/lib/rate-limit";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { trustedClientIp } from "@/lib/trusted-client-ip";
+import { checkAuthenticationThrottle } from "@/lib/auth-throttle-policy";
 const credentials=z.object({email:z.string().trim().email().max(254).transform(s=>s.toLowerCase()),password:z.string().min(12).max(128)});
 async function authenticationAllowed(scope:"login"|"register",email:string,emailLimit:number,ipLimit:number,minutes:number){
- const emailAllowed=await allowAttempt(scope,email,emailLimit,minutes);
- // Enable only behind a reverse proxy that overwrites this header and blocks direct origin access.
- const configured=process.env.TRUSTED_CLIENT_IP_HEADER;
- if(!configured)return emailAllowed;
- const ip=trustedClientIp(await headers(),configured);
- if(!ip)return false; // Fail closed for misconfigured or ambiguous proxy headers.
- const ipAllowed=await allowAttempt(scope+"-trusted-ip",ip,ipLimit,minutes);
- return emailAllowed&&ipAllowed;
+ return checkAuthenticationThrottle({
+  scope,identity:email,emailLimit,ipLimit,minutes,
+  nodeEnv:process.env.NODE_ENV,
+  configuredHeader:process.env.TRUSTED_CLIENT_IP_HEADER,
+  headers:await headers()
+ },allowAttempt);
 }
 export async function login(form:FormData){
  const input=credentials.safeParse(Object.fromEntries(form));
