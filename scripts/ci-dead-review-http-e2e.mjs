@@ -82,9 +82,14 @@ async function run(){
  assert.ok(html.includes("终止通知任务复核"),"Admin heading missing");
  assert.ok(html.includes(intentKey.slice(0,12)),"Owned DEAD task not visible");
  // The full key is intentionally present only as a hidden POST field; the visible table truncates it.
- // React Server Actions expose the action ID in a hidden form field.
- const actionId=html.match(/name="(\$ACTION_ID_[a-zA-Z0-9]+)"/)?.[1];
- assert.ok(actionId,"No real Server Action ID found in admin HTML");
+ // The global layout also has a LOGOUT Server Action form. Never use the
+ // first action ID in the whole HTML: scope it to this DEAD task form only.
+ const targetForm=[...html.matchAll(/<form\b[^>]*>([\s\S]*?)<\/form>/g)]
+  .map(match=>match[1])
+  .find(markup=>markup.includes(`value="${intentKey}"`)&&markup.includes('name="reasonCode"'));
+ assert.ok(targetForm,"Owned DEAD review form missing (would risk invoking logout)");
+ const actionId=targetForm.match(/name="(\$ACTION_ID_[a-zA-Z0-9]+)"/)?.[1];
+ assert.ok(actionId,"No DEAD review Server Action ID found");
  const form=()=>{
   const value=new FormData();
   value.set(actionId,"");
