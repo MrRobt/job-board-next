@@ -252,6 +252,14 @@
 - 手动 `npm run release:preflight` 使用关闭所有真实业务开关的 LOCAL_PREVIEW：PASS / exit 0；未提供明确模式：BLOCKED / exit 2。旧 `npm run release:smoke` 13/13 PASS。
 - 这只是配置验证：没有商户退款/AI 真实调用、没有数据库或文件备份恢复操作，**没有自动接入 GitHub CI，也没有检查真实公网 TLS/代理与独立合规审批**。详情 `docs/goal/mvp/d02-prelaunch-env-guard-2026-11-21.md`。
 
+## 2026-11-21 A02 模型出站隐私格式安全
+
+- `hasContact` 新增 Unicode NFKC、短分隔符手机号（含国际区号）与分组证件号识别；`generate()` 在模型配置检查、请求体生成和任何 `fetch` 前强制 Zod 与敏感格式检查。
+- 新单元专项 `career-privacy-boundary.test.ts` **2/2 PASS**：有效敏感格式阻断、不包含联系信息的正常技术经历可通过；新集成专项 `ai-privacy-outbound.test.ts` **1/1 PASS**：底层直接调用也应阻断并且 `fetch` 次数为 0。
+- TypeScript exit 0；单元总计 **46/46 PASS**；隔离 MySQL 集成（文件串行）总计 **29/29 PASS**；Next.js 16.4.6 build exit 0。
+- 专项首次执行命令中 Node 路径误写导致 exit 127，修正路径后测试全部通过；并非应用断言失败。
+- 不包含真实模型、姓名/地址等完整个人信息识别、法律审批、第三方数据处理或真实浏览器交互。见 `docs/goal/mvp/a02-model-privacy-boundary-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

@@ -220,6 +220,14 @@
 - 本包只完成手动/部署前环境防误配置检查，**没有修改受保护 GitHub CI、真实运行时商业开关、账户会话或生产数据库**。CI 最新 push 的 run、TLS 与代理、E2E、非空备份恢复、商户资金及合规仍留待独立验收。证据 `docs/goal/mvp/d02-prelaunch-env-guard-2026-11-21.md`。
 - 继续保留其它 Agent 在主 handoff/需求矩阵/风险表/上线清单/financial-risk-audit 与本机缓存中的未提交修改；本轮仅精确 stage 自身代码、测试、增量文档，分批 commit/push。
 
+## 2026-11-21 A02 模型出站隐私安全加固
+
+- 从真实 Git/长期 Goal 恢复后，识别 `hasContact` 对带短分隔符的手机号、分组身份证号、全角联系方式漏检，并发现底层 `generate()` 缺独立出口检查。增加 NFKC 格式识别与出站前 Zod + 联系方式双重验证，即使新增调用入口也不能直接向模型发送已识别敏感正文。
+- 新增 `tests/career-privacy-boundary.test.ts` 两项、`tests/integration/ai-privacy-outbound.test.ts` 一项，专项全部通过，并证明被拒绝材料触发 **0 次 `fetch`**；全量单元 **46/46**、隔离 MySQL 集成 **29/29**、TypeScript 和 Next.js build exit 0。
+- 原定 U01 认证态 HTTP 合成会话脚本因安全凭据写入检查阻断，未绕过、未创建脚本、未触碰用户认证/业务数据库。继续优先推进独立可验收 A02 子包。
+- A02 仍 IN_PROGRESS：格式过滤不等于完整 DLP，不涵盖所有身份信息，真实合规模型、第三方个人信息处理、保留与删除机制、真实浏览器 E2E 仍有阻断。详细证据 `docs/goal/mvp/a02-model-privacy-boundary-2026-11-21.md`。
+- 保留他人主 handoff、需求矩阵、发布清单、风险登记与 financial-risk-audit 等未提交内容；本轮精确 stage 自身文件，不强推。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
