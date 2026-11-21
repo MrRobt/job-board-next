@@ -12,7 +12,7 @@ import {queueApprovedRefund,claimRefundDispatchOnce} from "../../lib/career/refu
 import {reconcileDispatchedRefund} from "../../lib/career/refund-finalization";
 import type {RefundInquiryGateway} from "../../lib/payment/refund-query";
 import {available} from "../../lib/career/credits";
-import {assessOpsAlerts,opsAlertQueryFilters} from "../../lib/career/ops-alert-policy";
+import {approvedOpsScanEnvironment,assessOpsAlerts,opsAlertQueryFilters} from "../../lib/career/ops-alert-policy";
 
 test("signed refund inquiry settlement requires confirmed matching refund, atomically revokes unused credits",async()=>{
  if(process.env.INTEGRATION_TEST_DATABASE!=="true")throw new Error("Disposable MySQL required");
@@ -83,13 +83,26 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
     ...process.env,OPS_ALERT_READ_ONLY_APPROVED:"true",
     INTEGRATION_TEST_DATABASE:"true",NODE_ENV:"test"
    }});
-   assert.equal(cli.status,2,cli.stderr);
-   const report=JSON.parse(cli.stdout) as {
-    status:string;counts:{uncertainRefunds:number};alerts:string[]
+   // The CLI is intentionally restricted to the historical localhost
+   // disposable migration DB. CI uses a fresh MySQL "jobs" database and
+   // must prove the scan is refused, not bypass the safety boundary.
+   const scanEnvironment={
+    ...process.env,OPS_ALERT_READ_ONLY_APPROVED:"true",
+    INTEGRATION_TEST_DATABASE:"true",NODE_ENV:"test"
    };
-   assert.equal(report.status,"ALERT");
-   assert.ok(report.counts.uncertainRefunds>=1);
-   assert.ok(report.alerts.includes("REFUND_IN_DOUBT"));
+   if(approvedOpsScanEnvironment(scanEnvironment)){
+    assert.equal(cli.status,2,cli.stderr);
+    const report=JSON.parse(cli.stdout) as {
+     status:string;counts:{uncertainRefunds:number};alerts:string[]
+    };
+    assert.equal(report.status,"ALERT");
+    assert.ok(report.counts.uncertainRefunds>=1);
+    assert.ok(report.alerts.includes("REFUND_IN_DOUBT"));
+   }else{
+    assert.equal(cli.status,3,"Unsafe scan must fail closed");
+    assert.match(cli.stderr,/Operational scan refused/);
+    assert.equal(cli.stdout.trim(),"","Rejected scan must not leak aggregate details");
+   }
    assert.equal(assessOpsAlerts({
     staleReservations:0,uncertainRefunds:1,agedReadyRefunds:0
    }).status,"ALERT");

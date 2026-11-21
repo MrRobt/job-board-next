@@ -343,6 +343,12 @@
 - 本地历史专用隔离 MySQL 仍只有旧迁移，新测试明确 SKIP；集成结果 **32 total / 31 PASS / 1 SKIP / 0 FAIL**，不能解释为新告警确认 MySQL 已通过。独立 TS exit 0、npm 单元 exit 0、Next 构建 exit 0。CI=true 单独演练调用受安全门禁影响，没有有效通过证据。
 - 独立证据 `b04-incident-ci-mysql-gate-2026-11-21.md`；第 9 项迁移、真实 Prisma Client、GitHub Actions 实际结果及 B04/U03 总体验收仍 IN_PROGRESS；其他 Agent 未提交文件均保护不动。
 
+## 2026-11-21 B04/B06 修复真实 GitHub Actions 财务扫描误报失败
+
+- 查 GitHub run `44870889080` 与 `44871860531` 的 job 原始日志，确认连续 CI failure 来自 `refund-finalization.test.ts` 强制断言 `ops-alert-scan` exit 2，而 CI `jobs` 库被生产只读隔离安全门禁正确拒绝 exit 3。修复测试仅在 `approvedOpsScanEnvironment` 许可时校验 ALERT，否则校验安全拒绝 exit 3、stderr 提示和无 stdout，不更改扫描白名单。
+- 本地 npm 单元、TS 和 Next build exit 0；历史专用库集成第一次 30 PASS/1 FAIL/1 SKIP（其他 Agent 未提交 `financial-risk-audit` 测试遇 MySQL 暂时不可连接），原命令复跑 31 PASS/0 FAIL/1 SKIP。新第 9 项迁移测试仍 SKIP，不能视为已验收。
+- 修复独立证据 `b04-ci-ops-scan-guard-fix-2026-11-21.md`；当前本地测试修复子包 VERIFIED，远端新 commit CI 状态仍待核验，B04/U03 总体继续 IN_PROGRESS。其他 Agent 所有脏文件保留。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

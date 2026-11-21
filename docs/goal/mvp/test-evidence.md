@@ -368,6 +368,12 @@
 - 本地独立 TS exit 0、npm 单元 exit 0、Next build exit 0；旧隔离 MySQL **32 total / 31 PASS / 1 SKIP / 0 FAIL / exit 0**，唯一 SKIP 是第 9 项迁移必需的新事故表测试，不是新功能的 MySQL PASS。本地模拟 CI 门禁演练被工具安全检查阻断，未宣称已通过。
 - 未对正常开发或生产库执行迁移/写入。B04/U03、B07、D02 继续 IN_PROGRESS；独立证据 `b04-incident-ci-mysql-gate-2026-11-21.md`。
 
+## 2026-11-21 GitHub Actions 退款异常扫描安全门禁断言修复
+
+- 远端两次 CI `8442b89` / `8145fd2` 的 job logs 确认 `refund-finalization.test.ts` 固定 expect exit2 与 CI 安全拒绝 exit3 冲突，不能通过开放 CLI 到普通库修复。新条件断言在授权隔离库必须看到 ALERT/JSON、CI 普通库则必须看到拒绝/无 stdout。
+- 本地 npm test、TS、Next build exit 0；专用隔离 MySQL 首轮 **32 total / 30 PASS / 1 FAIL / 1 SKIP**（其他 Agent `financial-risk-audit` 遇 `127.0.0.1:3306` 暂时不可连接），复跑 **32 total / 31 PASS / 0 FAIL / 1 SKIP**。新事故表迁移测试 SKIP，不是新表验收通过。
+- 详细 `b04-ci-ops-scan-guard-fix-2026-11-21.md`；修复后远端 GitHub Actions 结果需新提交核实。B04/U03/B07/D02 仍未整体验收。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
