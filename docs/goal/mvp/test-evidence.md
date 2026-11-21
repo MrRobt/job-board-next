@@ -486,7 +486,7 @@
 
 - `c8d7b5c` CI run `44894374079` SUCCESS。新增第十四迁移 `OpsNotificationDeadReview`（intentKey PK+FK 保证一次复核，DB role lookup ADMIN）；`reviewDeadOpsNotification` 仅对 DEAD 创建审计，幂等重放、不同决定冲突、拒绝 USER/非 DEAD。
 - 新单元覆盖权限、幂等、冲突、输入限制、Serializable Prisma Adapter；同一真实 MySQL 测试中使用自有队列记录及测试用户验证 USER 拒绝、ADMIN 首次成功、重复成功结果幂等、冲突失败、记录唯一并保持 DEAD；finally 只删除自身数据。
-- 本地 npm test、独立 tsc exit 0；第十四迁移/真实 MySQL 权限审计及完整 build 须本提交 CI 成功才可标 VERIFIED。独立 `b04-notification-dead-review-2026-11-21.md`。无通知发送、死信复活、HTTP 或 Cron，B04/U03 IN_PROGRESS，NOT READY。
+- 本地 npm test、独立 tsc exit 0；第十四迁移/真实 MySQL 权限审计已核验 `00fd34d` GitHub Actions run `44895376472` **SUCCESS**：全新 MySQL8、149/149 单元、35/35 集成，0 FAIL/0 SKIP，数据库角色查询、管理员唯一复核、普通用户被拒、冲突决定拒绝及任务保持 DEAD PASS；Prisma validate、typecheck、Next build、HTTP smoke 均通过。独立 `b04-notification-dead-review-2026-11-21.md`。无通知发送、死信复活、HTTP 或 Cron，B04/U03 IN_PROGRESS，NOT READY。
 
 ## 保留的局限
 

@@ -1,6 +1,6 @@
 # B04/U03 DEAD 通知任务管理员复核（第十四迁移）— 2026-11-21
 
-状态：本地单元、独立 TypeScript VERIFIED；第十四迁移、真实 MySQL 角色/幂等复核及生产构建待新 CI。B04/U03 IN_PROGRESS，整体 NOT READY。
+状态：本地单元、独立 TypeScript VERIFIED；第十四迁移、真实 MySQL 角色/幂等复核及生产构建已在 `00fd34d` GitHub Actions [run 44895376472](https://github.com/MrRobt/job-board-next/actions/runs/44895376472) **SUCCESS**：149/149 单元、35/35 集成，0 FAIL/0 SKIP；管理员权限/复核唯一性、冲突拒绝、DEAD 保持以及完整 typecheck/build/smoke PASS。B04/U03 IN_PROGRESS，整体 NOT READY。
 
 ## 恢复与边界
 - 已确认 `c8d7b5c` GitHub Actions run [44894374079](https://github.com/MrRobt/job-board-next/actions/runs/44894374079) SUCCESS；第十三迁移与真实数据库 FK 回滚演练已经验收，不重复。

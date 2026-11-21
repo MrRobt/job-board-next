@@ -459,7 +459,7 @@
 
 - 已核验 `c8d7b5c` GitHub Actions run `44894374079` SUCCESS，真实审计 FK 失败回滚已验收。本轮补第十四迁移 `OpsNotificationDeadReview`：任务 PK/FK 唯一复核记录（管理员 ID、规范机器原因、时间），不存消息、令牌或个人资料。
 - `reviewDeadOpsNotification` 在 Serializable 事务内查数据库用户角色 ADMIN、确认任务仍 DEAD、验证已有记录，同一决定返回 ALREADY_REVIEWED，不同决定拒绝覆盖，普通用户/非 DEAD 拒绝。没有重新入队、重发或外部 HTTP/Worker。新增单元及扩展既有 MySQL 队列集成用例，对测试自己种下的 DEAD 状态、ADMIN/USER 权限、复核幂等及任务保持 DEAD 进行真实数据库测试。
-- 本地 npm test、独立 tsc exit 0；第十四迁移、权限及唯一约束真 MySQL 测试待新 CI。独立交接 `b04-notification-dead-review-2026-11-21.md`。B04/U03 仍 IN_PROGRESS、整体 NOT READY。
+- 本地 npm test、独立 tsc exit 0；已核验 `00fd34d` GitHub Actions run `44895376472` **SUCCESS**：第十四迁移全新 MySQL8、149/149 单元、35/35 集成，0 FAIL/0 SKIP，真实 ADMIN/USER 权限、复核幂等、冲突拒绝及 DEAD 保持不变的用例 PASS，typecheck、build、smoke 全通过。独立交接 `b04-notification-dead-review-2026-11-21.md`。B04/U03 仍 IN_PROGRESS、整体 NOT READY。
 
 ## Git 安全
 
