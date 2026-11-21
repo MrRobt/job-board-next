@@ -252,6 +252,14 @@
 - 子包本机 VERIFIED，但不能替代完整 DLP、个人信息/真实模型合规；A02 usage 与次数结算原子入库仍被工作区安全门禁阻断，B06/B07/U01/D02 等仍为 IN_PROGRESS。参见 `a02-output-privacy-2026-11-21.md`。
 - 他人尚未提交的主 handoff、需求矩阵、风险、release-checklist 和 financial-risk-audit 不写入本轮提交。
 
+## 2026-11-21 A02 已报价模型成本离线核对（本轮）
+
+- 在 `A02 usage parsing` 验收后补充 `lib/career/model-cost-check.ts`：只接收同供应商、同模型、脱敏的运行 ID 和 usage，按批准的价格**重新计算**逐次整数分成本及是否超预算，不信任记录自带金额；同一 runId 重复、金额被篡改或错作用域直接拒绝。
+- 未报告/无效 usage、缺账单、已知金额差异、任一次超预算均 `REVIEW_REQUIRED`；只有给定样本数字完全匹配且无异常才输出 `INPUT_MATCH`，它不是外部账单真实性证明或资金结算状态。
+- 新专项 **4/4 PASS**，本轮完整单元 **60/60 PASS**、隔离 MySQL 集成 **31/31 PASS**、TypeScript 与 Next.js 16.4.6 build exit 0；无模型/商户网络调用、无 Prisma 迁移和生产数据变更。计数含并行 Agent 先前验收的模型输出安全测试，不混提交其改动。
+- 当前 A02 整体仍 `IN_PROGRESS`：真实 usage 与 ToolRun 原子落库的工作区安全阻断、独立账单真实/完整性、动态计价、正式监控和审批未解除。见 `docs/goal/mvp/a02-offline-cost-check-2026-11-21.md` 及独立交接。
+- 当前其他 Agent 的 `financial-risk-audit`、主 handoff/需求矩阵/风险/发布清单、工具缓存及锁文件保留原样；仅精确提交本轮源码和增量证据。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

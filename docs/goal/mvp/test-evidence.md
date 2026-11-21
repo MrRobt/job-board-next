@@ -282,6 +282,13 @@
 - 全量单元 **56/56 PASS**、MySQL 隔离库集成（文件串行）**31/31 PASS**、TypeScript exit 0、Next.js 16.4.6 build exit 0。无迁移、无真实支付/模型数据处理。
 - 仅是格式识别，并非完整 PII 检测；目前 A02 usage 与次数原子落库未完成。见 `docs/goal/mvp/a02-output-privacy-2026-11-21.md`。
 
+## 2026-11-21 A02 成本离线核对与输入防伪
+
+- `tests/model-cost-check.test.ts` **4/4 PASS**：双运行账目报价匹配、缺失/格式错误 usage 的未知成本、外部输入账单缺失或金额差异、超预算、重复请求及篡改逐条 `costFen`/`overBudget` 的安全拒绝。
+- `lib/career/model-cost-check.ts` 强制经批准的正数输入/输出单价和单次预算，再从 Token 数用 BigInt 重新计算人民币分；同作用域和去重要求避免误核销。返回 `INPUT_MATCH` **只表示输入样本价格口径算术一致**，不是实际供应商开票验证。
+- 本轮完整单元 **60/60 PASS**、隔离 MySQL 文件串行集成 **31/31 PASS**、TS exit 0、Next.js 16.4.6 build exit 0；没有新数据库迁移、支付/模型真实调用、账单读写或生产部署。
+- 模型 usage 与次数账本的原子审计入库仍被工作区安全限制阻断；外部账单完整性/真实性和合法模型/商户 UAT 没有验收，继续 `IN_PROGRESS`。详见 `docs/goal/mvp/a02-offline-cost-check-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
