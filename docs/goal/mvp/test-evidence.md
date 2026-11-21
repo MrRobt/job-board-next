@@ -482,6 +482,12 @@
 - `b2c7d44` CI run `44893435390` SUCCESS。新增真实 MySQL 集成断言：测试内重用真实 Prisma Serializable tx 与状态 CAS，在审计 delegate 中注入不存在的 64 位 FK，触发真实数据库审计 insert 拒绝；随后数据库核对任务保持 CLAIMED、令牌与 attemptCount 不变、失败字段为空、审计数 0；最后正常写 RETRY_WAIT 和唯一审计事件。
 - 本地独立 TypeScript、npm test exit 0。故障注入真库已核验 `a47e082` GitHub Actions run `44894008602` **SUCCESS**：全新 MySQL8、145/145 单元、35/35 集成，0 FAIL/0 SKIP，真实 FK 插入失败回滚及正常重试路径 PASS，typecheck/build/smoke 均通过；测试专用适配不接生产 sender、调度、商户或模型。证据 `b04-notification-fk-rollback-2026-11-21.md`；B04/U03 IN_PROGRESS，NOT READY。
 
+## 2026-11-21 B04/U03 DEAD 通知内部管理员复核（第十四迁移）
+
+- `c8d7b5c` CI run `44894374079` SUCCESS。新增第十四迁移 `OpsNotificationDeadReview`（intentKey PK+FK 保证一次复核，DB role lookup ADMIN）；`reviewDeadOpsNotification` 仅对 DEAD 创建审计，幂等重放、不同决定冲突、拒绝 USER/非 DEAD。
+- 新单元覆盖权限、幂等、冲突、输入限制、Serializable Prisma Adapter；同一真实 MySQL 测试中使用自有队列记录及测试用户验证 USER 拒绝、ADMIN 首次成功、重复成功结果幂等、冲突失败、记录唯一并保持 DEAD；finally 只删除自身数据。
+- 本地 npm test、独立 tsc exit 0；第十四迁移/真实 MySQL 权限审计及完整 build 须本提交 CI 成功才可标 VERIFIED。独立 `b04-notification-dead-review-2026-11-21.md`。无通知发送、死信复活、HTTP 或 Cron，B04/U03 IN_PROGRESS，NOT READY。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

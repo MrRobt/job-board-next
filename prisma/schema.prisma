@@ -354,6 +354,7 @@ model OpsIncidentNotificationIntent {
   incidentKey String @db.VarChar(40)
   incident OpsAlertIncident @relation(fields:[incidentKey],references:[key],onDelete:Restrict)
   failureEvents OpsNotificationFailureEvent[]
+  deadReview OpsNotificationDeadReview?
   episodeOpenedAt DateTime
   kind String @db.VarChar(16)
   priority String @db.VarChar(8)
@@ -383,6 +384,16 @@ model OpsNotificationFailureEvent {
   createdAt DateTime @default(now())
   @@unique([intentKey,attemptCount])
   @@index([createdAt])
+}
+
+// Internal-only: a DEAD task can be reviewed once; never requeues or sends.
+model OpsNotificationDeadReview {
+  intentKey String @id @db.Char(64)
+  intent OpsIncidentNotificationIntent @relation(fields:[intentKey],references:[idempotencyKey],onDelete:Restrict)
+  operatorId String @db.VarChar(191)
+  reasonCode String @db.VarChar(40)
+  reviewedAt DateTime
+  @@index([operatorId,reviewedAt])
 }
 
 model ToolRunAdjustment {

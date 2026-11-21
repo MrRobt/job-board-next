@@ -1,4 +1,7 @@
 import {test} from "node:test";
+import {randomUUID} from "node:crypto";
+import {reviewDeadOpsNotification} from "../../lib/career/ops-notification-dead-review";
+import {createPrismaDeadReviewStore,type DeadReviewPrismaPort} from "../../lib/career/ops-notification-dead-review-prisma-store";
 import assert from "node:assert/strict";
 import {db} from "../../lib/db";
 import {claimOpsNotificationIntent} from "../../lib/career/ops-notification-claim";
@@ -19,10 +22,10 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
  const migrations=await db.$queryRaw<Array<{n:bigint}>>`
   SELECT COUNT(*) AS n FROM information_schema.tables
   WHERE table_schema=DATABASE()
-  AND table_name IN ('OpsAlertIncident','OpsAlertIncidentEvent','OpsIncidentNotificationIntent','OpsNotificationFailureEvent')`;
- if(Number(migrations[0]?.n)!==4){
+  AND table_name IN ('OpsAlertIncident','OpsAlertIncidentEvent','OpsIncidentNotificationIntent','OpsNotificationFailureEvent','OpsNotificationDeadReview')`;
+ if(Number(migrations[0]?.n)!==5){
   if(process.env.CI==="true"||process.env.OPS_NOTIFICATION_INTEGRATION_REQUIRED==="true")
-   throw Error("Notification failure audit migration missing");
+   throw Error("Notification dead review migration missing");
   t.skip("historical dedicated local MySQL has no tenth notification migration");
   return;
  }
@@ -35,6 +38,7 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
  const queue=createPrismaOpsNotificationQueueStore(db as unknown as OpsNotificationQueuePrismaPort);
  const openedAt=new Date("2026-11-21T12:00:00.000Z");
  let own=false;
+ const deadReviewUserIds:string[]=[];
  try{
   own=true; // From here the test owns the new incident and queue rows.
   assert.equal((await syncOpsIncidentWithStore(sync,key,1,openedAt)).event,"OPENED");
@@ -137,13 +141,48 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
   assert.equal((await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(openedAt.getTime()+602200))).status,"STALE");
   assert.equal(await queueInitialOpsNotificationIntent(queue,intent,new Date(openedAt.getTime()+544000)),"STALE");
   assert.equal(await db.opsIncidentNotificationIntent.count({where:{incidentKey:key}}),1);
+  // Seed DEAD only on this test-owned row to exercise human review separately
+  // from the already-tested five-attempt failure policy.
+  await db.$executeRaw`UPDATE OpsIncidentNotificationIntent SET state='DEAD',
+   claimToken=NULL,claimedAt=NULL,leaseExpiresAt=NULL,nextAttemptAt=NULL
+   WHERE idempotencyKey=${intent.idempotencyKey}`;
+  const review=createPrismaDeadReviewStore(db as unknown as DeadReviewPrismaPort);
+  const admin=await db.user.create({data:{
+   email:randomUUID()+"-ops-dead-admin@example.invalid",passwordHash:"not-a-login",role:"ADMIN"
+  }});
+  deadReviewUserIds.push(admin.id);
+  const ordinary=await db.user.create({data:{
+   email:randomUUID()+"-ops-dead-user@example.invalid",passwordHash:"not-a-login",role:"USER"
+  }});
+  deadReviewUserIds.push(ordinary.id);
+  const request={key:intent.idempotencyKey,operatorId:admin.id,reasonCode:"REVIEWED_NO_REQUEUE"};
+  const reviewedAt=new Date(openedAt.getTime()+603000);
+  await assert.rejects(reviewDeadOpsNotification(review,{
+   ...request,operatorId:ordinary.id
+  },reviewedAt),/Administrator required/);
+  assert.equal(await reviewDeadOpsNotification(review,request,reviewedAt),"REVIEWED");
+  assert.equal(await reviewDeadOpsNotification(review,request,reviewedAt),"ALREADY_REVIEWED");
+  await assert.rejects(reviewDeadOpsNotification(review,{
+   ...request,reasonCode:"CONFLICT_DECISION"
+  },reviewedAt),/already reviewed/);
+  const reviewed=await db.$queryRaw<Array<{operatorId:string;reasonCode:string}>>`
+   SELECT operatorId,reasonCode FROM OpsNotificationDeadReview WHERE intentKey=${intent.idempotencyKey}`;
+  assert.equal(reviewed.length,1);
+  assert.equal(reviewed[0].operatorId,admin.id);
+  assert.equal(reviewed[0].reasonCode,"REVIEWED_NO_REQUEUE");
+  assert.equal((await db.opsIncidentNotificationIntent.findUniqueOrThrow({
+   where:{idempotencyKey:intent.idempotencyKey}
+  })).state,"DEAD");
+  assert.equal((await claimOpsNotificationIntent(lease,intent.idempotencyKey,reviewedAt)).status,"STALE");
  }finally{
   if(own){
+   await db.$executeRaw`DELETE FROM OpsNotificationDeadReview WHERE intentKey IN (SELECT idempotencyKey FROM OpsIncidentNotificationIntent WHERE incidentKey=${key})`;
    await db.$executeRaw`DELETE FROM OpsNotificationFailureEvent WHERE intentKey IN (SELECT idempotencyKey FROM OpsIncidentNotificationIntent WHERE incidentKey=${key})`;
    await db.opsIncidentNotificationIntent.deleteMany({where:{incidentKey:key}});
    await db.opsAlertIncidentEvent.deleteMany({where:{incidentKey:key}});
    await db.opsAlertIncident.deleteMany({where:{key}});
   }
+  if(deadReviewUserIds.length)await db.user.deleteMany({where:{id:{in:deadReviewUserIds}}});
   await db.$disconnect();
  }
 });

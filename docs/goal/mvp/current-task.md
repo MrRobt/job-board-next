@@ -455,6 +455,12 @@
 - 核验 `b2c7d44` GitHub Actions run `44893435390` SUCCESS。补齐 `ops-notification-queue-mysql.test.ts` 故障注入：同一真实 Prisma Serializable 事务先执行状态 CAS，审计写入时故意使用不存在的 intentKey 引发数据库 FK 失败；事务后核验任务仍 CLAIMED/旧 token 有效/尝试数不变、失败码/重试时间为空、审计记录 0，再正常失败写入一条事件。
 - 仅修改既有集成测试并新增独立证据，不改变生产逻辑/迁移/通知开关；本地 tsc 和 npm test exit 0。真库 FK/回滚分支已核验 `a47e082` GitHub Actions run `44894008602` **SUCCESS**：全新 MySQL8 迁移、145/145 单元、35/35 集成、0 FAIL/0 SKIP，真实审计外键失败后整笔任务 CAS 回滚，随后正常处理用例 PASS；typecheck、build、HTTP smoke 均通过。独立 `b04-notification-fk-rollback-2026-11-21.md`。B04/U03 IN_PROGRESS，整体 NOT READY。
 
+## 2026-11-21 B04/U03 DEAD 通知任务管理员只审复核（第十四迁移）
+
+- 已核验 `c8d7b5c` GitHub Actions run `44894374079` SUCCESS，真实审计 FK 失败回滚已验收。本轮补第十四迁移 `OpsNotificationDeadReview`：任务 PK/FK 唯一复核记录（管理员 ID、规范机器原因、时间），不存消息、令牌或个人资料。
+- `reviewDeadOpsNotification` 在 Serializable 事务内查数据库用户角色 ADMIN、确认任务仍 DEAD、验证已有记录，同一决定返回 ALREADY_REVIEWED，不同决定拒绝覆盖，普通用户/非 DEAD 拒绝。没有重新入队、重发或外部 HTTP/Worker。新增单元及扩展既有 MySQL 队列集成用例，对测试自己种下的 DEAD 状态、ADMIN/USER 权限、复核幂等及任务保持 DEAD 进行真实数据库测试。
+- 本地 npm test、独立 tsc exit 0；第十四迁移、权限及唯一约束真 MySQL 测试待新 CI。独立交接 `b04-notification-dead-review-2026-11-21.md`。B04/U03 仍 IN_PROGRESS、整体 NOT READY。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
