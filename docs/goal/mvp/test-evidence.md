@@ -440,6 +440,12 @@
 - npm 单元、独立 TS、Next build exit 0；历史隔离 MySQL 初次 `35 total/30 PASS/1 FAIL/4 SKIP`（原有 auth-retention 查询时本地 MySQL 短暂不可达），复跑 `35 total/31 PASS/0 FAIL/4 SKIP`；新增真实 MySQL 用例未在本机执行，已核验远端 `a018ac2` GitHub Actions run `44882556403` **success**：全新 MySQL8 迁移、119/119 单元、34/34 集成、0 FAIL/0 SKIP，实际 `B04/U03 isolated MySQL: actual stale reservation count opens and resolves incident, failed scan does not resolve` 测试明确 PASS；生产 build/smoke 也成功。
 - 本子包仅新增测试，原业务无变更；不接 Cron、真实通知、资金、模型。独立 `b04-real-mysql-coordinator-e2e-2026-11-21.md`，B04/U03 仍 IN_PROGRESS、商业 NOT READY。
 
+## 2026-11-21 B04/U03 事故通知意图幂等（仅离线）
+
+- 核实 `cd755a1` GitHub Actions run `44882754338` success。新增 `planOpsNotificationIntents` 从已持久化事故快照生成 SHA-256 轮次/通知种类/升级时间桶去重意图；同一轮首次 NOTIFY 稳定、同时间桶 ESCALATE 稳定、跨桶变化、ACK/已解决抑制、只输出类别/优先级/聚合数/轮次时间/哈希标识，无 PII 或商户数据。
+- 本地 npm test、独立 TS、Next build exit 0。历史隔离 MySQL 首轮 `35 total/30 PASS/1 FAIL/4 SKIP`（已有 auth-retention 查询遇短时 DB 连接失败），原样复跑 `35 total/31 PASS/0 FAIL/4 SKIP`（旧库缺第九事故迁移）。本轮通知意图只做单元测试，非真实 Outbox 或发送测试。
+- 独立证据 `b04-notification-idempotency-intents-2026-11-21.md`；后续仍需事务入队、唯一约束、claim 租约、投递重试/恢复及真实 MySQL/权限回归。B04/U03 IN_PROGRESS，NOT READY。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

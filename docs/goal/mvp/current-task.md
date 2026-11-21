@@ -415,6 +415,12 @@
 - CI 新库实际名 `jobs` 不符合生产隔离扫描白名单；测试仅在 CI=true、实际 localhost `/jobs` 且 integration=true 的受控 harness 内注入历史专用库策略配置用于调用，**不更改生产运行许可，也不声称实际 CI URL 已满足生产批准策略**。CI 缺第九事故迁移直接 FAIL。
 - npm 单元、TS、Next build exit 0；本地历史 MySQL 首轮 `35 total/30 PASS/1 FAIL/4 SKIP`（既有 auth-retention 临时 DB 连接断开），原样复跑 `35 total/31 PASS/0 FAIL/4 SKIP`；四个 SKIP 是历史库缺第九迁移，新增真库用例已核验 `a018ac2` GitHub Actions run `44882556403` **success**：全新 MySQL8 全量迁移、119/119 单元、34/34 集成、0 FAIL/0 SKIP，新增真实读取→OPENED→读取失败不误解决→RESOLVED 用例明确 PASS；Next build 与 smoke 通过。详见 `b04-real-mysql-coordinator-e2e-2026-11-21.md`。保持 B04/U03 IN_PROGRESS；禁止实收款/模型/自动通知，保护他人未提交内容。
 
+## 2026-11-21 B04/U03 通知幂等意图与升级时间桶（离线候选）
+
+- 已核验 `cd755a1` GitHub Actions run `44882754338` success；事故计数→事务同步的真实 MySQL 闭环不再重做。新增纯 `planOpsNotificationIntents`：**仅持久化事故轮次**可生成 NOTIFY/ESCALATE 意图，按 key+openedAt+种类+升级时间桶生成 SHA-256 幂等标识；同一轮首次通知重复扫描不生成不同 key，15/30 分钟升级跨桶，已确认/已解决不生成；只返回聚合非敏感字段，无外部发送。
+- 单元覆盖未存事故禁止发送、轮次和时间桶去重、人工确认抑制、重新开启唯一标识、异常数据 fail-closed。npm test、TS、Next build exit 0。旧本地 MySQL 首轮 `35 total/30 PASS/1 FAIL/4 SKIP` 为已有 auth-retention 测试短时 DB 不可达，原样复跑 `35 total/31 PASS/0 FAIL/4 SKIP`（旧库缺事故第 9 迁移）。证据 `b04-notification-idempotency-intents-2026-11-21.md`。
+- 当前仅离线规划，**Outbox UNIQUE 存储、可恢复 claim、发送确认、Crash/Retry 与 CI MySQL 端到端均未实现**；不得声称真实通知可靠投递。B04/U03 仍 IN_PROGRESS，资金/AI/通知与生产门禁保持关闭，其他 Agent 改动不碰。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
