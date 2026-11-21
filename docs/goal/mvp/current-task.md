@@ -213,6 +213,13 @@
 - 计划中的 U01 密码变更/旧会话撤销实现也被工作区敏感信息保护阻断；本轮没有修改身份认证代码，没有复用或绕过其他 Agent 的认证文件。
 - `D02-anonymous-smoke` 子包为本机 VERIFIED，D02 全体仍 IN_PROGRESS；财务商户、模型、生产数据库恢复和法律资质继续人工门禁。见 `d02-anonymous-smoke-2026-11-21.md`。
 
+## 2026-11-21 D02 预发布环境独立安全门禁
+
+- 已新增 `scripts/prelaunch-env-guard.mjs`、类型声明与专项单测，`npm run release:preflight` 以 LOCAL_PREVIEW / PUBLIC_PRELAUNCH 模式只读检查环境变量。任何真实支付、Mock 收款、退款发送/派发/查单、已批准商户/模型开关为 true 均拒绝；公网预发布还要求规范 HTTPS origin、生产模式与受支持可信代理头。输出仅列违规配置项名称，不回显配置值或接触数据库。
+- 新专项 **4/4 PASS**，全量单元 **44/44**，隔离 MySQL 集成（文件串行）**28/28**，TS/Next.js build exit 0；原有 HTTP Smoke **13/13**。显式 LOCAL_PREVIEW 返回 PASS / exit 0，未指定模式默认 BLOCKED / exit 2。首轮 TS 发现 MJS 声明与测试 ProcessEnv 类型缺失，已修复复测通过。
+- 本包只完成手动/部署前环境防误配置检查，**没有修改受保护 GitHub CI、真实运行时商业开关、账户会话或生产数据库**。CI 最新 push 的 run、TLS 与代理、E2E、非空备份恢复、商户资金及合规仍留待独立验收。证据 `docs/goal/mvp/d02-prelaunch-env-guard-2026-11-21.md`。
+- 继续保留其它 Agent 在主 handoff/需求矩阵/风险表/上线清单/financial-risk-audit 与本机缓存中的未提交修改；本轮仅精确 stage 自身代码、测试、增量文档，分批 commit/push。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

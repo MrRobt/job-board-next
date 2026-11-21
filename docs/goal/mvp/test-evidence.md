@@ -245,6 +245,13 @@
 - 尝试修改现有敏感配置 CI 文件被工具安全检查拒绝，**无 CI 工作流变更、无该提交的远端 Actions 验收结果**；未绕过安全检查。此本地脚本待授权仓库所有者加入 CI 启动服务后的流程。
 - 匿名 Smoke 无凭据、无登录态、无商户/模型调用、无真实数据库备份恢复，只能标记为本机局部证据。详见 `d02-anonymous-smoke-2026-11-21.md`。
 
+## 2026-11-21 D02 预发布安全配置门禁
+
+- 新 `tests/prelaunch-env-guard.test.ts` **4/4 PASS**，覆盖：未明确模式默认拒绝、10 类支付/退款/模型相关开关不能误开启、公网 origin 必须规范 HTTPS、可信代理头白名单、CLI 只报告违规变量名不打印值。
+- 首轮 TypeScript 报 `.mjs` 缺少声明以及测试 `NODE_ENV` 类型问题，新增 `.d.mts` 与修正后复检 exit 0。全量单元 **44/44 PASS**、MySQL 全量集成（文件串行）**28/28 PASS**、Next.js 16.4.6 生产 build exit 0。
+- 手动 `npm run release:preflight` 使用关闭所有真实业务开关的 LOCAL_PREVIEW：PASS / exit 0；未提供明确模式：BLOCKED / exit 2。旧 `npm run release:smoke` 13/13 PASS。
+- 这只是配置验证：没有商户退款/AI 真实调用、没有数据库或文件备份恢复操作，**没有自动接入 GitHub CI，也没有检查真实公网 TLS/代理与独立合规审批**。详情 `docs/goal/mvp/d02-prelaunch-env-guard-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
