@@ -480,7 +480,7 @@
 ## 2026-11-21 B04/U03 真正审计落库 FK 失败后整笔事务回滚
 
 - `b2c7d44` CI run `44893435390` SUCCESS。新增真实 MySQL 集成断言：测试内重用真实 Prisma Serializable tx 与状态 CAS，在审计 delegate 中注入不存在的 64 位 FK，触发真实数据库审计 insert 拒绝；随后数据库核对任务保持 CLAIMED、令牌与 attemptCount 不变、失败字段为空、审计数 0；最后正常写 RETRY_WAIT 和唯一审计事件。
-- 本地独立 TypeScript、npm test exit 0。新故障注入真库验证待本提交 CI；测试专用适配不接生产 sender、调度、商户或模型。证据 `b04-notification-fk-rollback-2026-11-21.md`；B04/U03 IN_PROGRESS，NOT READY。
+- 本地独立 TypeScript、npm test exit 0。故障注入真库已核验 `a47e082` GitHub Actions run `44894008602` **SUCCESS**：全新 MySQL8、145/145 单元、35/35 集成，0 FAIL/0 SKIP，真实 FK 插入失败回滚及正常重试路径 PASS，typecheck/build/smoke 均通过；测试专用适配不接生产 sender、调度、商户或模型。证据 `b04-notification-fk-rollback-2026-11-21.md`；B04/U03 IN_PROGRESS，NOT READY。
 
 ## 保留的局限
 

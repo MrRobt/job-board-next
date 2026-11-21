@@ -453,7 +453,7 @@
 ## 2026-11-21 B04/U03 真实 MySQL 审计插入失败事务回滚
 
 - 核验 `b2c7d44` GitHub Actions run `44893435390` SUCCESS。补齐 `ops-notification-queue-mysql.test.ts` 故障注入：同一真实 Prisma Serializable 事务先执行状态 CAS，审计写入时故意使用不存在的 intentKey 引发数据库 FK 失败；事务后核验任务仍 CLAIMED/旧 token 有效/尝试数不变、失败码/重试时间为空、审计记录 0，再正常失败写入一条事件。
-- 仅修改既有集成测试并新增独立证据，不改变生产逻辑/迁移/通知开关；本地 tsc 和 npm test exit 0。真库 FK/回滚分支需以本提交全新 CI 实测核验。独立 `b04-notification-fk-rollback-2026-11-21.md`。B04/U03 IN_PROGRESS，整体 NOT READY。
+- 仅修改既有集成测试并新增独立证据，不改变生产逻辑/迁移/通知开关；本地 tsc 和 npm test exit 0。真库 FK/回滚分支已核验 `a47e082` GitHub Actions run `44894008602` **SUCCESS**：全新 MySQL8 迁移、145/145 单元、35/35 集成、0 FAIL/0 SKIP，真实审计外键失败后整笔任务 CAS 回滚，随后正常处理用例 PASS；typecheck、build、HTTP smoke 均通过。独立 `b04-notification-fk-rollback-2026-11-21.md`。B04/U03 IN_PROGRESS，整体 NOT READY。
 
 ## Git 安全
 

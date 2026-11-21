@@ -1,6 +1,6 @@
 # B04/U03 真实 MySQL 审计插入失败的事务回滚验证 — 2026-11-21
 
-状态：**测试实现、本地 TypeScript 与单元 VERIFIED；真正全新 MySQL 约束故障演练待本提交 CI。** B04/U03 IN_PROGRESS，整体 NOT READY。
+状态：**测试实现、本地 TypeScript 与单元 VERIFIED；真正全新 MySQL 约束故障演练已在 `a47e082` GitHub Actions [run 44894008602](https://github.com/MrRobt/job-board-next/actions/runs/44894008602) **SUCCESS**：145/145 单元、35/35 集成，0 FAIL/0 SKIP；真实 FK 拒绝后状态和审计同时回滚、随后正常失败处理成功，typecheck/build/smoke 全通过。** B04/U03 IN_PROGRESS，整体 NOT READY。
 
 ## 工作树与进度
 - 核验 `b2c7d44` GitHub Actions [run 44893435390](https://github.com/MrRobt/job-board-next/actions/runs/44893435390) SUCCESS。第十三迁移及按次故障审计已经通过 145/145 单元、35/35 集成；当前缺失的是真实数据库事务在审计写入失败时，前序任务状态 CAS 能否一起回滚的独立演练。
