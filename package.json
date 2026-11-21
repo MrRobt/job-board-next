@@ -12,6 +12,7 @@
     "test": "tsx --test tests/*.test.ts",
     "test:integration": "node --conditions=react-server --import tsx --test --test-concurrency=1 tests/integration/*.test.ts",
     "release:smoke": "node scripts/ci-http-smoke.mjs",
+    "release:preflight": "node scripts/prelaunch-env-guard.mjs",
     "auth:retention": "node --conditions=react-server --import tsx scripts/prune-auth.ts"
   },
   "dependencies": {
