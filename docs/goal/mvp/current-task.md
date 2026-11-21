@@ -466,6 +466,11 @@
 - 已核验 `c7170ba` GitHub Actions run `44895785888` SUCCESS。新增后台 `/admin/dead-notifications` 与 Server Action：严格 `ENABLE_OPS_DEAD_REVIEW_READ`/`ENABLE_OPS_DEAD_REVIEW_WRITE` 双门禁且默认全关；requireAdmin 真实会话、Origin/Host 同源检查、DB 原子限流、只允许固定机器原因/明确勾选并拒绝重复字段，操作人仅从服务端 session 获取。复用已验收的 DB 角色核对和 DEAD 幂等复核。页面只展示最近 25 条必要元信息，**无重放、发送或自动调度**。
 - 新增开关、来源与表单安全单元测试；独立 tsc、npm test exit 0。已核验 `a6da140` GitHub Actions run `44897021404` **SUCCESS**：全新 MySQL8、152/152 单元、35/35 集成、0 FAIL/0 SKIP，Prisma/typecheck、Next build/HTTP smoke 全通过；真实管理员浏览器登录态、CSRF 跨域攻击测试和预发布开关/迁移验收仍未完成。独立证据 `b04-dead-review-web-gate-2026-11-21.md`。B04/U03 IN_PROGRESS，整体 NOT READY。
 
+## 2026-11-21 U03/B04 管理员真实 HTTP/CSRF/权限隔离 E2E
+
+- 核验 `af0444a` GitHub Actions run `44897394234` SUCCESS。现有 CI workflow 受保护字段不可直接编辑，故保留原工作流不动；新增独立 `.github/workflows/dead-review-e2e.yml`（全新 MySQL8、隔离 `127.0.0.1:3101`、读写开关仅在临时测试 job 中为 true，真实支付/AI/通知关闭）与 `scripts/ci-dead-review-http-e2e.mjs`。
+- 用随机无效邮箱创建测试 ADMIN/USER 和模拟会话及单条 DEAD 任务，在真实 Next HTTP GET/POST 验证匿名访问、USER 越权、ADMIN 页面/动作、跨站和缺 Origin 请求阻断、不变更数据库、同决定幂等、不同决定冲突和始终 DEAD。finally 只清理自有数据，拒绝触碰已有事故记录。node --check 与独立 tsc 本地 exit 0；**独立工作流真实结果待本提交 CI 核验**。详见 `b04-dead-review-http-e2e-2026-11-21.md`。该专项不等于完整浏览器/正式预发布 UAT，B04/U03 IN_PROGRESS、整体 NOT READY。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

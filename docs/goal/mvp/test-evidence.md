@@ -493,6 +493,12 @@
 - `c7170ba` GitHub Actions run `44895785888` SUCCESS。新增 Next.js 管理页面、Server Action 和独立开关/表单/同源校验；双开关均只有精确 `true` 启用复核，先核对 requireAdmin 登录态、Origin/Host、DB 限流，固定机器原因和用户确认，随后通过后端事务重新核对 ADMIN 与 DEAD；页面不泄露正文/令牌，没有发送/重入队。
 - 新增单元验证默认关闭、恶意/缺失来源、伪装域名和请求表单、重复字段与非法原因、伪造角色忽略。独立 tsc、npm test exit 0；已核验 `a6da140` GitHub Actions run `44897021404` **SUCCESS**：全新 MySQL8、152/152 单元、35/35 集成，0 FAIL/0 SKIP，typecheck、Next build、HTTP smoke 全通过。**未执行真实浏览器管理员登录态、跨站 POST 与 CSRF E2E**，不能据此声明实际 HTTP 攻防已验收。独立 `b04-dead-review-web-gate-2026-11-21.md`；B04/U03 IN_PROGRESS、NOT READY。
 
+## 2026-11-21 U03/B04 管理员 localhost HTTP 会话与 CSRF 端到端演练
+
+- 已核验 `af0444a` GitHub Actions run `44897394234` SUCCESS。因原工作流有受保护字段，未修改它，新建独立 GitHub Actions MySQL8 + Next 生产构建 + `127.0.0.1:3101` 专用安全 E2E；真实支付/AI/通知关闭，临时打开仅复核读写门禁。
+- 测试在隔离库仅创建随机无效邮箱的 ADMIN/USER、会话和自有 DEAD 通知；HTTP 匿名 GET/普通用户 GET 和 POST 拒绝、ADMIN GET 200、恶意/缺失 Origin POST 阻断且无副作用、有效同源 ADMIN POST 首次落审计、幂等重放、冲突拒绝、终态仍 DEAD。最后清理测试记录。
+- 本地 `node --check` 与独立 tsc exit 0；**本提交 CI 真实 HTTP 与 MySQL 结果待核实**。不包含 Playwright 浏览器截图、正式域名反向代理和完整商业 E2E，仍需后续独立验收。见 `b04-dead-review-http-e2e-2026-11-21.md`，B04/U03 IN_PROGRESS，整体 NOT READY。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

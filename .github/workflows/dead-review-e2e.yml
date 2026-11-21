@@ -1,0 +1,54 @@
+name: Dead review authenticated HTTP E2E
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  dead-review-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci_test_only
+          MYSQL_DATABASE: dead_review_ci
+          MYSQL_USER: ci_test
+          MYSQL_PASSWORD: ci_test_only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+    env:
+      DATABASE_URL: mysql://ci_test:ci_test_only@127.0.0.1:3306/dead_review_ci
+      INTEGRATION_TEST_DATABASE: "true"
+      ENABLE_REAL_PAYMENT: "false"
+      ENABLE_MOCK_PAYMENT: "false"
+      ENABLE_LIVE_AI: "false"
+      ENABLE_TOOL_PAYMENTS: "false"
+      ENABLE_REFUND_QUERY: "false"
+      ENABLE_REFUND_DISPATCH_CLAIM: "false"
+      ENABLE_OPS_DEAD_REVIEW_READ: "true"
+      ENABLE_OPS_DEAD_REVIEW_WRITE: "true"
+      DEAD_REVIEW_HTTP_PORT: "3101"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - run: npx prisma validate
+      - run: npx prisma migrate deploy
+      - run: npx prisma generate
+      - run: npm run build
+      - name: Verify live HTTP session, authorization, origin and idempotence
+        run: |
+          node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3101 > /tmp/dead-review-http.log 2>&1 &
+          APP_PID=$!
+          trap 'kill "$APP_PID" 2>/dev/null || true' EXIT
+          node scripts/ci-dead-review-http-e2e.mjs
