@@ -244,6 +244,14 @@
 - 原定 usage 与 ToolRun 同事务落库的实现被工作区安全保护拦截，已**撤回本轮未部署的 schema/迁移草案**，没有绕过或触碰数据库。**A02 整体仍 IN_PROGRESS**：真实 Token 用量审计落库、账单复核、原子结算、异常告警和合规门禁未完成。
 - 证据：`docs/goal/mvp/a02-provider-usage-evidence-2026-11-21.md`。所有其他 Agent 的主矩阵/主 handoff/financial-risk-audit 原有改动保留。
 
+## 2026-11-21 A02 模型输出隐私门禁
+
+- 新增 `lib/career/output-safety.ts`，对 Zod 验证后的模型报告全部摘要/小节标题/建议项/下一步进行现有联系方式/身份证格式复检，命中时直接拒绝向用户交付，不在错误提示中回显敏感文本。
+- `provider.generateMeasured` 在模型输出返回前调用该检查，原 `generate` 仍仅返回报告；沿用 `app/actions/career.ts` 现有失败返还预留次数的处理，未修改数据库或扣次业务。没有真实模型、商户调用。
+- TDD：先执行新单测得 MODULE_NOT_FOUND 红灯；实现后专项单元 **3/3 PASS**、模拟网络集成 **1/1 PASS**；全量单元 **56/56**、隔离 MySQL 集成 **31/31**、TypeScript/Next build exit 0。
+- 子包本机 VERIFIED，但不能替代完整 DLP、个人信息/真实模型合规；A02 usage 与次数结算原子入库仍被工作区安全门禁阻断，B06/B07/U01/D02 等仍为 IN_PROGRESS。参见 `a02-output-privacy-2026-11-21.md`。
+- 他人尚未提交的主 handoff、需求矩阵、风险、release-checklist 和 financial-risk-audit 不写入本轮提交。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

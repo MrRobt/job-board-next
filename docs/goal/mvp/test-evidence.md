@@ -275,6 +275,13 @@
 - 全量单元 **53/53 PASS**、隔离 MySQL（文件串行）**30/30 PASS**、Prisma migrate status 显示**仍为原有 8 个版本、up to date**，Next.js 16.4.6 build 与 TypeScript exit 0。
 - 数据库原子 usage 审计草案在事务文件写入时被工作区安全检查阻断，撤销本轮 Prisma 改动，**没有实际创建或迁移审计表，不可宣称用量已经落库**。真实商户/模型和生产 UAT 没有执行。详见 `a02-provider-usage-evidence-2026-11-21.md`。
 
+## 2026-11-21 A02 模型输出隐私过滤
+
+- 新 `tests/ai-output-privacy.test.ts` 先于实现执行 MODULE_NOT_FOUND，新增过滤函数后 **3/3 PASS**：安全报告不变、报告每个字段的格式化手机号/全角邮箱/分组身份证号拒绝、结构非法拒绝。
+- 新 `tests/integration/ai-output-privacy.test.ts` 模拟服务返回合法 JSON、但含联系信息的报告：`generate` 和 `generateMeasured` **都不交付报告**，专项 **1/1 PASS**，不接触真实模型。
+- 全量单元 **56/56 PASS**、MySQL 隔离库集成（文件串行）**31/31 PASS**、TypeScript exit 0、Next.js 16.4.6 build exit 0。无迁移、无真实支付/模型数据处理。
+- 仅是格式识别，并非完整 PII 检测；目前 A02 usage 与次数原子落库未完成。见 `docs/goal/mvp/a02-output-privacy-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
