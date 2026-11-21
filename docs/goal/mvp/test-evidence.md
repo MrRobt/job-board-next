@@ -398,6 +398,12 @@
 - 本地全量单元 exit 0、TypeScript exit 0、Next build exit 0。历史隔离 MySQL 首轮 **32 total/30 PASS/1 FAIL/1 SKIP**，FAIL 是其他 Agent 的 `financial-risk-audit` 测试遇 `127.0.0.1:3306` 暂时不可连接；复跑 **32 total/31 PASS/0 FAIL/1 SKIP**。唯一 SKIP 是旧隔离库缺第 9 项迁移，不能算本轮新表 UAT。
 - 真实 ADMIN/USER/匿名登录态、CSRF、只读 HTTP 和事故数据库操作链还需要预发布 E2E；仅本轮单元/编译安全子包 VERIFIED，B04/U03 整体 IN_PROGRESS。证据 `b04-incident-read-write-gates-2026-11-21.md`。
 
+## 2026-11-21 事故扫描状态同步事务候选
+
+- 核实 `d252123` GitHub Actions `44877523145` 为 success；新建仅注入式服务 `syncOpsIncidentWithStore`、Prisma Serializable/CAS adapter，事务更新事故/追加状态审计，零计数未开新事故不落库；覆盖重开、无重复事件、CAS 冲突及审计失败回滚的单元用例。
+- `npm test`、独立 TypeScript `tsc --noEmit` 和 Next build 全部 exit 0；本地历史隔离库 **33 total/31 PASS/0 FAIL/2 SKIP**，两个 SKIP 都因旧库没有第 9 项迁移，绝非新业务链路真实数据库已通过。新增 CI=true 缺表失败的新 MySQL 集成测试将由远端 CI 验证。
+- 未开启事故自动落库/通知、无预发布迁移或恢复演练，商业资金和外部资质仍未验收。完整 `b04-incident-sync-prisma-candidate-2026-11-21.md`，B04/U03 整体 IN_PROGRESS。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

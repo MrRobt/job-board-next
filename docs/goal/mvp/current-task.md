@@ -373,6 +373,12 @@
 - 事故确认表单 `confirmed/key/expectedOpenedAt/reason` 必须各恰好一个值，拒绝多值污染，补组合开关与重复字段单元用例。npm test、TS、Next build exit 0。历史 MySQL 首轮 `30 PASS/1 FAIL/1 SKIP`（其他 Agent 未提交财务审计测试遇短时连接故障）；原命令复跑 `31 PASS/0 FAIL/1 SKIP`。旧库新事故表仍 SKIP，不能算真实页面 E2E。
 - 详细 `b04-incident-read-write-gates-2026-11-21.md`；B04/U03 仍 IN_PROGRESS，外部商户/模型/合规门禁未改变；其余 Agent 脏文件未修改。
 
+## 2026-11-21 B04/U03 持久事故状态同步事务候选（未接生产）
+
+- 已核实 `d252123` GitHub Actions run `44877523145` success。继续未验收的扫描→事故持久化链路，新增独立 `syncOpsIncidentWithStore` 与 Prisma Serializable/CAS adapter，对 OPENED/RESOLVED/REOPENED 在同一事务追加审计；不接定时器/真实通知/资金动作。
+- 新增模拟事务回滚/CAS 冲突/重复扫描/解决重开等单元测试，以及 CI 新 MySQL8 第 9 项迁移下强制运行的 `ops-incident-sync-mysql.test.ts`；本地 npm test、TS、Next build exit 0，历史 MySQL `33 total/31 PASS/0 FAIL/2 SKIP`（两个旧库缺表测试不能算 PASS），待远端真实新库 CI 验证。
+- 详细 `b04-incident-sync-prisma-candidate-2026-11-21.md`；B04/U03、B07/D02 仍 IN_PROGRESS，生产启用和外部门禁不变；保留其他 Agent 脏文件。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
