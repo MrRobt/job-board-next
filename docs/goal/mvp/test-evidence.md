@@ -356,6 +356,12 @@
 - 历史专用隔离 MySQL **31/31 PASS**，仅覆盖原有账务/退款集成，不涵盖本次新事故确认服务；未对生产/开发库做写入，未验证第 9 项告警表迁移或真实 Prisma transaction。
 - 本地服务契约子包 VERIFIED，持久化、管理员 API、通知送达及 B04/U03 整体 IN_PROGRESS。详见 `b04-ack-transaction-contract-2026-11-21.md`。
 
+## 2026-11-21 B04/U03 Prisma 委托适配器及 CAS 列名映射
+
+- 新增适配器和 5 项 Prisma 委托模拟器单测，TDD 先 RED，实际发现服务字段 `expectedState/expectedOpenedAt` 与 Prisma 列名 `state/openedAt` 不一致，已修复。最终全量单元 exit 0、独立 TS exit 0、Next build exit 0。
+- 历史专用隔离 MySQL 原有集成第一轮 30/31 PASS、exit 1；原样复跑 31/31 PASS、exit 0。首轮偶发失败原因仍待进一步捕获与排查，不能视为稳定性已验证。
+- 新事故表第 9 项迁移、真实 Prisma Client 委托、数据库 CAS 并发/回滚、管理员身份 HTTP 接口与生产通知尚无验收；只将纯适配器模拟器子包标本地 VERIFIED，B04/U03 整体 IN_PROGRESS。独立证据 `b04-prisma-incident-adapter-candidate-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

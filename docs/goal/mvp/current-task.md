@@ -331,6 +331,12 @@
 - 新增 5 项事务存储模拟器单测，先 RED（服务不存在），后全量单元 **90/90 PASS**、TypeScript exit 0、Next.js build exit 0，隔离 MySQL 现有回归 **31/31 PASS**。这不是新事务的 MySQL 验收；未接真实 Prisma adapter，未应用第 9 项迁移，真实持久化和通知仍 BLOCKED/IN_PROGRESS。见 `b04-ack-transaction-contract-2026-11-21.md`。
 - 本地事务契约子包 VERIFIED，B04/U03 整体依旧 IN_PROGRESS；共享 handoff、矩阵、风险与其他 Agent 的财务审计保护不动。
 
+## 2026-11-21 B04/U03 Prisma 事故确认适配器候选（CAS 字段修复）
+
+- 接续 `0d1d9f2`，新增 `createPrismaOpsIncidentStore`：按 Serializable 事务依次查询服务端角色、事故快照，以 `key+state=OPEN+openedAt` 条件 updateMany，并同事务插入审计。新模拟 Prisma 委托的 5 组单测覆盖非管理员、更新竞态、审计失败回滚、幂等及事务参数。
+- TDD 发现 `expectedState/expectedOpenedAt` 错传给 Prisma 字段的实际缺陷并修复为 `state/openedAt`。全量单元 exit 0、直接 TS exit 0、Next.js build exit 0；现有隔离 MySQL 回归第一次 30/31 失败，第二次 31/31 PASS，保留测试稳定性风险。
+- 此为注入委托候选，不读取真实新告警表；第 9 项迁移、Prisma Client 生成、真 MySQL 事务/审计与权限 HTTP E2E 尚未验收，B04/U03 仍 IN_PROGRESS。独立证据 `b04-prisma-incident-adapter-candidate-2026-11-21.md`；其它 Agent 的共享文档与财务审计均不混提交。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
