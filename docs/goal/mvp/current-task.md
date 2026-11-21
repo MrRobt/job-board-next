@@ -407,7 +407,7 @@
 
 - 已核实 `ba15b8d` GitHub Actions run `44880692126` success。当前只读 CLI 和事务同步服务原未有受控协调层；新增 `runIsolatedOpsIncidentScan`，只有历史 localhost 专用 MySQL + 只读许可 + 单独 `OPS_INCIDENT_SYNC_APPROVED=true` 才有权获取完整三类计数并写事务；生产、远端、开发普通库全部 fail closed，默认无操作。
 - 新增 Prisma `RepeatableRead` 同快照三计数读取适配；任一计数查询异常、漏字段、负数或时钟无效都不会开始事故同步事务。仅作为隔离候选，未接生产 Cron/CLI、通知或资金/AI 服务。
-- 新增单元覆盖门禁 0 IO、部分观测拒绝、同快照事务与失败传播；npm test、TS、Next build exit 0，历史 MySQL `34 total /31 PASS /0 FAIL /3 SKIP`（旧库缺事故第九迁移）。详细 `b04-isolated-incident-scan-coordinator-2026-11-21.md`；B04/U03 整体 IN_PROGRESS、上线 NOT READY。其他 Agent 脏文件未修改。
+- 新增单元覆盖门禁 0 IO、部分观测拒绝、同快照事务与失败传播；npm test、TS、Next build exit 0，历史 MySQL `34 total /31 PASS /0 FAIL /3 SKIP`（旧库缺事故第九迁移）。详细 `b04-isolated-incident-scan-coordinator-2026-11-21.md`；已核验 `49d258e` GitHub Actions run `44881430687` **success**，全新 MySQL8 全部迁移、119/119 单元、33/33 集成、build/smoke 均 PASS、0 FAIL/0 SKIP；该 CI 仅覆盖协调器单元与此前的 MySQL 集成，不代表新协调器已完成真库端到端。B04/U03 整体 IN_PROGRESS、上线 NOT READY。其他 Agent 脏文件未修改。
 
 ## Git 安全
 

@@ -431,7 +431,7 @@
 ## 2026-11-21 B04/U03 事故完整计数与状态同步隔离入口
 
 -  `ba15b8d` GitHub Actions `44880692126` success。独立双许可门禁 `approvedOpsIncidentSyncEnvironment`：原只读扫描许可 + 额外 `OPS_INCIDENT_SYNC_APPROVED=true`，生产及非专用 DB 拒绝、未授权 0 DB IO。新增 `createPrismaOpsIncidentCountReader` RepeatableRead 事务读取三类别计数，完整/合法后统一调用现有原子同步入口；读失败不会以 0 代替或自动解决事故。
-- 全量 npm 单元、独立 TS、Next build exit 0；历史隔离 MySQL **34 total /31 PASS /0 FAIL /3 SKIP**（旧库缺事故第九迁移）。本轮新增协调器/适配器只有模拟的同快照事务与 fail-closed 单元测试，**没有声称真实迁移 MySQL 端到端或生产 Cron 已完成**。
+- 全量 npm 单元、独立 TS、Next build exit 0；历史隔离 MySQL **34 total /31 PASS /0 FAIL /3 SKIP**（旧库缺事故第九迁移）。本轮新增协调器/适配器只有模拟的同快照事务与 fail-closed 单元测试，**没有声称真实迁移 MySQL 端到端或生产 Cron 已完成**。已核验 `49d258e` 的 GitHub Actions run `44881430687` 最终 success：119/119 单元、33/33 集成，0 FAIL/0 SKIP，迁移、构建、smoke 均通过。
 - 证据 `b04-isolated-incident-scan-coordinator-2026-11-21.md`。仍欠可靠通知、真实管理会话/CSRF E2E 和预发布备份/恢复。B04/U03 IN_PROGRESS，生产开关保持关闭。
 
 ## 保留的局限

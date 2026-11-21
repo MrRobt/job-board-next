@@ -14,7 +14,7 @@
 
 ## 验证
 - 单元 `npm test` exit 0；独立 TS `tsc --noEmit` exit 0；Next.js 生产构建 exit 0。
-- 本地历史独立 MySQL 集成：**34 total / 31 PASS / 0 FAIL / 3 SKIP**。三项 SKIP 是旧隔离库未有第九项事故迁移，不能将本轮协调器解释为真实数据库端到端验收；CI 需再次检查新提交。
+- 本地历史独立 MySQL 集成：**34 total / 31 PASS / 0 FAIL / 3 SKIP**。三项 SKIP 是旧隔离库未有第九项事故迁移，不能将本轮协调器解释为真实数据库端到端验收；已核验新提交 `49d258e` 的 GitHub Actions [run 44881430687](https://github.com/MrRobt/job-board-next/actions/runs/44881430687) **success**：全新 MySQL8 迁移成功、119/119 单元、33/33 集成、0 FAIL/0 SKIP，Next build 和 smoke PASS。新增协调器仍仅通过单元注入测试，未做实际数据库端到端。
 - 首次 TS 检查发现测试替身的 where 类型未收窄，已修正并完整复测通过。
 
 ## 待验收
