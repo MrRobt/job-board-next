@@ -275,6 +275,14 @@
 - **部署门禁**：生产反向代理必须覆盖选定 `x-real-ip`/`cf-connecting-ip`，阻止外部直连源站；未完成此配置，账号认证将被拒绝。缺邮箱验证、账户删除、浏览器真实 E2E、生产网关检查，U01 整体仍 IN_PROGRESS。见 `u01-production-auth-proxy-gate-2026-11-21.md`。
 - 其他 Agent 的主 handoff/需求矩阵/风险/发布清单和 financial-risk-audit 未提交文件保持原样，独立增量交接，精确暂存，不强推。
 
+## 2026-11-21 A02 模型报告外链拦截（本轮）
+
+- 复核现有 `validateSafeModelOutput`：虽已过滤手机号/邮箱/身份证，却未过滤模型生成的外部收集网页、下载 URL、邮件/电话跳转。扩展 `lib/career/output-safety.ts` 对报告所有摘要、小节和下一步文本检查常见外部目的地，不回显被拒链接；Unicode NFKC 和部分零宽字符混淆也纳入过滤。
+- TDD：新 `tests/ai-output-links.test.ts` 首轮 1/3（外链漏检 RED），加入过滤后发现误将 `Node.js` 当成外部网站导致 2/3，收紧裸域名后最终新测试 **3/3**，加原有隐私输出专项 **6/6 PASS**。
+- TypeScript exit 0、全量单元 **69/69 PASS**、Next.js 16.4.6 生产构建 exit 0；隔离 MySQL 全量第一次 **30/31**（其他 Agent 财务风险审计测试失败），该专项单跑 **1/1**、完整串行重跑 **31/31 PASS**。原本偶发失败仍需后续调查，不归功于本次外链修复。
+- 该子包只能过滤常见 URL/跳转，不能替代完整反钓鱼/DLP、真实模型数据处理审查与 usage 落库；A02 整体仍 IN_PROGRESS。另尝试 U01 登录时序加固测试草稿触发敏感凭据安全检查，**未写入、未绕过、未修改认证代码**。
+- 本轮独立交接与证据 `docs/goal/mvp/a02-output-external-links-2026-11-21.md`，只精确暂存自身源码/测试与增量记录；其他 Agent 的共享 handoff、矩阵、风险/发布清单及财务审计文件全部保留。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
