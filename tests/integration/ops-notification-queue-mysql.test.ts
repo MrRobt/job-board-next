@@ -19,10 +19,10 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
  const migrations=await db.$queryRaw<Array<{n:bigint}>>`
   SELECT COUNT(*) AS n FROM information_schema.tables
   WHERE table_schema=DATABASE()
-  AND table_name IN ('OpsAlertIncident','OpsAlertIncidentEvent','OpsIncidentNotificationIntent')`;
- if(Number(migrations[0]?.n)!==3){
+  AND table_name IN ('OpsAlertIncident','OpsAlertIncidentEvent','OpsIncidentNotificationIntent','OpsNotificationFailureEvent')`;
+ if(Number(migrations[0]?.n)!==4){
   if(process.env.CI==="true"||process.env.OPS_NOTIFICATION_INTEGRATION_REQUIRED==="true")
-   throw Error("Tenth notification outbox migration missing");
+   throw Error("Notification failure audit migration missing");
   t.skip("historical dedicated local MySQL has no tenth notification migration");
   return;
  }
@@ -74,7 +74,15 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
   const failedAt=new Date(openedAt.getTime()+302300);
   const disposition=await failOpsNotificationClaim(failure,intent.idempotencyKey,recovered.claimToken,"TEMPORARY_FAILURE",failedAt);
   assert.equal(disposition.status,"RETRY_WAIT");
+  const firstAudit=await db.$queryRaw<Array<{attemptCount:number;disposition:string;failureCode:string}>>`
+   SELECT attemptCount,disposition,failureCode FROM OpsNotificationFailureEvent WHERE intentKey=${intent.idempotencyKey}`;
+  assert.equal(firstAudit.length,1);
+  assert.equal(firstAudit[0].attemptCount,2);
+  assert.equal(firstAudit[0].disposition,"RETRY_WAIT");
+  assert.equal(firstAudit[0].failureCode,"TEMPORARY_FAILURE");
   assert.equal((await failOpsNotificationClaim(failure,intent.idempotencyKey,recovered.claimToken,"TEMPORARY_FAILURE",failedAt)).status,"FENCED");
+  const duplicateAudit=await db.$queryRaw<Array<{n:bigint}>>`SELECT COUNT(*) AS n FROM OpsNotificationFailureEvent WHERE intentKey=${intent.idempotencyKey}`;
+  assert.equal(Number(duplicateAudit[0]?.n),1);
   assert.equal((await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(failedAt.getTime()+1000))).status,"DEFERRED");
   const retried=await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(failedAt.getTime()+240_000));
   assert.equal(retried.status,"CLAIMED");
@@ -90,6 +98,7 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
   assert.equal(await db.opsIncidentNotificationIntent.count({where:{incidentKey:key}}),1);
  }finally{
   if(own){
+   await db.$executeRaw`DELETE FROM OpsNotificationFailureEvent WHERE intentKey IN (SELECT idempotencyKey FROM OpsIncidentNotificationIntent WHERE incidentKey=${key})`;
    await db.opsIncidentNotificationIntent.deleteMany({where:{incidentKey:key}});
    await db.opsAlertIncidentEvent.deleteMany({where:{incidentKey:key}});
    await db.opsAlertIncident.deleteMany({where:{key}});

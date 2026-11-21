@@ -353,6 +353,7 @@ model OpsIncidentNotificationIntent {
   idempotencyKey String @id @db.Char(64)
   incidentKey String @db.VarChar(40)
   incident OpsAlertIncident @relation(fields:[incidentKey],references:[key],onDelete:Restrict)
+  failureEvents OpsNotificationFailureEvent[]
   episodeOpenedAt DateTime
   kind String @db.VarChar(16)
   priority String @db.VarChar(8)
@@ -369,6 +370,19 @@ model OpsIncidentNotificationIntent {
   @@index([state,createdAt])
   @@index([state,leaseExpiresAt])
   @@index([incidentKey,episodeOpenedAt])
+}
+
+// Internal-only audit: one failure event per claimed attempt, no PII or token.
+model OpsNotificationFailureEvent {
+  id String @id @default(cuid())
+  intentKey String @db.Char(64)
+  intent OpsIncidentNotificationIntent @relation(fields:[intentKey],references:[idempotencyKey],onDelete:Restrict)
+  attemptCount Int
+  disposition String @db.VarChar(16)
+  failureCode String @db.VarChar(40)
+  createdAt DateTime @default(now())
+  @@unique([intentKey,attemptCount])
+  @@index([createdAt])
 }
 
 model ToolRunAdjustment {

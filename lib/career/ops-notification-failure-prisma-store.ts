@@ -1,7 +1,9 @@
 import type {OpsNotificationFailureRow,OpsNotificationFailureStore,OpsNotificationFailureTx} from "./ops-notification-failure";
 type Row=Awaited<ReturnType<OpsNotificationFailureTx["read"]>>;
 type Update=Parameters<OpsNotificationFailureTx["compareAndSet"]>[1];
-type Tx=Readonly<{opsIncidentNotificationIntent:{
+type Tx=Readonly<{opsNotificationFailureEvent:{
+ create(args:{data:{intentKey:string;attemptCount:number;disposition:"RETRY_WAIT"|"DEAD";failureCode:string}}):Promise<unknown>
+};opsIncidentNotificationIntent:{
  findUnique(args:{where:{idempotencyKey:string};select:{
   idempotencyKey:true;state:true;claimToken:true;leaseExpiresAt:true;attemptCount:true
  }}):Promise<Row>;
@@ -23,7 +25,13 @@ export function createPrismaOpsNotificationFailureStore(db:OpsNotificationFailur
       claimToken:previous.claimToken,leaseExpiresAt:previous.leaseExpiresAt,
       attemptCount:previous.attemptCount},
      data:update
-    });return changed.count;
+    });if(changed.count===1){
+      await tx.opsNotificationFailureEvent.create({data:{
+       intentKey:previous.idempotencyKey,attemptCount:previous.attemptCount,
+       disposition:update.state,failureCode:update.failureCode
+      }});
+     }
+     return changed.count;
    }
   }),{isolationLevel:"Serializable",maxWait:10000,timeout:15000});
  }};

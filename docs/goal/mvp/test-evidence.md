@@ -471,6 +471,12 @@
 - claim 服务对 RETRY_WAIT 在到点前拒绝（DEFERRED），到点清理旧失败属性后恢复 CLAIMED；单元与现有 MySQL 集成扩展覆盖重领、重复失败和事故解决后拒领。
 - 本地 npm 单元、独立 tsc exit 0；Prisma validate 命令工具超时，Next 生产 build 编译+TS 通过但页面数据收集超时，**不得认定完整 build PASS**；第十二迁移及新增真库分支已核验 `6e51099` GitHub Actions run `44891465518` **SUCCESS**：全新 MySQL8、142/142 单元、35/35 集成、0 FAIL/0 SKIP，失败后延时重领、过早 DEFERRED、已解决 STALE 的真实用例 PASS，远端 typecheck/build/smoke 全通过。本地超时记录不覆盖。详见 `b04-notification-retry-disposition-2026-11-21.md`，状态 IN_PROGRESS，整体 NOT READY。
 
+## 2026-11-21 B04/U03 故障事件按次持久审计（第十三迁移）
+
+- 已核验 `a6b5c4a` GitHub Actions run `44891820268` SUCCESS。第十三迁移增加 `OpsNotificationFailureEvent`、任务 FK、`UNIQUE(intentKey,attemptCount)`；Prisma Serializable 事务中仅 CAS 更新成功后写审计，数据库异常不允许状态成功提交。仅保存机器失败码、尝试次数、RETRY_WAIT/DEAD，不存 claimToken 或 PII。
+- 新单元覆盖成功写事件、CAS 冲突不写事件、重复失败无法重复审计、审计写入异常传播。扩展既有真实 MySQL 队列用例核实事件计数 1、失败码、序号、重复失败不加行；第十三迁移缺表 CI fail。独立 TS 和 npm test exit 0；本机 Prisma validate/Next build 被执行器超时中断，完整验收待 CI，不得据此声称真实原子审计已通过。
+- 证据 `b04-notification-failure-audit-2026-11-21.md`。没有发送器、送达确认、管理员死信处置、定时调度；B04/U03 IN_PROGRESS，NOT READY。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

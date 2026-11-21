@@ -445,6 +445,11 @@
 - `failOpsNotificationClaim` 以 Serializable CAS 检查当前 CLAIMED、同一令牌、租约有效；1～4 次失败进入指数退避 RETRY_WAIT 并释放 token，5 次后 DEAD，旧令牌/重复失败拒绝；`claimOpsNotificationIntent` 提前重领 DEFERRED、到点可再次领取。扩展真实 MySQL 队列测试和单元状态机测试。
 - 本地 `npm test`、独立 tsc exit 0；Prisma schema validate 命令超时，Next build 编译及 TS 阶段成功但页面数据收集时工具超时，不能记完成。已核验 `6e51099` GitHub Actions run `44891465518` **SUCCESS**：第十二迁移全新 MySQL8 apply/repeatable、142/142 单元、35/35 集成、0 FAIL/0 SKIP，真实失败 RETRY_WAIT→到期重领→事故解决后拒领用例 PASS；远端 Prisma generate/typecheck、Next build/HTTP smoke 全部成功。本地工具超时仍如实保留。详见 `b04-notification-retry-disposition-2026-11-21.md`；B04/U03 IN_PROGRESS、整体 NOT READY。
 
+## 2026-11-21 B04/U03 通知失败尝试事务审计（第十三迁移）
+
+- 核验 `a6b5c4a` CI run `44891820268` SUCCESS。新增 `OpsNotificationFailureEvent` 及第十三迁移，`UNIQUE(intentKey,attemptCount)` 保证同一次尝试仅一个失败事件，字段不含个人信息或令牌。Prisma Serializable Store 在更新通知状态 CAS 成功后同事务插入审计；CAS 冲突不记事件，审计异常阻断整个事务，保持外部发送关闭。
+- 新增单元审计失败传播与重复令牌去重测试；原 MySQL 队列集成测试核验首次失败事件存在且重复提交不新增，并只清理本测试产生的审计。单元、独立 TS exit 0；本机 Prisma validate 与完整 Next build 因执行器超时未完成。新迁移、真实 MySQL 和完整构建必须由本提交 CI 核验。独立证据 `b04-notification-failure-audit-2026-11-21.md`。B04/U03 仍 IN_PROGRESS，整体 NOT READY。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
