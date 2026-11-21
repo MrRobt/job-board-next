@@ -374,6 +374,12 @@
 - 本地 npm test、TS、Next build exit 0；专用隔离 MySQL 首轮 **32 total / 30 PASS / 1 FAIL / 1 SKIP**（其他 Agent `financial-risk-audit` 遇 `127.0.0.1:3306` 暂时不可连接），复跑 **32 total / 31 PASS / 0 FAIL / 1 SKIP**。新事故表迁移测试 SKIP，不是新表验收通过。
 - 详细 `b04-ci-ops-scan-guard-fix-2026-11-21.md`；修复后远端 GitHub Actions 结果需新提交核实。B04/U03/B07/D02 仍未整体验收。
 
+## 2026-11-21 远端 CI 新事故表真实 MySQL 完整通过及管理员确认入口候选
+
+- 真实 GitHub Actions `efceb92` run `44872146477` validate success，原始日志显示全新 MySQL8 migrate deploy/repeat 与状态检查通过，**95/95 单元、31/31 集成、0 SKIP、0 FAIL**，含新 `B04/U03 migrated MySQL: admin CAS acknowledgment and audit are atomic/idempotent` 用例；build、smoke 均成功。这是 CI 新隔离库证据，不是生产或预发布库验收。
+- 新增管理员确认 Server Action 独立禁用开关、服务端鉴权和限流、轮次/理由安全表单校验。新增表单单元覆盖，首次 TypeScript 类型错误修复后本地单元、tsc 和 Next build exit 0；老本地隔离库 MySQL **31 PASS/1 SKIP**，新表未落库所以明确跳过。
+- 不宣称管理员 HTTP 真实登录态、CSRF、页面或独立开关启用已完成；需预发布迁移、浏览器及权限 E2E。证据 `b04-admin-incident-action-candidate-2026-11-21.md`；B04/U03 整体 IN_PROGRESS。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

@@ -349,6 +349,12 @@
 - 本地 npm 单元、TS 和 Next build exit 0；历史专用库集成第一次 30 PASS/1 FAIL/1 SKIP（其他 Agent 未提交 `financial-risk-audit` 测试遇 MySQL 暂时不可连接），原命令复跑 31 PASS/0 FAIL/1 SKIP。新第 9 项迁移测试仍 SKIP，不能视为已验收。
 - 修复独立证据 `b04-ci-ops-scan-guard-fix-2026-11-21.md`；当前本地测试修复子包 VERIFIED，远端新 commit CI 状态仍待核验，B04/U03 总体继续 IN_PROGRESS。其他 Agent 所有脏文件保留。
 
+## 2026-11-21 B04/U03 CI 新 MySQL 验收与管理员确认 Server Action 候选
+
+- 已核实 GitHub Actions `efceb92` run `44872146477` success：全新 MySQL8 所有迁移成功应用、重复 deploy 无 pending；95/95 单元、31/31 集成（含第 9 项 OpsIncident 真实 MySQL CAS/审计测试）均无 skip，Next build 与 smoke 通过。仅是 CI 隔离数据库证据，非生产迁移。
+- 新增 `ops-ack-form.ts` 白名单及严格发生轮次/理由解析，`confirmOpsIncident` Server Action：requireAdmin 取服务器身份、独立开关 `ENABLE_OPS_INCIDENT_ACK=true`（默认关闭）、5 次/小时 DB 限流、事务确认与审计，统一错误重定向；**未开放 UI/真实通知/资金操作**。新单测校验非法类别、伪造管理员、过期/格式错误与确认勾选。
+- 首轮测试 helper 类型不匹配已修；最终 npm test/TS/Next build exit 0，旧历史隔离 MySQL 31 PASS/1 SKIP（库未迁第 9 项，不能混同 CI 已成功新库）。本动作 HTTP E2E 和预发布迁移未验收，B04/U03 继续 IN_PROGRESS。详见 `b04-admin-incident-action-candidate-2026-11-21.md`；保护其他 Agent 脏文件。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
