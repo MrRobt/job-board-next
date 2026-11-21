@@ -4,7 +4,7 @@
  * No live merchant requests, no automated refunds, no credentials logged.
  */
 import {PrismaClient} from "@prisma/client";
-import {approvedOpsScanEnvironment,assessOpsAlerts} from "../lib/career/ops-alert-policy";
+import {approvedOpsScanEnvironment,assessOpsAlerts,opsAlertQueryFilters} from "../lib/career/ops-alert-policy";
 
 async function main(){
   if(!approvedOpsScanEnvironment(process.env)){
@@ -14,11 +14,11 @@ async function main(){
   }
   const db=new PrismaClient();
   try{
-    const now=Date.now();
+    const filters=opsAlertQueryFilters(new Date());
     const [staleReservations,uncertainRefunds,agedReadyRefunds]=await Promise.all([
-      db.toolRun.count({where:{status:"RESERVED",createdAt:{lt:new Date(now-10*60_000)}}}),
-      db.toolRefundDispatch.count({where:{state:"IN_DOUBT",claimedAt:{lt:new Date(now-15*60_000)}}}),
-      db.toolRefundDispatch.count({where:{state:"READY",createdAt:{lt:new Date(now-30*60_000)}}})
+      db.toolRun.count({where:filters.staleReservations}),
+      db.toolRefundDispatch.count({where:filters.uncertainRefunds}),
+      db.toolRefundDispatch.count({where:filters.agedReadyRefunds})
     ]);
     const result=assessOpsAlerts({staleReservations,uncertainRefunds,agedReadyRefunds});
     console.log(JSON.stringify({

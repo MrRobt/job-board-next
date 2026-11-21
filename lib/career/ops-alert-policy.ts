@@ -29,6 +29,23 @@ export function assessOpsAlerts(counts:OpsAlertCounts):{
   return {status:alerts.length?"ALERT":"PASS",counts:clean,alerts};
 }
 
+/**
+ * Query filters are shared by tests and the read-only CLI. A claimed refund
+ * with missing claimedAt is inconsistent and must be flagged immediately,
+ * rather than silently excluded by the older-than comparison.
+ */
+export function opsAlertQueryFilters(now:Date){
+  if(!Number.isFinite(now.getTime()))throw new Error("Invalid scan time");
+  return {
+    staleReservations:{status:"RESERVED" as const,createdAt:{lt:new Date(now.getTime()-10*60_000)}},
+    uncertainRefunds:{
+      state:"IN_DOUBT" as const,
+      OR:[{claimedAt:null},{claimedAt:{lt:new Date(now.getTime()-15*60_000)}}]
+    },
+    agedReadyRefunds:{state:"READY" as const,createdAt:{lt:new Date(now.getTime()-30*60_000)}}
+  };
+}
+
 /** Only inspect the historical dedicated disposable MySQL test DB in this phase. */
 export function approvedOpsScanEnvironment(env:Readonly<Record<string,string|undefined>>):boolean{
   if(env.OPS_ALERT_READ_ONLY_APPROVED!=="true"||

@@ -1,6 +1,6 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
-import {approvedOpsScanEnvironment,assessOpsAlerts} from "../lib/career/ops-alert-policy";
+import {approvedOpsScanEnvironment,assessOpsAlerts,opsAlertQueryFilters} from "../lib/career/ops-alert-policy";
 
 test("operations alert policy returns only bounded aggregate signals",()=>{
   assert.deepEqual(assessOpsAlerts({staleReservations:0,uncertainRefunds:0,agedReadyRefunds:0}),{
@@ -12,6 +12,22 @@ test("operations alert policy returns only bounded aggregate signals",()=>{
   for(const n of [-1,0.1,Infinity,NaN,Number.MAX_SAFE_INTEGER+1]){
     assert.throws(()=>assessOpsAlerts({staleReservations:n,uncertainRefunds:0,agedReadyRefunds:0}),/count/);
   }
+});
+
+test("uncertain refund scan catches missing claimedAt and stale claims without false positives",()=>{
+  const now=new Date("2026-11-21T12:00:00.000Z");
+  const queries=opsAlertQueryFilters(now);
+  assert.deepEqual(queries.uncertainRefunds,{
+    state:"IN_DOUBT",
+    OR:[{claimedAt:null},{claimedAt:{lt:new Date("2026-11-21T11:45:00.000Z")}}]
+  });
+  assert.deepEqual(queries.staleReservations,{
+    status:"RESERVED",createdAt:{lt:new Date("2026-11-21T11:50:00.000Z")}
+  });
+  assert.deepEqual(queries.agedReadyRefunds,{
+    state:"READY",createdAt:{lt:new Date("2026-11-21T11:30:00.000Z")}
+  });
+  assert.throws(()=>opsAlertQueryFilters(new Date("not a date")),/Invalid scan time/);
 });
 
 test("scan requires explicit permission and a local disposable migration database",()=>{

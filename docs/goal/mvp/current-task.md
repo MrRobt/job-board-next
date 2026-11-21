@@ -295,6 +295,12 @@
 - 规则专项 2/2、全量单元 **71/71**、隔离 MySQL 集成 **31/31**、TypeScript 和 Next.js 生产构建通过。历史专用隔离库只读扫描三项计数均为 0、exit 0；默认阻断 exit 3。详情 `b04-ops-alert-scan-2026-11-21.md`。
 - 本地子包 VERIFIED，生产真实自动告警投递/轮值、商户与模型、生产迁移/备份恢复/E2E 均未验收。共享 handoff、矩阵、风险、发布清单和其他 Agent 财务审计改动不得覆盖。
 
+## 2026-11-21 B04/B06 退款未知态时间戳缺失防漏报
+
+- 修复专用只读扫描漏报：`IN_DOUBT` 派发若 `claimedAt IS NULL` 也必须产生人工核账告警，而不是被“超过 15 分钟”筛选忽略；其他阈值不变，不改变任何资金或权益。
+- 先补失败测试 71/72 RED，再修复为单元 **72/72 PASS**；隔离 MySQL 全量 **31/31 PASS**、TS/Next 生产构建 exit 0，实际隔离库授权扫描 exit 0、异常计数为 0。证据 `b04-refund-null-claim-alert-2026-11-21.md`。
+- 本地规则子包 VERIFIED，但没有对异常 NULL 数据进行真实 DB 夹具回放，生产监控/告警送达/商户核对仍 IN_PROGRESS。共享 Goal 变更与财务扫描均不得混提交。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
