@@ -308,6 +308,13 @@
 - TypeScript exit 0、单元全量 **69/69 PASS**、Next.js 16.4.6 生产 build exit 0；隔离 MySQL 集成初次 **30/31 FAIL**（其他 Agent 未提交的 `financial-risk-audit.test.ts`），其单测复跑 **1/1**，全量文件串行复跑 **31/31 PASS**。保留偶发失败风险。
 - 未做真实模型调用、用户浏览器 E2E、数据库迁移、生产部署或商户操作。详见 `a02-output-external-links-2026-11-21.md`。
 
+## 2026-11-21 B06 Outbox 领取人竞态安全复验
+
+- 启动前核验 `job-board-next-db-1` healthy、专用隔离库 `jobs_mvp_migrate_20261118_8f72` 存在、原 8 项迁移成功；在该库上 `prisma migrate status` exit 0、up to date。
+- `INTEGRATION_TEST_DATABASE=true` 且 `DATABASE_URL` 明确指向上述隔离库，完整 `npm run test:integration` **31/31 PASS**，包含商户模拟查询中间变更 Outbox claimant 后必须拒绝撤权的新增回归。
+- 独立 `tsc --noEmit` exit 0、单元测试 exit 0、Next.js 生产构建 exit 0；上轮 `npm run typecheck` 的 Prisma Client 重生成有 Windows DLL EPERM，不冒称整条命令通过。
+- 不访问真实商户、实际 AI、普通开发库或生产数据。本地子包 VERIFIED，不代表远端 Actions/生产 E2E 或合规商户 UAT 已通过。详细证据 `refund-claimant-race-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

@@ -283,6 +283,12 @@
 - 该子包只能过滤常见 URL/跳转，不能替代完整反钓鱼/DLP、真实模型数据处理审查与 usage 落库；A02 整体仍 IN_PROGRESS。另尝试 U01 登录时序加固测试草稿触发敏感凭据安全检查，**未写入、未绕过、未修改认证代码**。
 - 本轮独立交接与证据 `docs/goal/mvp/a02-output-external-links-2026-11-21.md`，只精确暂存自身源码/测试与增量记录；其他 Agent 的共享 handoff、矩阵、风险/发布清单及财务审计文件全部保留。
 
+## 2026-11-21 B06 Outbox 领取人竞态补验（增量）
+
+- 在已签名商户退款查询后、最终 SERIALIZABLE 事务中复核 Outbox 领取人 ID 和领取时间，防止查询过程中的派发记录变更被错误当作可入账状态。
+- 专用 `jobs_mvp_migrate_20261118_8f72` 隔离 MySQL 库的 8 项迁移 up-to-date；文件串行集成 **31/31 PASS**（包含新竞态注入测试），单元、TS、生产构建通过。完整 `npm run typecheck` 的 Prisma Client generate 曾 Windows EPERM；独立 TypeScript exit 0，不能掩盖该异常。
+- 本地子包 VERIFIED，B06 整体仍 IN_PROGRESS；真实商户、远端 CI、浏览器 E2E、生产迁移和合法上线门禁未解除。独立证据 `refund-claimant-race-2026-11-21.md`；共享 handoff/风险/矩阵等其他 Agent 修改继续保护。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

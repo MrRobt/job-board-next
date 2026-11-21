@@ -38,9 +38,13 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
   let queryCount=0;
   let observed:"UNKNOWN"|"PROCESSING"|"FAILED"|"SUCCEEDED"="UNKNOWN";
   let mismatch=false;
+  let changeClaimDuringInquiry=false;
   const gateway:RefundInquiryGateway={
    async query(provider,inquiry){
     queryCount++;
+    if(changeClaimDuringInquiry){
+     await db.toolRefundDispatch.update({where:{id:dispatch.id},data:{claimantId:outsider.id}});
+    }
     assert.equal(provider,"ALIPAY");
     assert.equal(inquiry.providerTradeId,"final-"+tag);
     assert.equal(inquiry.orderId,order.id);
@@ -64,6 +68,11 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
   await assert.rejects(reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),/mismatch/);
   assert.equal(await db.toolRefundInquiryEvent.count({where:{dispatchId:dispatch.id}}),0);
   mismatch=false;
+  changeClaimDuringInquiry=true;
+  await assert.rejects(reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),/ledger changed/);
+  assert.equal((await db.toolOrder.findUniqueOrThrow({where:{id:order.id}})).status,"PAID");
+  await db.toolRefundDispatch.update({where:{id:dispatch.id},data:{claimantId:dispatcher.id}});
+  changeClaimDuringInquiry=false;
   observed="PROCESSING";
   assert.equal(await reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),"PROCESSING");
   observed="UNKNOWN";

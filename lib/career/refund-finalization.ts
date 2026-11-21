@@ -86,6 +86,8 @@ export async function reconcileDispatchedRefund(
    throw new Error("Refund terminal ledger inconsistent");
   }
   if(current.state!=="IN_DOUBT"||!current.claimedAt||
+      current.claimantId!==dispatch.claimantId||
+      current.claimedAt.getTime()!==dispatch.claimedAt!.getTime()||
      nowIntent.id!==intent.id||nowIntent.state!=="APPROVED"||
      nowIntent.fingerprint!==dispatch.fingerprint||
      nowIntent.outRefundNo!==dispatch.outRefundNo||
