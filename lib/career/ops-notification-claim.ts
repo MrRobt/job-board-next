@@ -3,12 +3,13 @@ import {randomUUID} from "node:crypto";
 /** Internal state machine boundary only: a lease never authorizes delivery. */
 export type OpsNotificationLeaseRow=Readonly<{
  idempotencyKey:string;
- state:"QUEUED"|"CLAIMED";
+ state:"QUEUED"|"CLAIMED"|"RETRY_WAIT"|"DEAD";
  incidentKey:string;
  episodeOpenedAt:Date;
  attemptCount:number;
  claimToken:string|null;
  leaseExpiresAt:Date|null;
+ nextAttemptAt?:Date|null;
 }>;
 export type OpsNotificationLeaseIncident=Readonly<{
  state:"OPEN"|"ACKNOWLEDGED"|"RESOLVED";
@@ -25,7 +26,7 @@ export type OpsNotificationLeaseStore=Readonly<{
 }>;
 export type OpsNotificationClaimResult=
  |Readonly<{status:"CLAIMED";claimToken:string;attempt:number;expiresAt:Date}>
- |Readonly<{status:"MISSING"|"STALE"|"BUSY"|"EXHAUSTED"}>;
+ |Readonly<{status:"MISSING"|"STALE"|"BUSY"|"EXHAUSTED"|"DEFERRED"}>;
 
 export async function claimOpsNotificationIntent(
  store:OpsNotificationLeaseStore,key:string,now:Date,leaseMinutes:number=5
@@ -48,12 +49,17 @@ export async function claimOpsNotificationIntent(
   if(!incident||incident.state!=="OPEN"||incident.count<=0||
    incident.openedAt.getTime()!==previous.episodeOpenedAt.getTime())
    return {status:"STALE"};
-  if(previous.attemptCount>=5)return {status:"EXHAUSTED"};
+  if(previous.state==="DEAD"||previous.attemptCount>=5)return {status:"EXHAUSTED"};
+  if(previous.state==="RETRY_WAIT"){
+   if(!(previous.nextAttemptAt instanceof Date)||!Number.isFinite(previous.nextAttemptAt.getTime()))
+    throw Error("Invalid retry schedule");
+   if(previous.nextAttemptAt.getTime()>now.getTime())return {status:"DEFERRED"};
+  }
   if(previous.state==="CLAIMED"){
    if(!previous.leaseExpiresAt||!Number.isFinite(previous.leaseExpiresAt.getTime()))
     throw Error("Claimed notification missing lease");
    if(previous.leaseExpiresAt.getTime()>now.getTime())return {status:"BUSY"};
-  }else if(previous.state!=="QUEUED")throw Error("Unknown notification state");
+  }else if(previous.state!=="QUEUED"&&previous.state!=="RETRY_WAIT")throw Error("Unknown notification state");
   if(await tx.compareAndClaim(previous,claimToken,now,expiresAt)!==1)
    return {status:"BUSY"};
   return {status:"CLAIMED",claimToken,attempt:previous.attemptCount+1,expiresAt};

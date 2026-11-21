@@ -439,6 +439,12 @@
 - 新增 5 项单元测试与既有真实 MySQL 领取集成测试中的 READY/FENCED/STALE 检查，未新增 DB 表或真实通知 Worker；npm 单元、独立 tsc、Next build exit 0；历史 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`（缺第九至十一迁移），扩展的真库 preflight 已核验提交 `1f2bae4` GitHub Actions run `44889847821` **SUCCESS**：全新 MySQL8 迁移、138/138 单元、35/35 集成，0 FAIL/0 SKIP，真实令牌 READY/FENCED/事故 RESOLVED 后 STALE 通过，typecheck、build、smoke 也成功。详见 `b04-notification-preflight-2026-11-21.md`，B04/U03 IN_PROGRESS、整体 NOT READY。
 - 保持真实支付、AI、通知开关关闭；未触碰其他 Agent 的 handoff、矩阵、风险、发布清单、财务审计和缓存。
 
+## 2026-11-21 B04/U03 通知失败处理与重试截止（第十二迁移）
+
+- 已核验 `517d50c` GitHub Actions run `44890089304` success。本轮新增第十二迁移：通知任务状态 RETRY_WAIT/DEAD、下一次可领时间、脱敏故障码；仅内部任务状态，无外部通知发送、HTTP、Cron 或资金/AI 开关变更。
+- `failOpsNotificationClaim` 以 Serializable CAS 检查当前 CLAIMED、同一令牌、租约有效；1～4 次失败进入指数退避 RETRY_WAIT 并释放 token，5 次后 DEAD，旧令牌/重复失败拒绝；`claimOpsNotificationIntent` 提前重领 DEFERRED、到点可再次领取。扩展真实 MySQL 队列测试和单元状态机测试。
+- 本地 `npm test`、独立 tsc exit 0；Prisma schema validate 命令超时，Next build 编译及 TS 阶段成功但页面数据收集时工具超时，不能记完成。必须核验新 CI 的第十二迁移/真库测试/构建。详见 `b04-notification-retry-disposition-2026-11-21.md`；B04/U03 IN_PROGRESS、整体 NOT READY。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

@@ -346,6 +346,8 @@ model OpsAlertIncidentEvent {
 enum OpsNotificationIntentState {
   QUEUED
   CLAIMED
+  RETRY_WAIT
+  DEAD
 }
 model OpsIncidentNotificationIntent {
   idempotencyKey String @id @db.Char(64)
@@ -361,6 +363,8 @@ model OpsIncidentNotificationIntent {
   claimToken String? @db.VarChar(36)
   claimedAt DateTime?
   leaseExpiresAt DateTime?
+  nextAttemptAt DateTime?
+  failureCode String? @db.VarChar(40)
   createdAt DateTime @default(now())
   @@index([state,createdAt])
   @@index([state,leaseExpiresAt])

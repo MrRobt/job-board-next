@@ -2,6 +2,8 @@ import {test} from "node:test";
 import assert from "node:assert/strict";
 import {db} from "../../lib/db";
 import {claimOpsNotificationIntent} from "../../lib/career/ops-notification-claim";
+import {failOpsNotificationClaim} from "../../lib/career/ops-notification-failure";
+import {createPrismaOpsNotificationFailureStore,type OpsNotificationFailurePrismaPort} from "../../lib/career/ops-notification-failure-prisma-store";
 import {preflightOpsNotification} from "../../lib/career/ops-notification-preflight";
 import {createPrismaOpsNotificationPreflightStore,type OpsNotificationPreflightPrismaPort} from "../../lib/career/ops-notification-preflight-prisma-store";
 import {createPrismaOpsNotificationLeaseStore,type OpsNotificationClaimPrismaPort} from "../../lib/career/ops-notification-claim-prisma-store";
@@ -68,11 +70,23 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
   });
   // The local Windows Prisma client may still predate migration 11 (DLL locked).
   assert.equal((claimRow as unknown as {attemptCount:number}).attemptCount,2);
-  const resolved=await syncOpsIncidentWithStore(sync,key,0,new Date(openedAt.getTime()+303000));
+  const failure=createPrismaOpsNotificationFailureStore(db as unknown as OpsNotificationFailurePrismaPort);
+  const failedAt=new Date(openedAt.getTime()+302300);
+  const disposition=await failOpsNotificationClaim(failure,intent.idempotencyKey,recovered.claimToken,"TEMPORARY_FAILURE",failedAt);
+  assert.equal(disposition.status,"RETRY_WAIT");
+  assert.equal((await failOpsNotificationClaim(failure,intent.idempotencyKey,recovered.claimToken,"TEMPORARY_FAILURE",failedAt)).status,"FENCED");
+  assert.equal((await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(failedAt.getTime()+1000))).status,"DEFERRED");
+  const retried=await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(failedAt.getTime()+240_000));
+  assert.equal(retried.status,"CLAIMED");
+  if(retried.status!=="CLAIMED")throw Error("Expected retry claim");
+  assert.equal((await db.opsIncidentNotificationIntent.findUniqueOrThrow({
+   where:{idempotencyKey:intent.idempotencyKey}
+  }) as unknown as {attemptCount:number}).attemptCount,3);
+  const resolved=await syncOpsIncidentWithStore(sync,key,0,new Date(openedAt.getTime()+543000));
   assert.equal(resolved.event,"RESOLVED");
-  assert.equal(await preflightOpsNotification(preflight,intent.idempotencyKey,recovered.claimToken,new Date(openedAt.getTime()+303100)),"STALE");
+  assert.equal(await preflightOpsNotification(preflight,intent.idempotencyKey,retried.claimToken,new Date(openedAt.getTime()+543100)),"STALE");
   assert.equal((await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(openedAt.getTime()+602200))).status,"STALE");
-  assert.equal(await queueInitialOpsNotificationIntent(queue,intent,new Date(openedAt.getTime()+304000)),"STALE");
+  assert.equal(await queueInitialOpsNotificationIntent(queue,intent,new Date(openedAt.getTime()+544000)),"STALE");
   assert.equal(await db.opsIncidentNotificationIntent.count({where:{incidentKey:key}}),1);
  }finally{
   if(own){

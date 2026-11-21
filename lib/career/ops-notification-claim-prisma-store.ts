@@ -2,10 +2,10 @@ import type {OpsNotificationLeaseRow,OpsNotificationLeaseIncident,OpsNotificatio
 
 type Tx=Readonly<{
  opsIncidentNotificationIntent:{
-  findUnique(args:{where:{idempotencyKey:string};select:{idempotencyKey:true;state:true;incidentKey:true;episodeOpenedAt:true;attemptCount:true;claimToken:true;leaseExpiresAt:true}}):Promise<OpsNotificationLeaseRow|null>;
+  findUnique(args:{where:{idempotencyKey:string};select:{idempotencyKey:true;state:true;incidentKey:true;episodeOpenedAt:true;attemptCount:true;claimToken:true;leaseExpiresAt:true;nextAttemptAt:true}}):Promise<OpsNotificationLeaseRow|null>;
   updateMany(args:{
-   where:{idempotencyKey:string;state:"QUEUED"|"CLAIMED";attemptCount:number;claimToken:string|null;leaseExpiresAt:Date|null};
-   data:{state:"CLAIMED";attemptCount:number;claimToken:string;claimedAt:Date;leaseExpiresAt:Date}
+   where:{idempotencyKey:string;state:"QUEUED"|"CLAIMED"|"RETRY_WAIT"|"DEAD";attemptCount:number;claimToken:string|null;leaseExpiresAt:Date|null};
+   data:{state:"CLAIMED";attemptCount:number;claimToken:string;claimedAt:Date;leaseExpiresAt:Date;nextAttemptAt:null;failureCode:null}
   }):Promise<{count:number}>;
  };
  opsAlertIncident:{
@@ -21,7 +21,7 @@ export function createPrismaOpsNotificationLeaseStore(db:OpsNotificationClaimPri
   return db.$transaction(async tx=>fn({
    read(key){return tx.opsIncidentNotificationIntent.findUnique({
     where:{idempotencyKey:key},
-    select:{idempotencyKey:true,state:true,incidentKey:true,episodeOpenedAt:true,attemptCount:true,claimToken:true,leaseExpiresAt:true}
+    select:{idempotencyKey:true,state:true,incidentKey:true,episodeOpenedAt:true,attemptCount:true,claimToken:true,leaseExpiresAt:true,nextAttemptAt:true}
    });},
    readIncident(key){return tx.opsAlertIncident.findUnique({
     where:{key},select:{state:true,openedAt:true,count:true}
@@ -30,7 +30,7 @@ export function createPrismaOpsNotificationLeaseStore(db:OpsNotificationClaimPri
     const result=await tx.opsIncidentNotificationIntent.updateMany({
      where:{idempotencyKey:previous.idempotencyKey,state:previous.state,
       attemptCount:previous.attemptCount,claimToken:previous.claimToken,leaseExpiresAt:previous.leaseExpiresAt},
-     data:{state:"CLAIMED",attemptCount:previous.attemptCount+1,claimToken,claimedAt:now,leaseExpiresAt:expiresAt}
+     data:{state:"CLAIMED",attemptCount:previous.attemptCount+1,claimToken,claimedAt:now,leaseExpiresAt:expiresAt,nextAttemptAt:null,failureCode:null}
     });
     return result.count;
    }
