@@ -446,6 +446,13 @@
 - 本地 npm test、独立 TS、Next build exit 0。历史隔离 MySQL 首轮 `35 total/30 PASS/1 FAIL/4 SKIP`（已有 auth-retention 查询遇短时 DB 连接失败），原样复跑 `35 total/31 PASS/0 FAIL/4 SKIP`（旧库缺第九事故迁移）。本轮通知意图只做单元测试，非真实 Outbox 或发送测试。
 - 独立证据 `b04-notification-idempotency-intents-2026-11-21.md`；后续仍需事务入队、唯一约束、claim 租约、投递重试/恢复及真实 MySQL/权限回归。B04/U03 IN_PROGRESS，NOT READY。
 
+## 2026-11-21 B04/U03 通知 Outbox QUEUED 仅入队（第十迁移）
+
+- 已验证第一小包 `89fbe7a` run `44884812385` **SUCCESS**：125/125 单元、34/34 MySQL 集成、0 FAIL/0 SKIP；离线通知计划器通过。
+- 新增第十迁移队列表 `OpsIncidentNotificationIntent` 唯一 64 字节 hash 主键、事故 FK、QUEUED 状态；`queueInitialOpsNotificationIntent` 对实际轮次/OPEN 状态重新验证，Serializable + skipDuplicates 幂等只入队；测试覆盖重复、ACK/RESOLVED、错轮次与恶意 hash/等级，单独 MySQL 集成 CI 必须真实执行。
+- 本地 npm test、独立 tsc、Next build、`prisma validate` exit 0；`prisma generate` 遇已有进程锁住 Windows query_engine.dll 的 EPERM，非 schema 校验失败，须由 CI 重生 client。历史专用 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`，旧库缺第九/第十迁移，**不代表新表入队已经数据库验收**。详见 `b04-notification-durable-queue-candidate-2026-11-21.md`。
+- 当前无自动发送/领取/重试/投递回执，也不允许开启真实通知；B04/U03 仍 IN_PROGRESS，整体 NOT READY。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

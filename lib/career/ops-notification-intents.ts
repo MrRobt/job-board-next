@@ -19,6 +19,13 @@ export type OpsNotificationIntent=Readonly<{
 const intervalMinutes=(key:OpsIncidentKey)=>key==="REFUND_IN_DOUBT"?15:30;
 const stamp=(date:Date)=>date.getTime();
 
+export function opsNotificationIdempotencyKey(
+ key:OpsIncidentKey,openedAt:Date,kind:"NOTIFY"|"ESCALATE",dueBucket:number
+):string{
+ const fingerprint="ops-incident-v1|"+key+"|"+openedAt.toISOString()+"|"+kind+"|"+dueBucket;
+ return createHash("sha256").update(fingerprint).digest("hex");
+}
+
 export function planOpsNotificationIntents(
  counts:OpsAlertCounts,
  persisted:readonly OpsIncidentAcknowledgment[],
@@ -39,9 +46,8 @@ export function planOpsNotificationIntents(
   // ESCALATE is bounded by deterministic episode-relative windows.
   const dueBucket=p.action==="NOTIFY"?0:Math.floor(age/width);
   if(p.action==="ESCALATE"&&dueBucket<1)return [];
-  const fingerprint="ops-incident-v1|"+p.key+"|"+episode.openedAt.toISOString()+"|"+p.action+"|"+dueBucket;
   return [{
-   idempotencyKey:createHash("sha256").update(fingerprint).digest("hex"),
+   idempotencyKey:opsNotificationIdempotencyKey(p.key,episode.openedAt,p.action,dueBucket),
    key:p.key,kind:p.action,priority:p.priority,count:p.count,
    incidentOpenedAt:episode.openedAt,dueBucket
   }];

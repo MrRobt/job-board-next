@@ -326,6 +326,7 @@ model OpsAlertIncident {
   acknowledgmentNote String? @db.VarChar(500)
   resolvedAt DateTime?
   events OpsAlertIncidentEvent[]
+  notificationIntents OpsIncidentNotificationIntent[]
   @@index([state,lastSeenAt])
 }
 model OpsAlertIncidentEvent {
@@ -339,6 +340,25 @@ model OpsAlertIncidentEvent {
   note String? @db.VarChar(500)
   createdAt DateTime @default(now())
   @@index([incidentKey,createdAt])
+}
+
+// B04/U03 durable notification intent only; no sender/worker is enabled.
+enum OpsNotificationIntentState {
+  QUEUED
+}
+model OpsIncidentNotificationIntent {
+  idempotencyKey String @id @db.Char(64)
+  incidentKey String @db.VarChar(40)
+  incident OpsAlertIncident @relation(fields:[incidentKey],references:[key],onDelete:Restrict)
+  episodeOpenedAt DateTime
+  kind String @db.VarChar(16)
+  priority String @db.VarChar(8)
+  dueBucket Int
+  count Int
+  state OpsNotificationIntentState @default(QUEUED)
+  createdAt DateTime @default(now())
+  @@index([state,createdAt])
+  @@index([incidentKey,episodeOpenedAt])
 }
 
 model ToolRunAdjustment {
