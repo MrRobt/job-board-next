@@ -474,7 +474,7 @@
 ## 2026-11-21 B04/U03 故障事件按次持久审计（第十三迁移）
 
 - 已核验 `a6b5c4a` GitHub Actions run `44891820268` SUCCESS。第十三迁移增加 `OpsNotificationFailureEvent`、任务 FK、`UNIQUE(intentKey,attemptCount)`；Prisma Serializable 事务中仅 CAS 更新成功后写审计，数据库异常不允许状态成功提交。仅保存机器失败码、尝试次数、RETRY_WAIT/DEAD，不存 claimToken 或 PII。
-- 新单元覆盖成功写事件、CAS 冲突不写事件、重复失败无法重复审计、审计写入异常传播。扩展既有真实 MySQL 队列用例核实事件计数 1、失败码、序号、重复失败不加行；第十三迁移缺表 CI fail。独立 TS 和 npm test exit 0；本机 Prisma validate/Next build 被执行器超时中断，完整验收待 CI，不得据此声称真实原子审计已通过。
+- 新单元覆盖成功写事件、CAS 冲突不写事件、重复失败无法重复审计、审计写入异常传播。扩展既有真实 MySQL 队列用例核实事件计数 1、失败码、序号、重复失败不加行；第十三迁移缺表 CI fail。独立 TS 和 npm test exit 0；本机 Prisma validate/Next build 被执行器超时中断，已核验 `ec9506e` GitHub Actions run `44892913723` **SUCCESS**：第十三迁移全新 MySQL8、145/145 单元、35/35 集成、0 FAIL/0 SKIP，真库失败事件写入、按次唯一及重复失败不新增记录均 PASS，typecheck/build/smoke 全通过；尚缺真库审计写入异常注入下的回滚演练。
 - 证据 `b04-notification-failure-audit-2026-11-21.md`。没有发送器、送达确认、管理员死信处置、定时调度；B04/U03 IN_PROGRESS，NOT READY。
 
 ## 保留的局限

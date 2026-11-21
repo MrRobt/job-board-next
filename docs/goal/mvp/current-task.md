@@ -448,7 +448,7 @@
 ## 2026-11-21 B04/U03 通知失败尝试事务审计（第十三迁移）
 
 - 核验 `a6b5c4a` CI run `44891820268` SUCCESS。新增 `OpsNotificationFailureEvent` 及第十三迁移，`UNIQUE(intentKey,attemptCount)` 保证同一次尝试仅一个失败事件，字段不含个人信息或令牌。Prisma Serializable Store 在更新通知状态 CAS 成功后同事务插入审计；CAS 冲突不记事件，审计异常阻断整个事务，保持外部发送关闭。
-- 新增单元审计失败传播与重复令牌去重测试；原 MySQL 队列集成测试核验首次失败事件存在且重复提交不新增，并只清理本测试产生的审计。单元、独立 TS exit 0；本机 Prisma validate 与完整 Next build 因执行器超时未完成。新迁移、真实 MySQL 和完整构建必须由本提交 CI 核验。独立证据 `b04-notification-failure-audit-2026-11-21.md`。B04/U03 仍 IN_PROGRESS，整体 NOT READY。
+- 新增单元审计失败传播与重复令牌去重测试；原 MySQL 队列集成测试核验首次失败事件存在且重复提交不新增，并只清理本测试产生的审计。单元、独立 TS exit 0；本机 Prisma validate 与完整 Next build 因执行器超时未完成。已核验 `ec9506e` GitHub Actions run `44892913723` **SUCCESS**：第十三迁移全新 MySQL8 部署可重复、145/145 单元、35/35 集成、0 FAIL/0 SKIP，真实首次失败事件存在及重复令牌不增加事件 PASS，Prisma generate/typecheck、Next build/HTTP smoke 成功；尚未单独完成审计写入故障的真实数据库回滚注入演练。独立证据 `b04-notification-failure-audit-2026-11-21.md`。B04/U03 仍 IN_PROGRESS，整体 NOT READY。
 
 ## Git 安全
 

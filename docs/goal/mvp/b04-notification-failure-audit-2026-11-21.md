@@ -1,6 +1,6 @@
 # B04/U03 通知失败尝试的事务审计（第十三迁移）— 2026-11-21
 
-状态：**代码、独立 TS、单元 VERIFIED；本地 Prisma validate / Next build 因执行器超时未完成；第十三迁移与真实 MySQL 原子审计需远端 CI。** B04/U03 IN_PROGRESS，技术上线 NOT READY。
+状态：**代码、独立 TS、单元 VERIFIED；本地 Prisma validate / Next build 因执行器超时未完成；第十三迁移与真实 MySQL 原子审计已由 `ec9506e` GitHub Actions [run 44892913723](https://github.com/MrRobt/job-board-next/actions/runs/44892913723) 验收成功：第十三迁移全新 MySQL8 部署及重复检查、145/145 单元、35/35 集成、0 FAIL/0 SKIP，真实故障事件及重复提交不新增行 PASS，Prisma typecheck、Next build、HTTP smoke 全通过。审计插入故障时的真正 MySQL 回滚注入仍待单独演练；本地工具超时记录继续保留。** B04/U03 IN_PROGRESS，技术上线 NOT READY。
 
 ## 恢复与隔离
 - 已确认 `a6b5c4a` GitHub Actions [run 44891820268](https://github.com/MrRobt/job-board-next/actions/runs/44891820268) SUCCESS；第十二迁移 `RETRY_WAIT/DEAD` 和故障限次重试已有证据，未重复开发。
