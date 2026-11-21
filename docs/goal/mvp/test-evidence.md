@@ -410,6 +410,12 @@
 - 本地 npm 单元、TypeScript、Next 生产构建 exit 0，历史隔离 MySQL **33 total / 31 PASS / 0 FAIL / 2 SKIP**；SKIP 是旧库缺第 9 项迁移。已核实前一提交 `91f867e` GitHub Actions run `44878355008` success：111/111 单元、32/32 集成，含单类别同步真实 MySQL 审计测试通过；**本轮新增三类同事务仍仅本地单测，待自己的 CI**。未启动自动扫描/通知，未改生产库或财务状态。
 - 独立 `b04-incident-batch-scan-transaction-2026-11-21.md`。本轮纯逻辑 VERIFIED，完整 B04/U03 仍 IN_PROGRESS。
 
+## 2026-11-21 三类事故整批 MySQL 原子回滚真实集成门禁
+
+- `79d7c5b` 的远端 CI run `44878653947` 已 **success**，全部管线步骤通过。新增独立 `ops-incident-batch-mysql.test.ts`：三类事务中最后类别审计成功插入后故意抛错，断言真正数据库事务全回滚，再运行三类 OPENED/RESOLVED 及 6 个事件审计。禁止覆盖已有 key、不得访问实际资金和用户数据。
+- 首轮新增测试的 TS 花括号语法错误导致 tsc、build、integration 失败，修复后全量 npm 单元 exit 0、tsc exit 0、Next build exit 0；历史 MySQL **34 total/31 PASS/0 FAIL/3 SKIP**，其中本测试由于旧库未迁第 9 项为 SKIP。**新增真实整批回滚并未在本机验证，必须等此提交 CI 新 MySQL 结果**。
+- 此项子包只新增测试、无生产运行行为；管理员/用户权限 E2E、多 Worker、预发布迁移和恢复仍欠验收。证据 `b04-batch-scan-real-mysql-rollback-2026-11-21.md`；总体 NOT READY。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

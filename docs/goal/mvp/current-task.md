@@ -385,6 +385,12 @@
 - 新增 `ops-incident-batch-sync.test.ts` 验证一次事务、解决复扫、最后一类失败整批回滚、缺字段/非法计数无事务。npm test、TypeScript、Next build exit 0；旧本地 MySQL 33 total/31 PASS/0 FAIL/2 SKIP（缺第 9 项迁移，不能算新事务 MySQL 验收）。尚未接入生产扫描/通知。
 - 独立证据 `b04-incident-batch-scan-transaction-2026-11-21.md`；现已核对前一提交 `91f867e` 的远端 run `44878355008` success：111/111 单元、32/32 MySQL 集成（含新事务事件测试）均无跳过。本轮整批入口仍待自己的远端 CI。其他 Agent 未提交内容不动，B04/U03 仍 IN_PROGRESS。
 
+## 2026-11-21 B04/U03 三类扫描真实 MySQL 回滚测试补验（子包）
+
+- 已核实 `79d7c5b` GitHub Actions run `44878653947` success，单元/集成/构建/smoke 都通过；继续补此前仅模拟验证的三类整批同事务真实 MySQL 回滚。
+- 新增 `tests/integration/ops-incident-batch-mysql.test.ts`：仅在专用迁移库执行；第三类审计 INSERT 后注入故障，要求三类事故/事件一起回滚；再真实 OPENED/RESOLVED 三类与六事件核验，完毕只清理本测试数据。CI 缺第 9 项迁移须 FAIL。
+- 测试首轮花括号语法错误导致 TypeScript/Build/集成入口失败，修复后最终 npm test、TypeScript、Next build exit 0；历史专用 MySQL **34 total/31 PASS/0 FAIL/3 SKIP**，新增真实事务用例旧库缺表明确 SKIP，待新提交 CI MySQL 验证。见 `b04-batch-scan-real-mysql-rollback-2026-11-21.md`。其他 Agent 变更保留，不动真实资金/AI/通知。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
