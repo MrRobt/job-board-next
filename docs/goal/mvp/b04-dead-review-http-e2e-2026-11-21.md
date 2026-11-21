@@ -17,5 +17,6 @@
 - 第二轮 `17fbbe1` 独立 run `44898400072` 仍 **FAIL**：跨域 POST 返回 HTTP 200 且无重定向，定位到测试器把 React Server Action 表单错误编码为 `application/x-www-form-urlencoded`，请求没有真正触发目标 action。已修正为原生 `FormData` multipart，让下一轮实际触发 action 并验证数据库变化；未更改生产代码、未放宽拒绝与零写入检查。
 - 第三轮 `7431902` 独立 run `44898655870` **FAIL**：multipart 修复后真实请求已经过跨站 Origin、无 Origin 的拒绝及零写入断言，随后普通用户 Server Action 返回不同于预设 307/308 的重定向状态。现允许 Next Server Action 的 HTTP 303，但必须明确重定向到 `/` 且数据库零写入；管理员首次成功、幂等及冲突的后续步骤仍待本轮修订后的实际 CI。
 - 第四轮 `ed96264` 独立 run `44898939045` **FAIL**：匿名、恶意/缺 Origin 和普通用户提交均通过拒绝检查，合法管理员 POST 未返回预期 REVIEWED。现增加只记录状态码、路径、受限错误码和审计计数的安全诊断，不记录会话、token、个人信息；必须先获得诊断证据再修复合法路径。
+- 第五轮 `8003cfe` run `44899117511` **FAIL**：合法管理员 HTTP POST 返回 303→`/` 且数据库复核数仍 0，说明没有越权写入但合法流程被重定向。追加只输出测试会话数据库角色/未过期布尔值、相同 Cookie 后续管理员 GET 状态和表单 Action 字段数量的诊断，不输出 token 或任何用户信息；在明确失败来源前不修改生产鉴权或放宽门禁。
 - 本地 `node --check`、独立 TypeScript exit 0；修订后的真 HTTP 流水线结果**待 GitHub 新提交运行**。与页面浏览器 Playwright 截图、正式预发布域名/反向代理、安全头以及真实商户/法务验收不同，必须明确标注此任务为 CI localhost HTTP/会话攻防 E2E，而非全站完整浏览器 UAT。
 - 失败后需按具体日志修复；未经独立 MySQL CI 成功，不可声称 CSRF/角色已通过真实网络验证。

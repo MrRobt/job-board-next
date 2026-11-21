@@ -117,8 +117,13 @@ async function run(){
  checks.push("user POST blocked");
  response=await post(tokenByRole.get("ADMIN"),origin);
  assert.ok([303,307,308].includes(response.status),`Admin action POST unexpected ${response.status}`);
+ const adminCookie=tokenByRole.get("ADMIN");
+ const tokenHash=createHash("sha256").update(adminCookie).digest("hex");
+ const actor=await db.session.findUnique({where:{tokenHash},select:{expiresAt:true,user:{select:{role:true}}}});
+ const subsequentGet=await request("/admin/dead-notifications",{cookie:adminCookie});
+ const subsequentGetStatus=subsequentGet.status;await subsequentGet.body?.cancel();
  assert.equal(location(response).searchParams.get("reviewOutcome"),"REVIEWED",
-  `Valid admin POST unexpected status=${response.status} path=${location(response).pathname} error=${location(response).searchParams.get("reviewError")} reviewCount=${await countReviews()}`);
+  `Valid admin POST unexpected status=${response.status} path=${location(response).pathname} error=${location(response).searchParams.get("reviewError")} reviewCount=${await countReviews()} seededRole=${actor?.user.role} sessionLive=${Number(actor?.expiresAt)>Date.now()} subsequentAdminGet=${subsequentGetStatus} actionFieldCount=${[...html.matchAll(/name="\\$ACTION_ID_/g)].length}`);
  await response.body?.cancel();
  assert.equal(await countReviews(),1,"Admin review must write once");
  checks.push("admin POST reviewed once");
