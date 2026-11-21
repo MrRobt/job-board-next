@@ -307,6 +307,12 @@
 - 完整隔离 MySQL 集成 **31/31 PASS**、单元 **72/72 PASS**、独立 TS/Next.js 生产构建 exit 0；详见 `b04-null-claim-mysql-replay-2026-11-21.md`。初次单文件测试使用错误启动方式触发 `server-only` 导入失败，正式脚本复验成功。
 - 本地数据库级告警回放子包 VERIFIED；生产实际通知/响应、商户/模型、恢复/部署/登录态 E2E 等仍缺，B04/B06 整体仍 IN_PROGRESS。不修改其他 Agent 的共享 handoff、风险、矩阵和财务审计。
 
+## 2026-11-21 B04/B06/U03 运维告警去重与确认升级纯策略
+
+- `ops-incident-policy.ts` 新增三类只读运维事故的稳定键、严重度和 `NOTIFY / SUPPRESS / ESCALATE / ACKNOWLEDGED` 决策；退款资金未知态 CRITICAL/15 分钟升级，其余 HIGH/30 分钟，已确认抑制重复提示，已恢复类别不再活跃。所有历史时间和计数失败关闭。
+- TDD 初次 72/73 RED（策略未存在）；完善后单元 **76/76 PASS**，独立 TypeScript exit 0、专用隔离 MySQL 全量集成 **31/31 PASS**、Next.js 生产 build exit 0。见 `b04-incident-policy-2026-11-21.md`。
+- 该子包只验证**无副作用规则**，没有持久事故记录、管理员确认 API、实际通知送达/重试或数据库迁移，不能宣称生产告警去重已经生效。B04/B06/U03 仍 IN_PROGRESS；其他 Agent 共享文档和财务风险审计不得混提交。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
