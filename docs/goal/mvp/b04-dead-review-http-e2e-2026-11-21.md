@@ -13,5 +13,6 @@
 - `finally` 按先复核→通知任务→事故→测试用户顺序清理本 job 创建的数据；不清空 DB，不触碰其他业务数据，不调用商户、模型或通知接口。
 
 ## 证据 / 限制
-- 本地 `node --check`、独立 TypeScript exit 0；真 HTTP 流水线结果**待 GitHub 新提交运行**。与页面浏览器 Playwright 截图、正式预发布域名/反向代理、安全头以及真实商户/法务验收不同，必须明确标注此任务为 CI localhost HTTP/会话攻防 E2E，而非全站完整浏览器 UAT。
+- 初版 `4db063d` 独立 HTTP run `44898182767` **FAIL**：MySQL 迁移和 Next build 成功，但用例把跨域拒绝误限定为 HTTP 4xx，而 Server Action 允许用重定向返回拒绝。现已修订为接受 4xx 或带 `reviewError=origin` 的明确拒绝重定向，且无论哪一种都再次检查审计行数必须为 0；完整真 HTTP 测试仍须下一次 CI 验证，不提前宣称安全通过。
+- 本地 `node --check`、独立 TypeScript exit 0；修订后的真 HTTP 流水线结果**待 GitHub 新提交运行**。与页面浏览器 Playwright 截图、正式预发布域名/反向代理、安全头以及真实商户/法务验收不同，必须明确标注此任务为 CI localhost HTTP/会话攻防 E2E，而非全站完整浏览器 UAT。
 - 失败后需按具体日志修复；未经独立 MySQL CI 成功，不可声称 CSRF/角色已通过真实网络验证。

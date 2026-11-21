@@ -93,7 +93,9 @@ async function run(){
  });
  const checks=[];
  response=await post(tokenByRole.get("ADMIN"),"https://attacker.invalid");
- assert.ok(response.status>=400,"Cross-origin POST must fail");
+ assert.ok(response.status>=400||
+  ([303,307,308].includes(response.status)&&location(response).searchParams.get("reviewError")==="origin"),
+  `Cross-origin POST must be rejected, got HTTP ${response.status} ${response.headers.get("location")}`);
  await response.body?.cancel();
  assert.equal(await countReviews(),0,"Cross-origin must not write");
  checks.push("cross-origin blocked");
