@@ -434,6 +434,12 @@
 - 全量 npm 单元、独立 TS、Next build exit 0；历史隔离 MySQL **34 total /31 PASS /0 FAIL /3 SKIP**（旧库缺事故第九迁移）。本轮新增协调器/适配器只有模拟的同快照事务与 fail-closed 单元测试，**没有声称真实迁移 MySQL 端到端或生产 Cron 已完成**。已核验 `49d258e` 的 GitHub Actions run `44881430687` 最终 success：119/119 单元、33/33 集成，0 FAIL/0 SKIP，迁移、构建、smoke 均通过。
 - 证据 `b04-isolated-incident-scan-coordinator-2026-11-21.md`。仍欠可靠通知、真实管理会话/CSRF E2E 和预发布备份/恢复。B04/U03 IN_PROGRESS，生产开关保持关闭。
 
+## 2026-11-21 B04/U03 真实读计数 → Prisma 事务事故端到端集成
+
+- 核实 `ef5a77f` GitHub Actions run `44881854858` success。新增隔离 MySQL 专项：测试临时超时 RESERVED → RepeatableRead 真读数 1 → 协调器 OPENED → 注入读故障后事故仍 OPEN → 临时 ToolRun SUCCEEDED → 真读数 0 → RESOLVED 及事件审计。CI 缺第九迁移 FAIL，本地旧库显式 SKIP。CI 新 `jobs` 库使用**仅测试调用**的合成隔离许可环境；不会改变实际运行时白名单，不代表生产环境获授权。
+- npm 单元、独立 TS、Next build exit 0；历史隔离 MySQL 初次 `35 total/30 PASS/1 FAIL/4 SKIP`（原有 auth-retention 查询时本地 MySQL 短暂不可达），复跑 `35 total/31 PASS/0 FAIL/4 SKIP`；新增真实 MySQL 用例尚未在本机执行，须远端 CI 实际通过。
+- 本子包仅新增测试，原业务无变更；不接 Cron、真实通知、资金、模型。独立 `b04-real-mysql-coordinator-e2e-2026-11-21.md`，B04/U03 仍 IN_PROGRESS、商业 NOT READY。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

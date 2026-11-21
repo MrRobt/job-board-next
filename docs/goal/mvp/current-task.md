@@ -409,6 +409,12 @@
 - 新增 Prisma `RepeatableRead` 同快照三计数读取适配；任一计数查询异常、漏字段、负数或时钟无效都不会开始事故同步事务。仅作为隔离候选，未接生产 Cron/CLI、通知或资金/AI 服务。
 - 新增单元覆盖门禁 0 IO、部分观测拒绝、同快照事务与失败传播；npm test、TS、Next build exit 0，历史 MySQL `34 total /31 PASS /0 FAIL /3 SKIP`（旧库缺事故第九迁移）。详细 `b04-isolated-incident-scan-coordinator-2026-11-21.md`；已核验 `49d258e` GitHub Actions run `44881430687` **success**，全新 MySQL8 全部迁移、119/119 单元、33/33 集成、build/smoke 均 PASS、0 FAIL/0 SKIP；该 CI 仅覆盖协调器单元与此前的 MySQL 集成，不代表新协调器已完成真库端到端。B04/U03 整体 IN_PROGRESS、上线 NOT READY。其他 Agent 脏文件未修改。
 
+## 2026-11-21 B04/U03 真实 MySQL 协调器端到端测试门禁
+
+- 已核实 `ef5a77f` GitHub Actions run `44881854858` success。新增 `tests/integration/ops-incident-coordinator-mysql.test.ts`：在独立全新 MySQL 新建测试临时 User/Grant/超时 RESERVED，使用真实 Prisma RepeatableRead 三计数读取 + 隔离协调器 + Serializable 事务存储，验证 OPENED、部分读取故障不误解决、SUCCEEDED 后 RESOLVED 及审计，只删除自己创建的记录。
+- CI 新库实际名 `jobs` 不符合生产隔离扫描白名单；测试仅在 CI=true、实际 localhost `/jobs` 且 integration=true 的受控 harness 内注入历史专用库策略配置用于调用，**不更改生产运行许可，也不声称实际 CI URL 已满足生产批准策略**。CI 缺第九事故迁移直接 FAIL。
+- npm 单元、TS、Next build exit 0；本地历史 MySQL 首轮 `35 total/30 PASS/1 FAIL/4 SKIP`（既有 auth-retention 临时 DB 连接断开），原样复跑 `35 total/31 PASS/0 FAIL/4 SKIP`；四个 SKIP 是历史库缺第九迁移，新增真库用例必须由远端 CI 核验。详见 `b04-real-mysql-coordinator-e2e-2026-11-21.md`。保持 B04/U03 IN_PROGRESS；禁止实收款/模型/自动通知，保护他人未提交内容。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
