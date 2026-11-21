@@ -16,7 +16,7 @@
 ## 本地实际测试
 - `npm test` exit 0；独立 TypeScript `tsc --noEmit` exit 0；Next 生产构建 exit 0。
 - 历史专用隔离 MySQL 首轮 **35 total/30 PASS/1 FAIL/4 SKIP**，因既有 `auth-retention.test.ts` 临时无法连 `127.0.0.1:3306`；原样复跑 **35 total/31 PASS/0 FAIL/4 SKIP**。4 SKIP 因旧本地库无第九事故迁移，新增实际协调器 DB 测试尚未在本地真实执行。
-- 后续需查本次提交 CI 上**全新迁移** MySQL 真实测试的实际 PASS/FAIL；若失败按 job 原始日志修复，不能将本地 SKIP 当通过。
+- 已核验 `a018ac2` 的 GitHub Actions [run 44882556403](https://github.com/MrRobt/job-board-next/actions/runs/44882556403) 最终 **success**：全新 MySQL8 迁移成功，119/119 单元、34/34 集成、0 FAIL/0 SKIP；新增 `B04/U03 isolated MySQL: actual stale reservation count opens and resolves incident, failed scan does not resolve` 测试明确 PASS，Next build 与 HTTP smoke 均通过。该结果只证明测试专用 CI 数据库及注入策略环境的端到端行为，不替代生产运行许可、真实调度或外部服务 UAT。
 
 ## 剩余门禁
 - 受控预发布环境迁移/备份/恢复、独立可靠通知/重试 outbox、管理员登录态/CSRF/越权浏览器 E2E、实际资金/AI 商户与隐私合规人工审批依旧未完成。禁止宣称技术上线就绪。

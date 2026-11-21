@@ -437,7 +437,7 @@
 ## 2026-11-21 B04/U03 真实读计数 → Prisma 事务事故端到端集成
 
 - 核实 `ef5a77f` GitHub Actions run `44881854858` success。新增隔离 MySQL 专项：测试临时超时 RESERVED → RepeatableRead 真读数 1 → 协调器 OPENED → 注入读故障后事故仍 OPEN → 临时 ToolRun SUCCEEDED → 真读数 0 → RESOLVED 及事件审计。CI 缺第九迁移 FAIL，本地旧库显式 SKIP。CI 新 `jobs` 库使用**仅测试调用**的合成隔离许可环境；不会改变实际运行时白名单，不代表生产环境获授权。
-- npm 单元、独立 TS、Next build exit 0；历史隔离 MySQL 初次 `35 total/30 PASS/1 FAIL/4 SKIP`（原有 auth-retention 查询时本地 MySQL 短暂不可达），复跑 `35 total/31 PASS/0 FAIL/4 SKIP`；新增真实 MySQL 用例尚未在本机执行，须远端 CI 实际通过。
+- npm 单元、独立 TS、Next build exit 0；历史隔离 MySQL 初次 `35 total/30 PASS/1 FAIL/4 SKIP`（原有 auth-retention 查询时本地 MySQL 短暂不可达），复跑 `35 total/31 PASS/0 FAIL/4 SKIP`；新增真实 MySQL 用例未在本机执行，已核验远端 `a018ac2` GitHub Actions run `44882556403` **success**：全新 MySQL8 迁移、119/119 单元、34/34 集成、0 FAIL/0 SKIP，实际 `B04/U03 isolated MySQL: actual stale reservation count opens and resolves incident, failed scan does not resolve` 测试明确 PASS；生产 build/smoke 也成功。
 - 本子包仅新增测试，原业务无变更；不接 Cron、真实通知、资金、模型。独立 `b04-real-mysql-coordinator-e2e-2026-11-21.md`，B04/U03 仍 IN_PROGRESS、商业 NOT READY。
 
 ## 保留的局限

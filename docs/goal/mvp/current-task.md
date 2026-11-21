@@ -413,7 +413,7 @@
 
 - 已核实 `ef5a77f` GitHub Actions run `44881854858` success。新增 `tests/integration/ops-incident-coordinator-mysql.test.ts`：在独立全新 MySQL 新建测试临时 User/Grant/超时 RESERVED，使用真实 Prisma RepeatableRead 三计数读取 + 隔离协调器 + Serializable 事务存储，验证 OPENED、部分读取故障不误解决、SUCCEEDED 后 RESOLVED 及审计，只删除自己创建的记录。
 - CI 新库实际名 `jobs` 不符合生产隔离扫描白名单；测试仅在 CI=true、实际 localhost `/jobs` 且 integration=true 的受控 harness 内注入历史专用库策略配置用于调用，**不更改生产运行许可，也不声称实际 CI URL 已满足生产批准策略**。CI 缺第九事故迁移直接 FAIL。
-- npm 单元、TS、Next build exit 0；本地历史 MySQL 首轮 `35 total/30 PASS/1 FAIL/4 SKIP`（既有 auth-retention 临时 DB 连接断开），原样复跑 `35 total/31 PASS/0 FAIL/4 SKIP`；四个 SKIP 是历史库缺第九迁移，新增真库用例必须由远端 CI 核验。详见 `b04-real-mysql-coordinator-e2e-2026-11-21.md`。保持 B04/U03 IN_PROGRESS；禁止实收款/模型/自动通知，保护他人未提交内容。
+- npm 单元、TS、Next build exit 0；本地历史 MySQL 首轮 `35 total/30 PASS/1 FAIL/4 SKIP`（既有 auth-retention 临时 DB 连接断开），原样复跑 `35 total/31 PASS/0 FAIL/4 SKIP`；四个 SKIP 是历史库缺第九迁移，新增真库用例已核验 `a018ac2` GitHub Actions run `44882556403` **success**：全新 MySQL8 全量迁移、119/119 单元、34/34 集成、0 FAIL/0 SKIP，新增真实读取→OPENED→读取失败不误解决→RESOLVED 用例明确 PASS；Next build 与 smoke 通过。详见 `b04-real-mysql-coordinator-e2e-2026-11-21.md`。保持 B04/U03 IN_PROGRESS；禁止实收款/模型/自动通知，保护他人未提交内容。
 
 ## Git 安全
 
