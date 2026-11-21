@@ -397,6 +397,12 @@
 - 在已有隔离 MySQL 整批事务测试中新增真实并发交错：扫描刷新 `REFUND_READY_AGED` count 3→4 与临时 ADMIN 的 CAS 确认同时执行，实际 Serializable 冲突需独立安全重试，最终确认状态/数量/操作人不丢失、ACK 审计只一条；完成后只清理本测试创建的数据。
 - 本地 npm test、TS、Next build exit 0；历史 MySQL 首轮 `30 PASS/1 FAIL/3 SKIP`（其他 Agent 未提交财务审计测试遇短时 DB 连接故障），复跑 `31 PASS/0 FAIL/3 SKIP`。3 SKIP 均因旧库缺第 9 项事故迁移。现已核验新提交 `859db27` GitHub Actions run `44879917200` **success**：全新 MySQL8 迁移、114/114 单元、33/33 集成、build 与 smoke 均成功且 0 FAIL/0 SKIP；并发交错测试实际 PASS。独立证据 `b04-scan-admin-race-mysql-2026-11-21.md`；不启用生产扫描/支付/AI/通知，保护其他 Agent 文件。
 
+## 2026-11-21 B04/U03 事故页 URL 伪结果与 key 白名单安全收口
+
+- `82d57a9` GitHub Actions run `44880164059` 已 success。发现 /admin/incidents 原先仅凭可伪造的 URL `incidentOutcome=ACKNOWLEDGED` 就展示“确认已记录”，存在管理员误判事故成功的风险；改为始终提示核对数据库事故状态/审计，不把 GET 作为确认结果。
+- `transitionOpsIncident` 新增运行时事故类别白名单校验，避免 JS/未知 key 绕过 TS 类型而持久化未许可类别；`planOpsIncidents` 复用相同验证。新增伪造 URL 和非法类别回归测试。
+- npm 单元、TypeScript、Next build exit 0；历史隔离 MySQL **34 total / 31 PASS / 0 FAIL / 3 SKIP**（旧库未迁第 9 项，不能算全部 DB 重新验收）。独立证据 `b04-incident-url-outcome-safety-2026-11-21.md`；本轮远端 CI 待核验。其他 Agent 未提交内容不动、生产开关均不变，B04/U03 仍 IN_PROGRESS。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

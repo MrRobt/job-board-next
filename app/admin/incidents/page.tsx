@@ -4,6 +4,7 @@ import {db} from "@/lib/db";
 import {confirmOpsIncident} from "@/app/actions/ops-incidents";
 import {incidentPanelSelect,toOpsIncidentView,type OpsIncidentPanelRecord} from "@/lib/career/ops-incident-view";
 import {opsIncidentGates} from "@/lib/career/ops-incident-gates";
+import {opsIncidentOutcomeNotice} from "@/lib/career/ops-incident-notice";
 
 /** Manual admin-only operations review. Never writes to a financial ledger. */
 export default async function OpsIncidentAdmin({
@@ -39,7 +40,7 @@ export default async function OpsIncidentAdmin({
  return <main><h1>运行事故与告警</h1>
   <p className="muted">仅展示最近 25 条事故汇总；不会显示用户简历、商户密钥或审核人笔记。确认仅表示管理员已接手排查，不代表退款成功、AI 调用已修复或外部通知已送达。</p>
   {params.incidentError&&<p role="alert">事故确认未执行或失败，请检查权限、操作限流及事故是否已更新。</p>}
-  {params.incidentOutcome&&<p role="status">人工确认处理结果：{params.incidentOutcome==="ACKNOWLEDGED"?"确认已记录":params.incidentOutcome==="ALREADY_ACKNOWLEDGED"?"原确认已存在":"请以事故状态为准"}。</p>}
+  {opsIncidentOutcomeNotice(params.incidentOutcome)&&<p role="status">{opsIncidentOutcomeNotice(params.incidentOutcome)}</p>}
   <section className="card scroll"><table>
    <thead><tr><th>类别</th><th>优先级</th><th>状态</th><th>数量</th><th>发生时间 UTC</th><th>最近发现 UTC</th><th>人工确认</th></tr></thead>
    <tbody>{items.map(item=><tr key={item.key}>

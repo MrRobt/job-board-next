@@ -1,5 +1,5 @@
 import {assessOpsAlerts} from "./ops-alert-policy";
-import type {OpsIncidentKey} from "./ops-incident-policy";
+import {assertOpsIncidentKey,type OpsIncidentKey} from "./ops-incident-policy";
 
 /**
  * Deterministic proposed state transition for one persisted operational
@@ -26,6 +26,7 @@ const checked=(date:Date,name:string)=>{
 export function transitionOpsIncident(
  key:OpsIncidentKey,previous:OpsIncidentSnapshot|null,count:number,now:Date
 ):{next:OpsIncidentSnapshot|null;event:OpsIncidentEvent|null}{
+ assertOpsIncidentKey(key);
  const instant=checked(now,"scan");
  assessOpsAlerts({staleReservations:count,uncertainRefunds:0,agedReadyRefunds:0});
  if(previous){

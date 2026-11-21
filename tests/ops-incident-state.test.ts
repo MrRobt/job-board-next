@@ -51,4 +51,7 @@ test("invalid clock, missing incident and stale timestamps fail closed",()=>{
  assert.throws(()=>transitionOpsIncident("REFUND_IN_DOUBT",base,1,
   new Date(base.openedAt.getTime()-1000)),/stale/);
  assert.throws(()=>transitionOpsIncident("REFUND_READY_AGED",base,1,now),/category/);
+ for(const key of ["UNAPPROVED_REFUND_ACTION","",null,42]){
+  assert.throws(()=>transitionOpsIncident(key as never,null,1,now),/Invalid incident key/);
+ }
 });

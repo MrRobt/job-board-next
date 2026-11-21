@@ -422,6 +422,12 @@
 - 本地 npm test、tsc、Next build exit 0；历史专用 MySQL 首轮 `34 total/30 PASS/1 FAIL/3 SKIP`，唯一 FAIL 是其他 Agent 财务审计查询时 `127.0.0.1:3306` 不可达；原样复跑 `34 total/31 PASS/0 FAIL/3 SKIP`。3 SKIP 因历史库缺事故第 9 迁移，**未在本机验收真实并发数据库**。现已查验 `859db27` GitHub Actions run `44879917200` 最终 success：全新 MySQL8 迁移、114/114 单元、33/33 集成、0 FAIL/0 SKIP，含扫描/ADMIN 交错测试真实通过，生产构建及 smoke 也 success。
 - 不连接真实扫描任务、资金、退款或模型服务；不代表管理员会话/CSRF 或预发布部署已验收。详见 `b04-scan-admin-race-mysql-2026-11-21.md`，整体 B04/U03 IN_PROGRESS。
 
+## 2026-11-21 B04/U03 事故页面 URL 伪结果及类别运行时校验
+
+- 查验 `82d57a9` GitHub Actions run `44880164059` success。新增安全提示函数与页面接线，URL `incidentOutcome` 不再可制造“确认已记录”的虚假肯定提示；状态真实性仍由管理员看到的事故行与原子审计判定。
+- 新增 `assertOpsIncidentKey` 运行时枚举校验，事故状态计划及迁移写入前拒绝未知类别；单元补覆盖空 key、伪造类别、数字/null 和伪造 ACK 查询串。
+- 本地 npm test、tsc、Next build 均 exit 0；历史 MySQL **34 total / 31 PASS / 0 FAIL / 3 SKIP**（旧库缺第 9 事故迁移）。B04/U03 整体仍需真实登录态/CSRF HTTP、自动扫描与可靠通知及预发布恢复门禁。详见 `b04-incident-url-outcome-safety-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

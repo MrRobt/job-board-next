@@ -23,6 +23,11 @@ export type PlannedOpsIncident=Readonly<{
 const keys:readonly OpsIncidentKey[]=[
  "STALE_AI_RESERVATIONS","REFUND_IN_DOUBT","REFUND_READY_AGED"
 ];
+/** Validate runtime values even when the caller is TypeScript-typed. */
+export function assertOpsIncidentKey(key:unknown):asserts key is OpsIncidentKey{
+ if(typeof key!=="string"||!keys.includes(key as OpsIncidentKey))
+  throw new Error("Invalid incident key");
+}
 const priority=(key:OpsIncidentKey)=>key==="REFUND_IN_DOUBT"?"CRITICAL" as const:"HIGH" as const;
 const escalationMinutes=(key:OpsIncidentKey)=>key==="REFUND_IN_DOUBT"?15:30;
 const millis=(date:Date,label:string)=>{
@@ -41,7 +46,7 @@ export function planOpsIncidents(
  const valid=assessOpsAlerts(counts).counts;
  const records=new Map<OpsIncidentKey,OpsIncidentAcknowledgment>();
  for(const record of previous){
-  if(!keys.includes(record.key))throw new Error("Invalid incident key");
+  assertOpsIncidentKey(record.key);
   if(records.has(record.key))throw new Error("Invalid duplicate incident");
   const opened=millis(record.openedAt,"opened time");
   if(opened>time)throw new Error("Incident opened in future");
