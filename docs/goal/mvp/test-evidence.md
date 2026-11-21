@@ -488,6 +488,11 @@
 - 新单元覆盖权限、幂等、冲突、输入限制、Serializable Prisma Adapter；同一真实 MySQL 测试中使用自有队列记录及测试用户验证 USER 拒绝、ADMIN 首次成功、重复成功结果幂等、冲突失败、记录唯一并保持 DEAD；finally 只删除自身数据。
 - 本地 npm test、独立 tsc exit 0；第十四迁移/真实 MySQL 权限审计已核验 `00fd34d` GitHub Actions run `44895376472` **SUCCESS**：全新 MySQL8、149/149 单元、35/35 集成，0 FAIL/0 SKIP，数据库角色查询、管理员唯一复核、普通用户被拒、冲突决定拒绝及任务保持 DEAD PASS；Prisma validate、typecheck、Next build、HTTP smoke 均通过。独立 `b04-notification-dead-review-2026-11-21.md`。无通知发送、死信复活、HTTP 或 Cron，B04/U03 IN_PROGRESS，NOT READY。
 
+## 2026-11-21 U03/B04 默认关闭的管理员 DEAD 复核 Web 入口
+
+- `c7170ba` GitHub Actions run `44895785888` SUCCESS。新增 Next.js 管理页面、Server Action 和独立开关/表单/同源校验；双开关均只有精确 `true` 启用复核，先核对 requireAdmin 登录态、Origin/Host、DB 限流，固定机器原因和用户确认，随后通过后端事务重新核对 ADMIN 与 DEAD；页面不泄露正文/令牌，没有发送/重入队。
+- 新增单元验证默认关闭、恶意/缺失来源、伪装域名和请求表单、重复字段与非法原因、伪造角色忽略。独立 tsc、npm test exit 0，完整 CI 构建/真库回归待核验。**未执行真实浏览器管理员登录态、跨站 POST 与 CSRF E2E**，不能据此声明实际 HTTP 攻防已验收。独立 `b04-dead-review-web-gate-2026-11-21.md`；B04/U03 IN_PROGRESS、NOT READY。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
