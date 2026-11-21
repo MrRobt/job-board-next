@@ -236,6 +236,14 @@
 - 本包仅是成本**预估入场**门禁，不代表模型供应商真实计费、usage 落库、总成本告警、隐私/数据处理合规。A02 仍 IN_PROGRESS；详见 `docs/goal/mvp/a02-model-cost-budget-2026-11-21.md`。
 - 原有主 handoff/风险/需求矩阵/上线清单与财务审计未提交内容受其他 Agent 保护，本轮不覆盖或混提交。
 
+## 2026-11-21 A02 供应商 usage 解析（独立子包）
+
+- 新增 `modelUsageEvidence`：真实模型响应的 `usage` 严格区分 REPORTED / UNREPORTED / INVALID；供应商缺失/无效 Token 数时成本留空，已报告 Token 根据人工配置报价计算整数分并标注超预算，不保存原文/密钥。
+- 保留 `generate()` 原报告输出，新增 `generateMeasured()` 返回报告与结构化用量；供应商和模型标识、预算在模型出站前校验，不启用实际 AI。
+- 专项纯函数 **4/4**、模拟网络 **1/1**、全量单元 **53/53**、隔离 MySQL 集成 **30/30**、TypeScript 与 Next build exit 0；原 8 项 Prisma 迁移 up to date，本轮无新增迁移。
+- 原定 usage 与 ToolRun 同事务落库的实现被工作区安全保护拦截，已**撤回本轮未部署的 schema/迁移草案**，没有绕过或触碰数据库。**A02 整体仍 IN_PROGRESS**：真实 Token 用量审计落库、账单复核、原子结算、异常告警和合规门禁未完成。
+- 证据：`docs/goal/mvp/a02-provider-usage-evidence-2026-11-21.md`。所有其他 Agent 的主矩阵/主 handoff/financial-risk-audit 原有改动保留。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

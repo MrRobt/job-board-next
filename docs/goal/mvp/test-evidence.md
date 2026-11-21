@@ -268,6 +268,13 @@
 - 首次 TS 类型失败系配置读取函数签名过窄，改为 `Readonly<Record<string,string|undefined>>` 后通过；最初测试草稿的敏感内容写入被保护机制拒绝，没有绕过。
 - 本子包不涉及财务数据库表结构或真实 Token 使用量追踪，不代表实际供应商账单/成本对账、合规联调或已能开启真实 AI。参见 `a02-model-cost-budget-2026-11-21.md`。
 
+## 2026-11-21 A02 实际供应商用量解析
+
+- `tests/model-usage.test.ts` **4/4 PASS**：Token 数为有限非负整数、报告总数一致、使用价格的整数分计算、预算超限标记；缺失/无效格式明确记录为未知且 `costFen=null`；标识信息限制可审计且不含原文。
+- `tests/integration/ai-model-cost.test.ts` **1/1 PASS**：原 `generate` 响应兼容；`generateMeasured` 使用本地模拟供应商返回有 usage 的正常成本以及无 usage 的未报告情况。
+- 全量单元 **53/53 PASS**、隔离 MySQL（文件串行）**30/30 PASS**、Prisma migrate status 显示**仍为原有 8 个版本、up to date**，Next.js 16.4.6 build 与 TypeScript exit 0。
+- 数据库原子 usage 审计草案在事务文件写入时被工作区安全检查阻断，撤销本轮 Prisma 改动，**没有实际创建或迁移审计表，不可宣称用量已经落库**。真实商户/模型和生产 UAT 没有执行。详见 `a02-provider-usage-evidence-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
