@@ -431,7 +431,7 @@
 
 - 已核实 `d2834d9` GitHub Actions run `44886104615` success；第十迁移 QUEUED 唯一入队已验证。本轮新增第 11 迁移，通知任务允许 CLAIMED 状态及 attemptCount、UUID claimToken、claimedAt、leaseExpiresAt，**未接 sender/HTTP/Cron**。
 - `claimOpsNotificationIntent` 只对符合当前 OPEN 轮次的 QUEUED/过期 CLAIMED 任务使用 Serializable CAS 领取；有效租约 BUSY、已解决/已确认/旧轮次 STALE；最长 15 分钟，5 次尝试封顶。测试覆盖竞争、超期更换 token、上限、参数及事故状态；扩展原有第十迁移集成测试加入真实 MySQL 租约闭环，CI 缺表 FAIL。
-- 本地 npm 单元、tsc、Next build、Prisma validate 均 exit 0；旧隔离 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`（缺第九至十一迁移），新真实事务必须等 CI。详情 `b04-notification-claim-lease-2026-11-21.md`。没有外部通知发送/确认/续租/失败重试与生产部署验收，B04/U03 继续 IN_PROGRESS，整体 NOT READY。
+- 本地 npm 单元、tsc、Next build、Prisma validate 均 exit 0；旧隔离 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`（缺第九至十一迁移），新真实事务已核验 `7ae462f` GitHub Actions run `44886846171` **success**：第十一迁移及重复 deploy 全新 MySQL8、133/133 单元、35/35 集成、0 FAIL/0 SKIP，入队→首次 CLAIMED→有效租约 BUSY→租约过期更换 token→事故解决 STALE 的真实测试 PASS，Prisma generate/typecheck、build/smoke 均成功。详情 `b04-notification-claim-lease-2026-11-21.md`。没有外部通知发送/确认/续租/失败重试与生产部署验收，B04/U03 继续 IN_PROGRESS，整体 NOT READY。
 
 ## Git 安全
 

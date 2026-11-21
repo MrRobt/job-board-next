@@ -457,7 +457,7 @@
 
 - `d2834d9` CI run `44886104615` 已 success。新十一迁移给内部 QUEUED 通知任务添加 CLAIMED、尝试次数、UUID token、租约截止时间；独立 claim 纯服务和 Prisma Serializable/条件更新适配只领取、不发送，不修改业务账本。
 - 新单元测试验证有效租约 BUSY、租约到期换 token、5 次上限、旧轮次和非 OPEN 状态拒绝、错误参数 fail-closed、CAS 端口；原 MySQL 入队测试追加真领取→有效租约拒绝→超期重领→事故解决拒领，防止跨文件使用同一个事故 key 的并行冲突。
-- 本地 npm test、独立 tsc、Next build、Prisma validate exit 0；旧隔离 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`，旧库缺事故/通知新迁移不可算真实 DB 验收。必须核验本提交的新 CI 全新 MySQL 结果。见 `b04-notification-claim-lease-2026-11-21.md`。CLAIMED 不表示已投递；真实 sender、ack、失败回收和人工合规门禁仍未完成，NOT READY。
+- 本地 npm test、独立 tsc、Next build、Prisma validate exit 0；旧隔离 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`，旧库缺事故/通知新迁移不可算真实 DB 验收。已核验 `7ae462f` GitHub Actions run `44886846171` **success**：第十一迁移全新 MySQL8、133/133 单元、35/35 集成、0 FAIL/0 SKIP，实际租约 CLAIMED/BUSY/超期恢复/事故关闭拒领测试 PASS；生成 Client、typecheck、Next build、smoke 均成功。见 `b04-notification-claim-lease-2026-11-21.md`。CLAIMED 不表示已投递；真实 sender、ack、失败回收和人工合规门禁仍未完成，NOT READY。
 
 ## 保留的局限
 

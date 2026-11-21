@@ -15,5 +15,5 @@
 ## 本地真实证据及限制
 - `npm test`、独立 `tsc --noEmit`、Next.js `build` exit 0；`prisma validate` 使用非真实占位 DSN exit 0。
 - 历史专用隔离 MySQL：**36 total /31 PASS /0 FAIL /5 SKIP**；旧数据库缺第 9–11 项迁移，新租约测试在本地不计为真实数据库通过。
-- 本机旧 Prisma Client 因 Windows DLL 文件锁不能轻易 regenerate，测试中只对新字段回读做显式类型收窄；全新 GitHub CI 需执行 Prisma generate/typecheck + 第 11 迁移 + 真 MySQL 集成。若失败按原始日志修复。
+- 本机旧 Prisma Client 因 Windows DLL 文件锁不能轻易 regenerate，测试中只对新字段回读做显式类型收窄；全新 GitHub CI 需执行 Prisma generate/typecheck + 第 11 迁移 + 真 MySQL 集成。已查验提交 `7ae462f` 的 GitHub Actions [run 44886846171](https://github.com/MrRobt/job-board-next/actions/runs/44886846171) 最终 **success**：第十一迁移全新 MySQL8 apply/redeploy、133/133 单元、35/35 集成、0 FAIL/0 SKIP，扩展的 MySQL 入队测试包含第一次领取、有效租约阻止、到期再次领取及事故解决拒领，明确 PASS。Prisma generate/typecheck、生产 build 和 HTTP smoke 均 success；仍未涉及任何外部通知发送。
 - **没有发送器、发送成功/失败确认、租约续期、重试死信、可靠 Outbox dispatch 或通知渠道审批**；CLAIMED 只表示数据库排他占用，不等于消息投递。正式商户/模型/通知、预发布数据库迁移备份和合规审批继续各自人工门禁。
