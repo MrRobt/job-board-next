@@ -344,6 +344,12 @@
 - `prisma generate` Windows query engine DLL rename EPERM；专用隔离库 migrate deploy 以及本轮完整集成测试的工具调用均被安全检查拦截，**本轮无集成通过数字**。Schema/SQL 未在数据库实地验收，真实持久化和告警投递不算 VERIFIED。
 - 详见 `b04-incident-persistence-candidate-2026-11-21.md`；B04/U03 和 D02 仍 IN_PROGRESS，外部审批继续 BLOCKED。
 
+## 2026-11-21 B04/U03 管理员确认轮次隔离与 CAS 前置验证
+
+- 新增 `ops-acknowledgment-policy` 与 5 项测试：服务端 ADMIN 身份要求、审核原因格式、确认时间/告警轮次绑定、CAS 前提、同一操作幂等和非法状态拒绝。TDD 初始 **80/81 RED**，断言大小写修正后全量单元 **85/85 PASS**。
+- TypeScript `tsc --noEmit` exit 0；Next.js 生产构建 exit 0；历史专用隔离 MySQL **31/31 PASS**（仅现有集成回归，**未验证新增事故确认落库**）。
+- 未执行数据库迁移、生产通知、商户或模型 API；第 9 项迁移及事务化确认仍未验收，整体 B04/U03 IN_PROGRESS。详细证据 `b04-acknowledgment-episode-guard-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

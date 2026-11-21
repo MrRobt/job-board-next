@@ -319,6 +319,12 @@
 - 新单元 4 项，TDD 先 RED 76/77 后全量 **80/80 PASS**；Prisma validate exit 0、直接 TS exit 0、Next.js build exit 0。`prisma generate` Windows DLL EPERM，专用隔离库 migrate deploy 被安全门禁拦截，本轮集成复验调用也被拦截；不宣称 9 项迁移/持久化/数据库 E2E 验收成功。
 - 本轮纯状态转换子包 VERIFIED，**事故持久化与迁移整体 BLOCKED/IN_PROGRESS**；独立证据 `b04-incident-persistence-candidate-2026-11-21.md`。其他 Agent 共享 handoff/矩阵/风险、财务审计保持原样。
 
+## 2026-11-21 B04/U03 告警管理员确认防旧轮次误操作（独立子包）
+
+- 新增无副作用 `prepareOpsAcknowledgment`：校验 ADMIN 身份、10–500 字符理由、时间一致性、告警类别和 `expectedOpenedAt`；旧轮次/已解决事故拒绝，已确认仅原管理员原理由相同重试幂等。输出状态 OPEN 与发生时间绑定的 CAS 前提，后续持久化必须在事务内复验和记审计。
+- TDD 首次 80/81 RED（模块未实现），补实现与修正大小写断言后全量单元 **85/85 PASS**、TypeScript exit 0、Next.js 构建 exit 0；现有专用隔离 MySQL 集成回归 **31/31 PASS**（不包含新确认操作落库）。证据 `b04-acknowledgment-episode-guard-2026-11-21.md`。
+- 该子包本地规则 VERIFIED；第 9 项迁移 UAT、实际管理员确认服务/权限、事务审计及告警发送仍 IN_PROGRESS/BLOCKED。其他 Agent 的共享 handoff、风险、矩阵、发布清单和财务审计继续保护。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
