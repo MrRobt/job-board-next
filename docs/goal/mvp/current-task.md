@@ -436,7 +436,7 @@
 ## 2026-11-21 B04/U03 通知领取后只读 preflight 校验
 
 - 已核实 `1ab2428` GitHub CI run `44887201687` success，上一轮领取租约验收不重复。新增 `preflightOpsNotification` + Serializable 只读 Prisma 适配，在任何将来的外部处理前查询当前 CLAIMED 任务、匹配 UUID fencing token、有效租约和对应 OPEN 事故轮次；过期/旧令牌/已解决/已确认/新轮次分别 fail-closed。**READY 只是只读时点快照，不授权外部发送**。
-- 新增 5 项单元测试与既有真实 MySQL 领取集成测试中的 READY/FENCED/STALE 检查，未新增 DB 表或真实通知 Worker；npm 单元、独立 tsc、Next build exit 0；历史 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`（缺第九至十一迁移），扩展的真库 preflight 待新 CI 验证。详见 `b04-notification-preflight-2026-11-21.md`，B04/U03 IN_PROGRESS、整体 NOT READY。
+- 新增 5 项单元测试与既有真实 MySQL 领取集成测试中的 READY/FENCED/STALE 检查，未新增 DB 表或真实通知 Worker；npm 单元、独立 tsc、Next build exit 0；历史 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`（缺第九至十一迁移），扩展的真库 preflight 已核验提交 `1f2bae4` GitHub Actions run `44889847821` **SUCCESS**：全新 MySQL8 迁移、138/138 单元、35/35 集成，0 FAIL/0 SKIP，真实令牌 READY/FENCED/事故 RESOLVED 后 STALE 通过，typecheck、build、smoke 也成功。详见 `b04-notification-preflight-2026-11-21.md`，B04/U03 IN_PROGRESS、整体 NOT READY。
 - 保持真实支付、AI、通知开关关闭；未触碰其他 Agent 的 handoff、矩阵、风险、发布清单、财务审计和缓存。
 
 ## Git 安全

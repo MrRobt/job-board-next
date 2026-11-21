@@ -462,7 +462,7 @@
 ## 2026-11-21 B04/U03 通知任务发送前只读校验（未发送）
 
 - `1ab2428` CI run `44887201687` success，已验证的领取租约不重做。新增 `preflightOpsNotification`：只读 Serializable 快照校验 CLAIMED、当前 UUID claimToken、严格剩余租约、同轮次事故仍 OPEN/有告警；返 READY/MISSING/FENCED/EXPIRED/STALE，不能视为实际送达或发送许可。
-- 新增 5 项单元用例核对旧 token、期限、失效事故与重开轮次；原 MySQL 队列测试扩展为首次 READY、重领取旧 token FENCED/新 token READY、事故解决 STALE。全套 `npm test`、tsc、Next build exit 0；历史隔离 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`，因缺迁移，扩展真实 DB 用例须远端 CI 实际完成。独立 `b04-notification-preflight-2026-11-21.md`。
+- 新增 5 项单元用例核对旧 token、期限、失效事故与重开轮次；原 MySQL 队列测试扩展为首次 READY、重领取旧 token FENCED/新 token READY、事故解决 STALE。全套 `npm test`、tsc、Next build exit 0；历史隔离 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`，因缺迁移，扩展的真实 DB 用例已核验 `1f2bae4` GitHub Actions run `44889847821` **SUCCESS**：全新 MySQL8、138/138 单元、35/35 集成、0 FAIL/0 SKIP，真实首次 READY、重领取旧 token FENCED/新 token READY、事故解决 STALE 均 PASS，Next build/smoke 通过。独立 `b04-notification-preflight-2026-11-21.md`。
 - 缺真实 sender、外部渠道幂等、投递回执、崩溃重试与安全接收人审批；不允许直接使用 READY 作为网络发送授权。B04/U03 IN_PROGRESS，整体 NOT READY。
 
 ## 保留的局限

@@ -15,6 +15,6 @@
 
 ## 测试证据
 - 新增 5 条专门单元测试 exit 0；全套 `npm test` exit 0；独立 `tsc --noEmit` exit 0；Next.js 生产 `build` exit 0。
-- 历史专用 MySQL `36 total / 31 PASS / 0 FAIL / 5 SKIP`：缺第九至十一迁移，故扩展后的真实 preflight 测试在本机仍 SKIP；须由本提交的全新 MySQL CI 核验，不得提前声明通过。
+- 历史专用 MySQL `36 total / 31 PASS / 0 FAIL / 5 SKIP`：缺第九至十一迁移，故扩展后的真实 preflight 测试在本机仍 SKIP；已查验提交 `1f2bae4` 的 GitHub Actions [run 44889847821](https://github.com/MrRobt/job-board-next/actions/runs/44889847821) 最终 **SUCCESS**：全新 MySQL8 全量迁移、138/138 单元、35/35 集成、0 FAIL/0 SKIP；扩展后的既有 MySQL 入队测试验证首次 preflight READY、旧令牌 FENCED、新令牌 READY、事故已解决 STALE 明确 PASS；typecheck、Next build、HTTP smoke 均成功。仅证明内部时点校验，不代表网络发送或送达。
 - 工具执行曾出现一次批量超时，后用独立命令逐个复测，已取得上述有效退出码。
 - 不涉及数据库新迁移、HTTP/Cron、真实通知、支付、模型、用户数据。外部商户、资质与隐私/法律审批均保留人工门禁。
