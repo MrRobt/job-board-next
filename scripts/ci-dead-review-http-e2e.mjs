@@ -28,7 +28,7 @@ const request=async(path,{cookie,method="GET",body,originHeader}={})=>fetch(orig
  method,redirect:"manual",
  headers:{...(cookie?{cookie:`job_session=${cookie}`}:{}),
   ...(originHeader!==undefined?{origin:originHeader}:{}),
-  ...(body?{"content-type":"application/x-www-form-urlencoded"}:{})},
+ }, // Fetch sets the multipart boundary for real React Server Action form data.
  body,signal:AbortSignal.timeout(12000)
 });
 const location=(response)=>new URL(response.headers.get("location")??"/",origin);
@@ -85,9 +85,14 @@ async function run(){
  // React Server Actions expose the action ID in a hidden form field.
  const actionId=html.match(/name="(\$ACTION_ID_[a-zA-Z0-9]+)"/)?.[1];
  assert.ok(actionId,"No real Server Action ID found in admin HTML");
- const form=()=>new URLSearchParams({
-  [actionId]:"",key:intentKey,confirmed:"yes",reasonCode:"REVIEWED_NO_REQUEUE"
- }).toString();
+ const form=()=>{
+  const value=new FormData();
+  value.set(actionId,"");
+  value.set("key",intentKey);
+  value.set("confirmed","yes");
+  value.set("reasonCode","REVIEWED_NO_REQUEUE");
+  return value;
+ };
  const post=(cookie,originHeader,body=form())=>request("/admin/dead-notifications",{
   cookie,method:"POST",body,originHeader
  });
@@ -120,9 +125,9 @@ async function run(){
  await response.body?.cancel();
  assert.equal(await countReviews(),1,"Replay must remain one record");
  checks.push("idempotent replay");
- const changed=new URLSearchParams(form());
+ const changed=form();
  changed.set("reasonCode","NEEDS_OFFLINE_INVESTIGATION");
- response=await post(tokenByRole.get("ADMIN"),origin,changed.toString());
+ response=await post(tokenByRole.get("ADMIN"),origin,changed);
  assert.equal(location(response).searchParams.get("reviewError"),"1","Conflicting decision must be rejected");
  await response.body?.cancel();
  assert.equal(await countReviews(),1,"Conflict must leave first review intact");

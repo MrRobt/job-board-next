@@ -14,5 +14,6 @@
 
 ## 证据 / 限制
 - 初版 `4db063d` 独立 HTTP run `44898182767` **FAIL**：MySQL 迁移和 Next build 成功，但用例把跨域拒绝误限定为 HTTP 4xx，而 Server Action 允许用重定向返回拒绝。现已修订为接受 4xx 或带 `reviewError=origin` 的明确拒绝重定向，且无论哪一种都再次检查审计行数必须为 0；完整真 HTTP 测试仍须下一次 CI 验证，不提前宣称安全通过。
+- 第二轮 `17fbbe1` 独立 run `44898400072` 仍 **FAIL**：跨域 POST 返回 HTTP 200 且无重定向，定位到测试器把 React Server Action 表单错误编码为 `application/x-www-form-urlencoded`，请求没有真正触发目标 action。已修正为原生 `FormData` multipart，让下一轮实际触发 action 并验证数据库变化；未更改生产代码、未放宽拒绝与零写入检查。
 - 本地 `node --check`、独立 TypeScript exit 0；修订后的真 HTTP 流水线结果**待 GitHub 新提交运行**。与页面浏览器 Playwright 截图、正式预发布域名/反向代理、安全头以及真实商户/法务验收不同，必须明确标注此任务为 CI localhost HTTP/会话攻防 E2E，而非全站完整浏览器 UAT。
 - 失败后需按具体日志修复；未经独立 MySQL CI 成功，不可声称 CSRF/角色已通过真实网络验证。
