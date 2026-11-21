@@ -395,7 +395,7 @@
 
 - GitHub Actions `f365c28` run `44879055646` success；实际全新 MySQL8 迁移、114/114 单元、33/33 集成均 0 FAIL/0 SKIP，整批回滚真实用例 PASS，不重复验收。
 - 在已有隔离 MySQL 整批事务测试中新增真实并发交错：扫描刷新 `REFUND_READY_AGED` count 3→4 与临时 ADMIN 的 CAS 确认同时执行，实际 Serializable 冲突需独立安全重试，最终确认状态/数量/操作人不丢失、ACK 审计只一条；完成后只清理本测试创建的数据。
-- 本地 npm test、TS、Next build exit 0；历史 MySQL 首轮 `30 PASS/1 FAIL/3 SKIP`（其他 Agent 未提交财务审计测试遇短时 DB 连接故障），复跑 `31 PASS/0 FAIL/3 SKIP`。3 SKIP 均因旧库缺第 9 项事故迁移，新并发集成须由新 CI 实际证明。独立证据 `b04-scan-admin-race-mysql-2026-11-21.md`；不启用生产扫描/支付/AI/通知，保护其他 Agent 文件。
+- 本地 npm test、TS、Next build exit 0；历史 MySQL 首轮 `30 PASS/1 FAIL/3 SKIP`（其他 Agent 未提交财务审计测试遇短时 DB 连接故障），复跑 `31 PASS/0 FAIL/3 SKIP`。3 SKIP 均因旧库缺第 9 项事故迁移。现已核验新提交 `859db27` GitHub Actions run `44879917200` **success**：全新 MySQL8 迁移、114/114 单元、33/33 集成、build 与 smoke 均成功且 0 FAIL/0 SKIP；并发交错测试实际 PASS。独立证据 `b04-scan-admin-race-mysql-2026-11-21.md`；不启用生产扫描/支付/AI/通知，保护其他 Agent 文件。
 
 ## Git 安全
 

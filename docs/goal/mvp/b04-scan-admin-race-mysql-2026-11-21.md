@@ -18,5 +18,5 @@
 ## 测试证据及明确限制
 - `npm test` exit 0；独立 `tsc --noEmit` exit 0；Next.js 生产构建 exit 0。
 - 本地专用历史 MySQL 首轮 **34 total / 30 PASS / 1 FAIL / 3 SKIP**，失败仅来自其他 Agent 未提交的 `financial-risk-audit.test.ts` 的临时 `127.0.0.1:3306` 数据库连接故障，未编辑其代码；同命令复跑 **34 total / 31 PASS / 0 FAIL / 3 SKIP**。三个 SKIP 均因历史库缺第 9 项事故迁移，故新增真实并发用例**尚未在本地验证**。
-- 本轮的真实争用/重试仅在下一轮 GitHub Actions 全新 MySQL 执行并明确 PASS 后可计为通过；CI 若失败须读取 job 日志修复。此项不是管理员登录态浏览器/CSRF E2E，不代表生产库已迁移或真实通知闭环。
+- 已核实 `859db27` 的 GitHub Actions run [44879917200](https://github.com/MrRobt/job-board-next/actions/runs/44879917200) 完成且 **success**。实际 job 日志显示全新 MySQL8 全量迁移成功、**114/114 单元、33/33 集成、0 FAIL/0 SKIP**，整批事故扫描含真实 ADMIN 确认交错用例 PASS；生产 build 与匿名 smoke 均 success。此项不是管理员登录态浏览器/CSRF E2E，不代表生产库已迁移或真实通知闭环。
 - 外部经营主体资质、商户、模型、隐私/数据协议、法律审查全部仍需有权主体人工验证。正式上线 NOT READY。

@@ -419,7 +419,7 @@
 ## 2026-11-21 B04/U03 扫描与管理员确认同轮次 MySQL 争用补测
 
 - `f365c28` GitHub Actions run `44879055646` success，确认 114/114 单元、33/33 迁移 MySQL 集成（含整批回滚），0 跳过。扩展 `ops-incident-batch-mysql.test.ts`：真实 ADMIN 角色、扫描 count 更新与 ACK CAS 同时争用，容错后确认不被覆盖、操作人正确、ACK 审计恰好一条、三类最终解决且审计共 7 条。
-- 本地 npm test、tsc、Next build exit 0；历史专用 MySQL 首轮 `34 total/30 PASS/1 FAIL/3 SKIP`，唯一 FAIL 是其他 Agent 财务审计查询时 `127.0.0.1:3306` 不可达；原样复跑 `34 total/31 PASS/0 FAIL/3 SKIP`。3 SKIP 因历史库缺事故第 9 迁移，**未在本机验收真实并发数据库**，需下一次远端 CI。
+- 本地 npm test、tsc、Next build exit 0；历史专用 MySQL 首轮 `34 total/30 PASS/1 FAIL/3 SKIP`，唯一 FAIL 是其他 Agent 财务审计查询时 `127.0.0.1:3306` 不可达；原样复跑 `34 total/31 PASS/0 FAIL/3 SKIP`。3 SKIP 因历史库缺事故第 9 迁移，**未在本机验收真实并发数据库**。现已查验 `859db27` GitHub Actions run `44879917200` 最终 success：全新 MySQL8 迁移、114/114 单元、33/33 集成、0 FAIL/0 SKIP，含扫描/ADMIN 交错测试真实通过，生产构建及 smoke 也 success。
 - 不连接真实扫描任务、资金、退款或模型服务；不代表管理员会话/CSRF 或预发布部署已验收。详见 `b04-scan-admin-race-mysql-2026-11-21.md`，整体 B04/U03 IN_PROGRESS。
 
 ## 保留的局限
