@@ -228,6 +228,14 @@
 - A02 仍 IN_PROGRESS：格式过滤不等于完整 DLP，不涵盖所有身份信息，真实合规模型、第三方个人信息处理、保留与删除机制、真实浏览器 E2E 仍有阻断。详细证据 `docs/goal/mvp/a02-model-privacy-boundary-2026-11-21.md`。
 - 保留他人主 handoff、需求矩阵、发布清单、风险登记与 financial-risk-audit 等未提交内容；本轮精确 stage 自身文件，不强推。
 
+## 2026-11-21 A02 模型成本预算前置门禁
+
+- `lib/career/model-cost-policy.ts` 新增服务器端正整数单价/单次人民币分预算校验；`provider.liveAvailable` 缺成本配置时关闭，`generate()` 在任何模型 `fetch` 前采用 UTF-8 请求体字节数 + 额外预留 + 2500 输出 Token 上限进行保守成本估算，超预算一律拒绝，无真实调用。
+- 单元成本专项 3/3、模拟网络专项 1/1，验证缺配置/非法配置/超预算下 0 次模型出站；TypeScript exit 0、全量单元 **49/49 PASS**、隔离 MySQL 全量集成 **30/30 PASS**、Next.js 16.4.6 生产 build exit 0，另有完整 MySQL 再验 30/30。
+- 首轮 TypeScript 因测试对象不满足扩展 `NodeJS.ProcessEnv` 类型而失败，已换成只读键值参数并复验。最初测试草稿触发工作区敏感内容保护，未绕过，后采用无凭据的纯函数与模拟网络测试。
+- 本包仅是成本**预估入场**门禁，不代表模型供应商真实计费、usage 落库、总成本告警、隐私/数据处理合规。A02 仍 IN_PROGRESS；详见 `docs/goal/mvp/a02-model-cost-budget-2026-11-21.md`。
+- 原有主 handoff/风险/需求矩阵/上线清单与财务审计未提交内容受其他 Agent 保护，本轮不覆盖或混提交。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
