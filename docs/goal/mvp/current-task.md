@@ -469,7 +469,7 @@
 ## 2026-11-21 U03/B04 管理员真实 HTTP/CSRF/权限隔离 E2E
 
 - 核验 `af0444a` GitHub Actions run `44897394234` SUCCESS。现有 CI workflow 受保护字段不可直接编辑，故保留原工作流不动；新增独立 `.github/workflows/dead-review-e2e.yml`（全新 MySQL8、隔离 `127.0.0.1:3101`、读写开关仅在临时测试 job 中为 true，真实支付/AI/通知关闭）与 `scripts/ci-dead-review-http-e2e.mjs`。
-- 用随机无效邮箱创建测试 ADMIN/USER 和模拟会话及单条 DEAD 任务，在真实 Next HTTP GET/POST 验证匿名访问、USER 越权、ADMIN 页面/动作、跨站和缺 Origin 请求阻断、不变更数据库、同决定幂等、不同决定冲突和始终 DEAD。finally 只清理自有数据，拒绝触碰已有事故记录。node --check 与独立 tsc 本地 exit 0；**独立工作流真实结果待本提交 CI 核验**。详见 `b04-dead-review-http-e2e-2026-11-21.md`。该专项不等于完整浏览器/正式预发布 UAT，B04/U03 IN_PROGRESS、整体 NOT READY。
+- 用随机无效邮箱创建测试 ADMIN/USER 和模拟会话及单条 DEAD 任务，在真实 Next HTTP GET/POST 验证匿名访问、USER 越权、ADMIN 页面/动作、跨站和缺 Origin 请求阻断、不变更数据库、同决定幂等、不同决定冲突和始终 DEAD。finally 只清理自有数据，拒绝触碰已有事故记录。node --check 与独立 tsc 本地 exit 0；**独立工作流已核验 `3907def` GitHub Actions run `44899756149` SUCCESS：9/9 localhost HTTP 会话/Origin/CSRF/越权/管理员复核/幂等/冲突/DEAD 保持检查通过；同提交主 CI run `44899756101` SUCCESS：152/152 单元、35/35 真 MySQL 集成，0 失败/跳过，生产构建/冒烟通过。修复了测试器误取全局退出登录 Action ID 的缺陷，保留全部历史失败记录。**详见 `b04-dead-review-http-e2e-2026-11-21.md`。该专项不等于完整浏览器/正式预发布 UAT，B04/U03 IN_PROGRESS、整体 NOT READY。
 
 ## Git 安全
 

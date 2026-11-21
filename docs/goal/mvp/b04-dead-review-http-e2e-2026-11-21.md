@@ -1,6 +1,6 @@
 # U03/B04 管理员 HTTP 会话与 CSRF 真请求隔离验证 — 2026-11-21
 
-状态：新增独立真实 HTTP E2E 流水线候选；本地脚本语法、TypeScript 已检查，**真实 GitHub Actions 尚未运行，严禁提前标 VERIFIED**。整体 NOT READY。
+状态：**独立 localhost HTTP/会话/CSRF 专项 VERIFIED**：提交 `3907def` 的 GitHub Actions [run 44899756149](https://github.com/MrRobt/job-board-next/actions/runs/44899756149) 最终 SUCCESS，9/9 真实 HTTP 检查通过；同提交主 CI [run 44899756101](https://github.com/MrRobt/job-board-next/actions/runs/44899756101) SUCCESS，152/152 单元、35/35 MySQL 集成、0 失败/跳过，迁移、类型、构建、冒烟均成功。此结论仅限隔离 CI localhost，不代表正式预发布或全站浏览器 UAT；整体 NOT READY。
 
 ## 恢复基线
 - 已核验 `af0444a` GitHub Actions run [44897394234](https://github.com/MrRobt/job-board-next/actions/runs/44897394234) SUCCESS；上一包后台 Server Action/默认关闭开关已完成，只剩真实 HTTP 管理员登录态、跨站请求和幂等回归。按长期 Goal 读取 AGENTS、current-task、handoff、需求矩阵、测试证据、发布清单、风险和当前 Git。

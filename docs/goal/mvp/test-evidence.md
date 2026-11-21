@@ -497,7 +497,7 @@
 
 - 已核验 `af0444a` GitHub Actions run `44897394234` SUCCESS。因原工作流有受保护字段，未修改它，新建独立 GitHub Actions MySQL8 + Next 生产构建 + `127.0.0.1:3101` 专用安全 E2E；真实支付/AI/通知关闭，临时打开仅复核读写门禁。
 - 测试在隔离库仅创建随机无效邮箱的 ADMIN/USER、会话和自有 DEAD 通知；HTTP 匿名 GET/普通用户 GET 和 POST 拒绝、ADMIN GET 200、恶意/缺失 Origin POST 阻断且无副作用、有效同源 ADMIN POST 首次落审计、幂等重放、冲突拒绝、终态仍 DEAD。最后清理测试记录。
-- 本地 `node --check` 与独立 tsc exit 0；**本提交 CI 真实 HTTP 与 MySQL 结果待核实**。不包含 Playwright 浏览器截图、正式域名反向代理和完整商业 E2E，仍需后续独立验收。见 `b04-dead-review-http-e2e-2026-11-21.md`，B04/U03 IN_PROGRESS，整体 NOT READY。
+- 本地 `node --check` 与独立 tsc exit 0；**已核验 `3907def` GitHub Actions HTTP run `44899756149` SUCCESS，9/9 真 HTTP 检查通过；同提交主 CI run `44899756101` SUCCESS：152/152 单元、35/35 MySQL 集成，0 失败/跳过，迁移、生产构建、HTTP 冒烟通过。根因修复为仅提取目标死信复核表单 Action ID，不再误触导航登出；全部失败 run 和定位记录保留。**不包含 Playwright 浏览器截图、正式域名反向代理和完整商业 E2E，仍需后续独立验收。见 `b04-dead-review-http-e2e-2026-11-21.md`，B04/U03 IN_PROGRESS，整体 NOT READY。
 
 ## 保留的局限
 
