@@ -443,7 +443,7 @@
 
 - 已核验 `517d50c` GitHub Actions run `44890089304` success。本轮新增第十二迁移：通知任务状态 RETRY_WAIT/DEAD、下一次可领时间、脱敏故障码；仅内部任务状态，无外部通知发送、HTTP、Cron 或资金/AI 开关变更。
 - `failOpsNotificationClaim` 以 Serializable CAS 检查当前 CLAIMED、同一令牌、租约有效；1～4 次失败进入指数退避 RETRY_WAIT 并释放 token，5 次后 DEAD，旧令牌/重复失败拒绝；`claimOpsNotificationIntent` 提前重领 DEFERRED、到点可再次领取。扩展真实 MySQL 队列测试和单元状态机测试。
-- 本地 `npm test`、独立 tsc exit 0；Prisma schema validate 命令超时，Next build 编译及 TS 阶段成功但页面数据收集时工具超时，不能记完成。必须核验新 CI 的第十二迁移/真库测试/构建。详见 `b04-notification-retry-disposition-2026-11-21.md`；B04/U03 IN_PROGRESS、整体 NOT READY。
+- 本地 `npm test`、独立 tsc exit 0；Prisma schema validate 命令超时，Next build 编译及 TS 阶段成功但页面数据收集时工具超时，不能记完成。已核验 `6e51099` GitHub Actions run `44891465518` **SUCCESS**：第十二迁移全新 MySQL8 apply/repeatable、142/142 单元、35/35 集成、0 FAIL/0 SKIP，真实失败 RETRY_WAIT→到期重领→事故解决后拒领用例 PASS；远端 Prisma generate/typecheck、Next build/HTTP smoke 全部成功。本地工具超时仍如实保留。详见 `b04-notification-retry-disposition-2026-11-21.md`；B04/U03 IN_PROGRESS、整体 NOT READY。
 
 ## Git 安全
 

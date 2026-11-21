@@ -469,7 +469,7 @@
 
 - 之前 `517d50c` GitHub Actions run `44890089304` SUCCESS。新增 `OpsIncidentNotificationIntent` RETRY_WAIT、DEAD、nextAttemptAt、failureCode；仅当前有效 UUID 令牌持有者可在 Serializable CAS 下将 CLAIMED 转回延迟重试或最终 DEAD，旧 token / 过期 / 非法 code 拒绝。
 - claim 服务对 RETRY_WAIT 在到点前拒绝（DEFERRED），到点清理旧失败属性后恢复 CLAIMED；单元与现有 MySQL 集成扩展覆盖重领、重复失败和事故解决后拒领。
-- 本地 npm 单元、独立 tsc exit 0；Prisma validate 命令工具超时，Next 生产 build 编译+TS 通过但页面数据收集超时，**不得认定完整 build PASS**；第十二迁移及新增真实 MySQL 分支由本提交 CI 核验。详见 `b04-notification-retry-disposition-2026-11-21.md`，状态 IN_PROGRESS，整体 NOT READY。
+- 本地 npm 单元、独立 tsc exit 0；Prisma validate 命令工具超时，Next 生产 build 编译+TS 通过但页面数据收集超时，**不得认定完整 build PASS**；第十二迁移及新增真库分支已核验 `6e51099` GitHub Actions run `44891465518` **SUCCESS**：全新 MySQL8、142/142 单元、35/35 集成、0 FAIL/0 SKIP，失败后延时重领、过早 DEFERRED、已解决 STALE 的真实用例 PASS，远端 typecheck/build/smoke 全通过。本地超时记录不覆盖。详见 `b04-notification-retry-disposition-2026-11-21.md`，状态 IN_PROGRESS，整体 NOT READY。
 
 ## 保留的局限
 

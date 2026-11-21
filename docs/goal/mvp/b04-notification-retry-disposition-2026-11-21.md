@@ -15,5 +15,5 @@
 ## 已得到的验证和阻断
 - `npm test` exit 0，独立 `tsc --noEmit` exit 0。
 - `prisma validate` 本地工作区命令超时，无法宣称通过；`next build` 编译与 TypeScript 阶段完成，但收集页面数据时工具超时，**不记全量 build PASS**。不可终止其他 Agent 进程或强制删除工作区缓存。
-- 第十二迁移/新 Prisma Client/真 MySQL 入队重试**只有 GitHub Actions 全新隔离库运行结果才可记为 VERIFIED**；本次提交之后必须核查 CI 原始日志。没有开启真实发送、自动 Worker、商户或模型。
+- 第十二迁移/新 Prisma Client/真 MySQL 入队重试**只有 GitHub Actions 全新隔离库运行结果才可记为 VERIFIED**；现已核验提交 `6e51099` GitHub Actions [run 44891465518](https://github.com/MrRobt/job-board-next/actions/runs/44891465518) 最终 **SUCCESS**：全新 MySQL8 第十二迁移成功及重复 deploy，142/142 单元、35/35 集成、0 FAIL/0 SKIP，扩展的真实 MySQL 任务用例验证失败 RETRY_WAIT、旧 token 拒绝、提前 DEFERRED、到点再次 CLAIMED、事故解决拒领。Prisma generate/typecheck、Next build、HTTP smoke 均成功；本地 validate/build 工具超时事实仍保留。没有开启真实发送、自动 Worker、商户或模型。
 - 仍待实际 sender/回执/接收人授权、故障 dead-letter 人工处置、自动调度、预发布备份恢复和完整管理员/支付/退款/AI E2E。
