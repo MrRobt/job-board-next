@@ -1,6 +1,6 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
-import {generate,liveAvailable} from "../../lib/career/provider";
+import {generate,generateMeasured,liveAvailable} from "../../lib/career/provider";
 
 test("approved model requests are refused before network when cost policy is missing or over budget",async()=>{
  const original=globalThis.fetch;
@@ -19,7 +19,7 @@ test("approved model requests are refused before network when cost policy is mis
     {title:"岗位匹配",items:["补充项目证据"]},
     {title:"表达优化",items:["展示清晰结果"]}
    ],next:["复核真实经历"]
-  })}}]}),{status:200});
+  })}}],usage:calls===2?{prompt_tokens:100,completion_tokens:50,total_tokens:150}:undefined}),{status:200});
  }) as typeof fetch;
  try{
   Object.assign(process.env,{
@@ -45,7 +45,16 @@ test("approved model requests are refused before network when cost policy is mis
   process.env.AI_MAX_REQUEST_COST_FEN="500";
   const result=await generate(payload);
   assert.equal(result.summary,"求职练习");
-  assert.equal(calls,1);
+  const measured=await generateMeasured(payload);
+  assert.equal(measured.report.summary,"求职练习");
+  assert.equal(measured.usage.status,"REPORTED");
+  assert.equal(measured.usage.inputTokens,100);
+  assert.equal(measured.usage.outputTokens,50);
+  assert.equal(measured.usage.costFen,15);
+  const missing=await generateMeasured(payload);
+  assert.equal(missing.usage.status,"UNREPORTED");
+  assert.equal(missing.usage.costFen,null);
+  assert.equal(calls,3);
  }finally{
   globalThis.fetch=original;
   for(const k of keys){
