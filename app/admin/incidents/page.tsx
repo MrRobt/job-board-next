@@ -2,8 +2,7 @@ import Link from "next/link";
 import {requireAdmin} from "@/lib/auth";
 import {db} from "@/lib/db";
 import {confirmOpsIncident} from "@/app/actions/ops-incidents";
-import {toOpsIncidentView} from "@/lib/career/ops-incident-view";
-import type {OpsIncidentSnapshot} from "@/lib/career/ops-incident-state";
+import {incidentPanelSelect,toOpsIncidentView,type OpsIncidentPanelRecord} from "@/lib/career/ops-incident-view";
 
 /** Manual admin-only operations review. Never writes to a financial ledger. */
 export default async function OpsIncidentAdmin({
@@ -15,19 +14,17 @@ export default async function OpsIncidentAdmin({
   return <main><h1>运行事故与告警</h1>
    <p className="muted">人工事故确认尚未启用。须先核实目标数据库迁移、权限和审计门禁。</p>
    <Link href="/admin">返回管理概览</Link></main>;
- let records:OpsIncidentSnapshot[];
+ let records:OpsIncidentPanelRecord[];
  try{
   const client=db as unknown as {opsAlertIncident:{
    findMany(args:{
     orderBy:{lastSeenAt:"desc"};take:number;
-    select:{key:true;state:true;count:true;openedAt:true;lastSeenAt:true;
-      acknowledgedAt:true;acknowledgedById:true;acknowledgmentNote:true;resolvedAt:true}
-   }):Promise<OpsIncidentSnapshot[]>
+    select:typeof incidentPanelSelect
+   }):Promise<OpsIncidentPanelRecord[]>
   }};
   records=await client.opsAlertIncident.findMany({
    orderBy:{lastSeenAt:"desc"},take:25,
-   select:{key:true,state:true,count:true,openedAt:true,lastSeenAt:true,
-    acknowledgedAt:true,acknowledgedById:true,acknowledgmentNote:true,resolvedAt:true}
+   select:incidentPanelSelect
   });
  }catch{
   return <main><h1>运行事故与告警</h1>

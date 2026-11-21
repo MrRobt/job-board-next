@@ -2,6 +2,11 @@ import type {OpsIncidentKey} from "./ops-incident-policy";
 import type {OpsIncidentSnapshot} from "./ops-incident-state";
 
 const keys:readonly OpsIncidentKey[]=["REFUND_IN_DOUBT","STALE_AI_RESERVATIONS","REFUND_READY_AGED"];
+/** The page queries only the fields needed to render its public-to-admin summary. */
+export const incidentPanelSelect={
+ key:true,state:true,count:true,openedAt:true,lastSeenAt:true,acknowledgedAt:true
+} as const;
+export type OpsIncidentPanelRecord=Pick<OpsIncidentSnapshot,keyof typeof incidentPanelSelect>;
 export type OpsIncidentView=Readonly<{
  key:OpsIncidentKey;label:string;priority:"CRITICAL"|"HIGH";
  state:"OPEN"|"ACKNOWLEDGED"|"RESOLVED";count:number;
@@ -12,7 +17,7 @@ const label:Record<OpsIncidentKey,string>={
  STALE_AI_RESERVATIONS:"AI 次数预留超时",
  REFUND_READY_AGED:"退款待派发积压"
 };
-export function toOpsIncidentView(snapshot:OpsIncidentSnapshot):OpsIncidentView{
+export function toOpsIncidentView(snapshot:OpsIncidentPanelRecord):OpsIncidentView{
  if(!keys.includes(snapshot.key)||
     !["OPEN","ACKNOWLEDGED","RESOLVED"].includes(snapshot.state)||
     !Number.isSafeInteger(snapshot.count)||snapshot.count<0||

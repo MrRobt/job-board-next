@@ -386,6 +386,12 @@
 - 新增仅管理员可访问、开关关闭时不读取新表的事故面板；仅 OPEN 允许明确人工提交，提交绑定 key/openedAt 并使用已实现的事务审计。新增纯只读投影三项安全单测；独立 npm test、tsc 和 Next.js build exit 0。
 - 旧专用 MySQL：32 total / 31 PASS / 1 SKIP / 0 FAIL，唯一 SKIP 因历史库缺第 9 项迁移。未启用事故管理开关，尚无真实浏览器已登录权限/CSRF/表单提交验收；详细证据 `b04-admin-incidents-panel-2026-11-21.md`，B04/U03 整体仍 IN_PROGRESS。
 
+## 2026-11-21 事故页面最小字段查询与匿名 HTTP 冒烟测试
+
+- `224b084` GitHub Actions run `44876152273` success；此次增加 `incidentPanelSelect` 的六字段查询白名单与单元回归，实际 Prisma 委托不再取审核笔记/管理员 ID 等无关字段。npm test、tsc、Next build exit 0。
+- 运行中旧 3000 服务的 `release:smoke` exit 1（新 `/admin/incidents` 尚不存在，HTTP 404）；临时独立 3100 端口启动本轮构建并实际检查 `/admin`、`/admin/incidents`、`/admin/refund-dispatch`，均 **307 /login**；没有触碰 3000 旧服务进程。HTTP 检查仅为匿名保护，不是登录态/CSRF E2E。
+- 历史隔离 MySQL 全量回归 `32 total/31 PASS/1 SKIP/0 FAIL`，SKIP 是旧库缺第 9 项事故迁移；独立记录 `b04-admin-incident-minimal-select-smoke-2026-11-21.md`，B04/U03 总体依旧 IN_PROGRESS。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

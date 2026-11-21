@@ -361,6 +361,12 @@
 - 新增 `/admin/incidents` 页面、只读汇总投影和导航，要求 `requireAdmin`；独立开关未开启时绝不查询新事故表。启用后最多展示最近 25 条事故状态，仅 OPEN 可提交事故类别 + openedAt + 理由 + 人工确认，复用现有管理员身份/限流/事务 CAS 审计。调整 Server Action 重定向到新页面；禁止资金、AI 和通知动作。
 - 新增三个只读安全投影测试；本地 npm 单元、TypeScript、Next build exit 0；旧历史隔离 MySQL 32 total/31 PASS/1 SKIP（旧库缺第 9 项迁移），不作为页面 E2E。管理员已登录提交、CSRF/越权、预发布迁移仍未验收，B04/U03 继续 IN_PROGRESS。见 `b04-admin-incidents-panel-2026-11-21.md`。保留其他 Agent 脏文件。
 
+## 2026-11-21 B04/U03 事故页面最小字段查询与匿名权限 HTTP 收口
+
+- 确认 `224b084` GitHub Actions run `44876152273` 实际 success。精简事故页数据库 `select` 为 key/state/count/openedAt/lastSeenAt/acknowledgedAt 六个必要字段，禁止查询审核笔记/操作人 ID；新增精确键集回归单测。
+- 更新匿名 HTTP smoke 加入 `/admin/incidents`，支持严格限制到 `127.0.0.1` 的可选本地端口。初次对既有 3000 服务运行 smoke exit 1（旧服务缺新路由返回 404）；未动其他 Agent 进程，另起当前构建临时 3100 服务，`/admin`、`/admin/incidents`、`/admin/refund-dispatch` 实际均 307→/login，临时子进程随后退出。
+- npm 单元、TS、Next build exit 0；历史独立 MySQL **31 PASS/1 SKIP/0 FAIL**（第 9 项迁移在旧库缺失，该测试在既有 CI 新 MySQL 有 PASS 证据）。完整管理员登录态/CSRF/E2E、部署库迁移、扫描通知仍 IN_PROGRESS。独立证据 `b04-admin-incident-minimal-select-smoke-2026-11-21.md`。其它 Agent 的脏文件保护不动。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

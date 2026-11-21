@@ -6,7 +6,12 @@
 import assert from "node:assert/strict";
 import {setTimeout as sleep} from "node:timers/promises";
 
-const origin="http://127.0.0.1:3000";
+// An explicit alternative port lets a new build be checked without replacing
+// another agent's existing localhost:3000 process. Always localhost only.
+const port=process.env.SMOKE_PORT??"3000";
+assert.match(port,/^[1-9][0-9]{0,4}$/,"Invalid smoke port");
+assert.ok(Number(port)<=65535,"Invalid smoke port");
+const origin=`http://127.0.0.1:${port}`;
 const pages=[
  {path:"/",required:["职讯集","求职工作台"]},
  {path:"/pricing",required:["轻量次数包"]},
@@ -14,7 +19,7 @@ const pages=[
  {path:"/register",required:["注册账号"]},
 ];
 const restricted=[
- "/admin","/admin/tool-orders","/admin/refund-dispatch",
+ "/admin","/admin/tool-orders","/admin/refund-dispatch","/admin/incidents",
  "/account","/tracker","/tools/resume","/tools/interview"
 ];
 const privateHeaders=[

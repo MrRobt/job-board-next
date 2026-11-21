@@ -1,6 +1,6 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
-import {toOpsIncidentView} from "../lib/career/ops-incident-view";
+import {incidentPanelSelect,toOpsIncidentView} from "../lib/career/ops-incident-view";
 import type {OpsIncidentSnapshot} from "../lib/career/ops-incident-state";
 const openedAt=new Date("2026-11-21T09:00:00.000Z");
 const record:OpsIncidentSnapshot={
@@ -8,6 +8,14 @@ const record:OpsIncidentSnapshot={
  openedAt,lastSeenAt:openedAt,acknowledgedAt:null,
  acknowledgedById:null,acknowledgmentNote:null,resolvedAt:null
 };
+test("admin incident query fetches only six approved columns",()=>{
+ assert.deepEqual(Object.keys(incidentPanelSelect).sort(),[
+  "acknowledgedAt","count","key","lastSeenAt","openedAt","state"
+ ]);
+ assert.equal("acknowledgmentNote" in incidentPanelSelect,false);
+ assert.equal("acknowledgedById" in incidentPanelSelect,false);
+ assert.equal("resolvedAt" in incidentPanelSelect,false);
+});
 test("admin incident panel only displays non-sensitive projection",()=>{
  const actual=toOpsIncidentView(record);
  assert.deepEqual(actual,{
