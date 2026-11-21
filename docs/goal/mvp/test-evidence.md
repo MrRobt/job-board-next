@@ -326,6 +326,12 @@
 - 补查询规则测试先 RED **71/72**，后 GREEN 单元 **72/72 PASS**，直接 TS exit 0；专用隔离 MySQL 串行集成 **31/31 PASS**；Next.js 生产 build exit 0；显式授权只读扫描 exit 0，当前三类异常计数 0。
 - 未注入实际 `IN_DOUBT + claimedAt NULL` 数据库夹具，完整异常场景的数据库级 E2E/生产监控仍未验收；见 `b04-refund-null-claim-alert-2026-11-21.md`。
 
+## 2026-11-21 B04/B06 空领取时间退款告警真实 MySQL 回放
+
+- 现有隔离 MySQL 退款测试夹具中临时写 `claimedAt=NULL`，真实 Prisma 只读查询由 0 -> 1，实际运行告警 CLI 子进程返回 `ALERT`、exit 2、命中 `REFUND_IN_DOUBT`；订单 PAID、余 20 次不变，恢复时间后同 ID 告警计数再次归零。
+- 完整单元 **72/72 PASS**、文件串行集成 **31/31 PASS**、独立 TS/Next build exit 0。初次直接 `tsx --test` 命令缺乏正确 server-only 环境 exit 1，后改用项目正式集成脚本后测试成功。
+- 无生产或真实商户、模型请求；本包子验收 VERIFIED，实际告警送达和业务 P0 仍 IN_PROGRESS。独立证据 `b04-null-claim-mysql-replay-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

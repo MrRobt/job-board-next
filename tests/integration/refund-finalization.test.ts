@@ -1,6 +1,8 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import {randomUUID} from "node:crypto";
+import {spawnSync} from "node:child_process";
+import {resolve} from "node:path";
 import {db} from "../../lib/db";
 import {reserveToolOrder,settleToolPayment} from "../../lib/career/billing";
 import {requestToolRefund} from "../../lib/career/refund-cases";
@@ -10,6 +12,7 @@ import {queueApprovedRefund,claimRefundDispatchOnce} from "../../lib/career/refu
 import {reconcileDispatchedRefund} from "../../lib/career/refund-finalization";
 import type {RefundInquiryGateway} from "../../lib/payment/refund-query";
 import {available} from "../../lib/career/credits";
+import {assessOpsAlerts,opsAlertQueryFilters} from "../../lib/career/ops-alert-policy";
 
 test("signed refund inquiry settlement requires confirmed matching refund, atomically revokes unused credits",async()=>{
  if(process.env.INTEGRATION_TEST_DATABASE!=="true")throw new Error("Disposable MySQL required");
@@ -59,6 +62,47 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
   process.env.ENABLE_REAL_PAYMENT="true";
   process.env.ENABLE_REFUND_DISPATCH_CLAIM="true";
   await claimRefundDispatchOnce(dispatch.id,dispatcher.id);
+  // Simulate a corrupted, claimed refund outbox only in the disposable MySQL.
+  const initialFilters=opsAlertQueryFilters(new Date());
+  assert.equal(await db.toolRefundDispatch.count({where:{AND:[initialFilters.uncertainRefunds,{id:dispatch.id}]}}),0);
+  const originalClaim=await db.toolRefundDispatch.findUniqueOrThrow({
+   where:{id:dispatch.id},select:{claimedAt:true}
+  });
+  assert.ok(originalClaim.claimedAt);
+  try{
+   await db.toolRefundDispatch.update({where:{id:dispatch.id},data:{claimedAt:null}});
+   const filters=opsAlertQueryFilters(new Date());
+   assert.equal(await db.toolRefundDispatch.count({
+    where:{AND:[filters.uncertainRefunds,{id:dispatch.id}]}
+   }),1,"NULL claimedAt must be counted as a refund anomaly");
+   const cli=spawnSync(process.execPath,[
+    "--conditions=react-server",
+    resolve(process.cwd(),"node_modules/tsx/dist/cli.mjs"),
+    resolve(process.cwd(),"scripts/ops-alert-scan.ts")
+   ],{cwd:process.cwd(),encoding:"utf8",timeout:20_000,env:{
+    ...process.env,OPS_ALERT_READ_ONLY_APPROVED:"true",
+    INTEGRATION_TEST_DATABASE:"true",NODE_ENV:"test"
+   }});
+   assert.equal(cli.status,2,cli.stderr);
+   const report=JSON.parse(cli.stdout) as {
+    status:string;counts:{uncertainRefunds:number};alerts:string[]
+   };
+   assert.equal(report.status,"ALERT");
+   assert.ok(report.counts.uncertainRefunds>=1);
+   assert.ok(report.alerts.includes("REFUND_IN_DOUBT"));
+   assert.equal(assessOpsAlerts({
+    staleReservations:0,uncertainRefunds:1,agedReadyRefunds:0
+   }).status,"ALERT");
+   assert.equal((await db.toolOrder.findUniqueOrThrow({where:{id:order.id}})).status,"PAID");
+   assert.equal((await db.toolGrant.findUniqueOrThrow({where:{orderId:order.id}})).remaining,20);
+  }finally{
+   await db.toolRefundDispatch.update({
+    where:{id:dispatch.id},data:{claimedAt:originalClaim.claimedAt}
+   });
+  }
+  assert.equal(await db.toolRefundDispatch.count({
+   where:{AND:[opsAlertQueryFilters(new Date()).uncertainRefunds,{id:dispatch.id}]}
+  }),0,"restored recent claim must not trigger stale alert");
   // Default live gateway cannot query a real merchant without its own gate/keys.
   delete process.env.ENABLE_REFUND_QUERY;
   await assert.rejects(reconcileDispatchedRefund(dispatch.id,reviewer.id),/disabled/);

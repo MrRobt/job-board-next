@@ -301,6 +301,12 @@
 - 先补失败测试 71/72 RED，再修复为单元 **72/72 PASS**；隔离 MySQL 全量 **31/31 PASS**、TS/Next 生产构建 exit 0，实际隔离库授权扫描 exit 0、异常计数为 0。证据 `b04-refund-null-claim-alert-2026-11-21.md`。
 - 本地规则子包 VERIFIED，但没有对异常 NULL 数据进行真实 DB 夹具回放，生产监控/告警送达/商户核对仍 IN_PROGRESS。共享 Goal 变更与财务扫描均不得混提交。
 
+## 2026-11-21 B04/B06 IN_DOUBT 空领取时间专用 MySQL 真实告警回放
+
+- 本包只扩展退款最终结算的现有合成 MySQL 集成夹具：将本包的 `IN_DOUBT` 派发 `claimedAt` 临时置为 `NULL`，Prisma 实查 1 条；正式只读告警 CLI 子进程返回 `ALERT`、exit 2，`REFUND_IN_DOUBT` 命中。订单继续 PAID、20 次权益未变，`finally` 恢复后再次查询为 0。
+- 完整隔离 MySQL 集成 **31/31 PASS**、单元 **72/72 PASS**、独立 TS/Next.js 生产构建 exit 0；详见 `b04-null-claim-mysql-replay-2026-11-21.md`。初次单文件测试使用错误启动方式触发 `server-only` 导入失败，正式脚本复验成功。
+- 本地数据库级告警回放子包 VERIFIED；生产实际通知/响应、商户/模型、恢复/部署/登录态 E2E 等仍缺，B04/B06 整体仍 IN_PROGRESS。不修改其他 Agent 的共享 handoff、风险、矩阵和财务审计。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
