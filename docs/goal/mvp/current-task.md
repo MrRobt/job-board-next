@@ -205,6 +205,14 @@
 - 专项保护测试 2/2 PASS；全量单元 **40/40**、MySQL 集成 **28/28**、TS 与 Next build exit 0。第一次 TS 校验发现新测试辅助函数类型过窄，修复后复验通过。
 - B07 **IN_PROGRESS**：缺真实非空备份/异库恢复演练、旧库迁移基线、权限/回滚、生产 RPO/RTO 和告警；其他 Agent 的 `handoff.md`、三份主矩阵及财务扫描原有未提交改动不合并，独立增量与交接文件记录。
 
+## 2026-11-21 D02 匿名 HTTP 上线 Smoke 子包
+
+- 新增固定本机 `http://127.0.0.1:3000` 的 `scripts/ci-http-smoke.mjs`，并在 `package.json` 增加 `npm run release:smoke`：13 项匿名路径/缓存/安全头/已禁用入口和就绪探针检查，应用启动时实际执行 **13/13 PASS**，构建后复验也通过；不执行支付、AI 或数据库写入。
+- 全量单元 **40/40 PASS**、TypeScript 与 Next 生产构建 exit 0；MySQL 集成首轮 **27/28**（其他 Agent 未提交的 financial-risk-audit 用例失败），该专项单独复验 1/1、全量串行复跑 **28/28 PASS**。仍保留首次失败及资源竞争不稳定风险。
+- 现有 `.github/workflows/ci.yml` 因工作区安全检查阻断编辑，**未强行改动或宣称 CI 已接入**。后续由授权所有者将 `npm run release:smoke` 挂接现有 CI 已启动服务后，核验真实远端 Actions run 和全量浏览器 E2E。
+- 计划中的 U01 密码变更/旧会话撤销实现也被工作区敏感信息保护阻断；本轮没有修改身份认证代码，没有复用或绕过其他 Agent 的认证文件。
+- `D02-anonymous-smoke` 子包为本机 VERIFIED，D02 全体仍 IN_PROGRESS；财务商户、模型、生产数据库恢复和法律资质继续人工门禁。见 `d02-anonymous-smoke-2026-11-21.md`。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
