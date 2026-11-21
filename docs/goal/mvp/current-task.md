@@ -464,7 +464,7 @@
 ## 2026-11-21 U03/B04 DEAD 任务后台复核入口（显式双开关、默认关闭）
 
 - 已核验 `c7170ba` GitHub Actions run `44895785888` SUCCESS。新增后台 `/admin/dead-notifications` 与 Server Action：严格 `ENABLE_OPS_DEAD_REVIEW_READ`/`ENABLE_OPS_DEAD_REVIEW_WRITE` 双门禁且默认全关；requireAdmin 真实会话、Origin/Host 同源检查、DB 原子限流、只允许固定机器原因/明确勾选并拒绝重复字段，操作人仅从服务端 session 获取。复用已验收的 DB 角色核对和 DEAD 幂等复核。页面只展示最近 25 条必要元信息，**无重放、发送或自动调度**。
-- 新增开关、来源与表单安全单元测试；独立 tsc、npm test exit 0。完整 CI 与全新 MySQL 回归待本提交核验；真实管理员浏览器登录态、CSRF 跨域攻击测试和预发布开关/迁移验收仍未完成。独立证据 `b04-dead-review-web-gate-2026-11-21.md`。B04/U03 IN_PROGRESS，整体 NOT READY。
+- 新增开关、来源与表单安全单元测试；独立 tsc、npm test exit 0。已核验 `a6da140` GitHub Actions run `44897021404` **SUCCESS**：全新 MySQL8、152/152 单元、35/35 集成、0 FAIL/0 SKIP，Prisma/typecheck、Next build/HTTP smoke 全通过；真实管理员浏览器登录态、CSRF 跨域攻击测试和预发布开关/迁移验收仍未完成。独立证据 `b04-dead-review-web-gate-2026-11-21.md`。B04/U03 IN_PROGRESS，整体 NOT READY。
 
 ## Git 安全
 

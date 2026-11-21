@@ -491,7 +491,7 @@
 ## 2026-11-21 U03/B04 默认关闭的管理员 DEAD 复核 Web 入口
 
 - `c7170ba` GitHub Actions run `44895785888` SUCCESS。新增 Next.js 管理页面、Server Action 和独立开关/表单/同源校验；双开关均只有精确 `true` 启用复核，先核对 requireAdmin 登录态、Origin/Host、DB 限流，固定机器原因和用户确认，随后通过后端事务重新核对 ADMIN 与 DEAD；页面不泄露正文/令牌，没有发送/重入队。
-- 新增单元验证默认关闭、恶意/缺失来源、伪装域名和请求表单、重复字段与非法原因、伪造角色忽略。独立 tsc、npm test exit 0，完整 CI 构建/真库回归待核验。**未执行真实浏览器管理员登录态、跨站 POST 与 CSRF E2E**，不能据此声明实际 HTTP 攻防已验收。独立 `b04-dead-review-web-gate-2026-11-21.md`；B04/U03 IN_PROGRESS、NOT READY。
+- 新增单元验证默认关闭、恶意/缺失来源、伪装域名和请求表单、重复字段与非法原因、伪造角色忽略。独立 tsc、npm test exit 0；已核验 `a6da140` GitHub Actions run `44897021404` **SUCCESS**：全新 MySQL8、152/152 单元、35/35 集成，0 FAIL/0 SKIP，typecheck、Next build、HTTP smoke 全通过。**未执行真实浏览器管理员登录态、跨站 POST 与 CSRF E2E**，不能据此声明实际 HTTP 攻防已验收。独立 `b04-dead-review-web-gate-2026-11-21.md`；B04/U03 IN_PROGRESS、NOT READY。
 
 ## 保留的局限
 

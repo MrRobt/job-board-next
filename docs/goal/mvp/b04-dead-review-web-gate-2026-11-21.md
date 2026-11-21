@@ -1,6 +1,6 @@
 # U03/B04 终止通知复核后台入口（默认关闭）— 2026-11-21
 
-状态：本地独立 TS 与单元测试 VERIFIED，CI 完整构建/隔离 MySQL 回归待本提交；**真实管理员登录态/CSRF 浏览器 E2E 未执行，不算上线就绪**。
+状态：本地独立 TS 与单元测试 VERIFIED，CI 已核验 `a6da140` GitHub Actions [run 44897021404](https://github.com/MrRobt/job-board-next/actions/runs/44897021404) **SUCCESS**：全新 MySQL8、152/152 单元、35/35 集成、0 FAIL/0 SKIP，Prisma、typecheck、Next build、HTTP smoke 全部通过；**真实管理员登录态/CSRF 浏览器 E2E 未执行，不算上线就绪**。
 
 ## 现场恢复
 - 核验上一轮 `c7170ba` GitHub Actions [run 44895785888](https://github.com/MrRobt/job-board-next/actions/runs/44895785888) SUCCESS；第十四迁移复核记录和角色 DB 检查已在 MySQL 验收，不重复。
