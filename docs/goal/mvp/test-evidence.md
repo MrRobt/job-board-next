@@ -428,6 +428,12 @@
 - 新增 `assertOpsIncidentKey` 运行时枚举校验，事故状态计划及迁移写入前拒绝未知类别；单元补覆盖空 key、伪造类别、数字/null 和伪造 ACK 查询串。
 - 本地 npm test、tsc、Next build 均 exit 0；历史 MySQL **34 total / 31 PASS / 0 FAIL / 3 SKIP**（旧库缺第 9 事故迁移）。B04/U03 整体仍需真实登录态/CSRF HTTP、自动扫描与可靠通知及预发布恢复门禁。详见 `b04-incident-url-outcome-safety-2026-11-21.md`。
 
+## 2026-11-21 B04/U03 事故完整计数与状态同步隔离入口
+
+-  `ba15b8d` GitHub Actions `44880692126` success。独立双许可门禁 `approvedOpsIncidentSyncEnvironment`：原只读扫描许可 + 额外 `OPS_INCIDENT_SYNC_APPROVED=true`，生产及非专用 DB 拒绝、未授权 0 DB IO。新增 `createPrismaOpsIncidentCountReader` RepeatableRead 事务读取三类别计数，完整/合法后统一调用现有原子同步入口；读失败不会以 0 代替或自动解决事故。
+- 全量 npm 单元、独立 TS、Next build exit 0；历史隔离 MySQL **34 total /31 PASS /0 FAIL /3 SKIP**（旧库缺事故第九迁移）。本轮新增协调器/适配器只有模拟的同快照事务与 fail-closed 单元测试，**没有声称真实迁移 MySQL 端到端或生产 Cron 已完成**。
+- 证据 `b04-isolated-incident-scan-coordinator-2026-11-21.md`。仍欠可靠通知、真实管理会话/CSRF E2E 和预发布备份/恢复。B04/U03 IN_PROGRESS，生产开关保持关闭。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

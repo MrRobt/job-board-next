@@ -403,6 +403,12 @@
 - `transitionOpsIncident` 新增运行时事故类别白名单校验，避免 JS/未知 key 绕过 TS 类型而持久化未许可类别；`planOpsIncidents` 复用相同验证。新增伪造 URL 和非法类别回归测试。
 - npm 单元、TypeScript、Next build exit 0；历史隔离 MySQL **34 total / 31 PASS / 0 FAIL / 3 SKIP**（旧库未迁第 9 项，不能算全部 DB 重新验收）。独立证据 `b04-incident-url-outcome-safety-2026-11-21.md`；本轮远端 CI 待核验。其他 Agent 未提交内容不动、生产开关均不变，B04/U03 仍 IN_PROGRESS。
 
+## 2026-11-21 B04/U03 隔离事故扫描协调器安全入口（未接生产）
+
+- 已核实 `ba15b8d` GitHub Actions run `44880692126` success。当前只读 CLI 和事务同步服务原未有受控协调层；新增 `runIsolatedOpsIncidentScan`，只有历史 localhost 专用 MySQL + 只读许可 + 单独 `OPS_INCIDENT_SYNC_APPROVED=true` 才有权获取完整三类计数并写事务；生产、远端、开发普通库全部 fail closed，默认无操作。
+- 新增 Prisma `RepeatableRead` 同快照三计数读取适配；任一计数查询异常、漏字段、负数或时钟无效都不会开始事故同步事务。仅作为隔离候选，未接生产 Cron/CLI、通知或资金/AI 服务。
+- 新增单元覆盖门禁 0 IO、部分观测拒绝、同快照事务与失败传播；npm test、TS、Next build exit 0，历史 MySQL `34 total /31 PASS /0 FAIL /3 SKIP`（旧库缺事故第九迁移）。详细 `b04-isolated-incident-scan-coordinator-2026-11-21.md`；B04/U03 整体 IN_PROGRESS、上线 NOT READY。其他 Agent 脏文件未修改。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
