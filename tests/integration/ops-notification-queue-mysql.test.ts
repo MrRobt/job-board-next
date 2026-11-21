@@ -2,7 +2,7 @@ import {test} from "node:test";
 import assert from "node:assert/strict";
 import {db} from "../../lib/db";
 import {claimOpsNotificationIntent} from "../../lib/career/ops-notification-claim";
-import {failOpsNotificationClaim} from "../../lib/career/ops-notification-failure";
+import {failOpsNotificationClaim,type OpsNotificationFailureStore} from "../../lib/career/ops-notification-failure";
 import {createPrismaOpsNotificationFailureStore,type OpsNotificationFailurePrismaPort} from "../../lib/career/ops-notification-failure-prisma-store";
 import {preflightOpsNotification} from "../../lib/career/ops-notification-preflight";
 import {createPrismaOpsNotificationPreflightStore,type OpsNotificationPreflightPrismaPort} from "../../lib/career/ops-notification-preflight-prisma-store";
@@ -72,6 +72,47 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
   assert.equal((claimRow as unknown as {attemptCount:number}).attemptCount,2);
   const failure=createPrismaOpsNotificationFailureStore(db as unknown as OpsNotificationFailurePrismaPort);
   const failedAt=new Date(openedAt.getTime()+302300);
+  // Exercise actual MySQL rollback: status CAS succeeds inside a real Prisma
+  // Serializable transaction, then the audit insert violates the real FK.
+  // No task or audit changes may survive that failed transaction.
+  type FailureTx=Parameters<Parameters<OpsNotificationFailurePrismaPort["$transaction"]>[0]>[0];
+  const invalidAuditPort:OpsNotificationFailurePrismaPort={
+   $transaction:(callback,options)=>db.$transaction(async tx=>{
+    // The local Windows Prisma Client may be stale; the fresh CI Client is
+    // regenerated before this runs. The injected delegate retains actual
+    // Prisma operations and changes only the test audit FK to a missing key.
+    const realTx=tx as unknown as FailureTx;
+    return callback({
+     opsIncidentNotificationIntent:realTx.opsIncidentNotificationIntent,
+     opsNotificationFailureEvent:{
+      create:args=>realTx.opsNotificationFailureEvent.create({
+       data:{...args.data,intentKey:"f".repeat(64)}
+      })
+     }
+    });
+   },options)
+  };
+  await assert.rejects(
+   failOpsNotificationClaim(
+    createPrismaOpsNotificationFailureStore(invalidAuditPort),
+    intent.idempotencyKey,recovered.claimToken,"TEMPORARY_FAILURE",failedAt
+   ),
+   "Injected FK-invalid audit insert must reject and roll back status CAS"
+  );
+  const rolledBack=await db.opsIncidentNotificationIntent.findUniqueOrThrow({
+   where:{idempotencyKey:intent.idempotencyKey}
+  }) as unknown as {
+   state:string;claimToken:string|null;attemptCount:number;
+   failureCode:string|null;nextAttemptAt:Date|null;
+  };
+  assert.equal(rolledBack.state,"CLAIMED");
+  assert.equal(rolledBack.claimToken,recovered.claimToken);
+  assert.equal(rolledBack.attemptCount,2);
+  assert.equal(rolledBack.failureCode,null);
+  assert.equal(rolledBack.nextAttemptAt,null);
+  const rollbackAudit=await db.$queryRaw<Array<{n:bigint}>>`
+   SELECT COUNT(*) AS n FROM OpsNotificationFailureEvent WHERE intentKey=${intent.idempotencyKey}`;
+  assert.equal(Number(rollbackAudit[0]?.n),0);
   const disposition=await failOpsNotificationClaim(failure,intent.idempotencyKey,recovered.claimToken,"TEMPORARY_FAILURE",failedAt);
   assert.equal(disposition.status,"RETRY_WAIT");
   const firstAudit=await db.$queryRaw<Array<{attemptCount:number;disposition:string;failureCode:string}>>`

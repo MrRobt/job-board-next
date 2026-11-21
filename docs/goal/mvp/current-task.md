@@ -450,6 +450,11 @@
 - 核验 `a6b5c4a` CI run `44891820268` SUCCESS。新增 `OpsNotificationFailureEvent` 及第十三迁移，`UNIQUE(intentKey,attemptCount)` 保证同一次尝试仅一个失败事件，字段不含个人信息或令牌。Prisma Serializable Store 在更新通知状态 CAS 成功后同事务插入审计；CAS 冲突不记事件，审计异常阻断整个事务，保持外部发送关闭。
 - 新增单元审计失败传播与重复令牌去重测试；原 MySQL 队列集成测试核验首次失败事件存在且重复提交不新增，并只清理本测试产生的审计。单元、独立 TS exit 0；本机 Prisma validate 与完整 Next build 因执行器超时未完成。已核验 `ec9506e` GitHub Actions run `44892913723` **SUCCESS**：第十三迁移全新 MySQL8 部署可重复、145/145 单元、35/35 集成、0 FAIL/0 SKIP，真实首次失败事件存在及重复令牌不增加事件 PASS，Prisma generate/typecheck、Next build/HTTP smoke 成功；尚未单独完成审计写入故障的真实数据库回滚注入演练。独立证据 `b04-notification-failure-audit-2026-11-21.md`。B04/U03 仍 IN_PROGRESS，整体 NOT READY。
 
+## 2026-11-21 B04/U03 真实 MySQL 审计插入失败事务回滚
+
+- 核验 `b2c7d44` GitHub Actions run `44893435390` SUCCESS。补齐 `ops-notification-queue-mysql.test.ts` 故障注入：同一真实 Prisma Serializable 事务先执行状态 CAS，审计写入时故意使用不存在的 intentKey 引发数据库 FK 失败；事务后核验任务仍 CLAIMED/旧 token 有效/尝试数不变、失败码/重试时间为空、审计记录 0，再正常失败写入一条事件。
+- 仅修改既有集成测试并新增独立证据，不改变生产逻辑/迁移/通知开关；本地 tsc 和 npm test exit 0。真库 FK/回滚分支需以本提交全新 CI 实测核验。独立 `b04-notification-fk-rollback-2026-11-21.md`。B04/U03 IN_PROGRESS，整体 NOT READY。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
