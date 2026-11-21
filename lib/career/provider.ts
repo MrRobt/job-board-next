@@ -1,8 +1,9 @@
 import "server-only";
-import {input as inputSchema,hasContact,output,type Input,type Output} from "./contracts";
+import {input as inputSchema,hasContact,type Input,type Output} from "./contracts";
 import {approvedModelBaseUrl,readBoundedModelResponse} from "./provider-safety";
 import {readModelCostPolicy,checkModelRequestBudget} from "./model-cost-policy";
 import {modelUsageEvidence,type ModelUsageEvidence} from "./model-usage";
+import {validateSafeModelOutput} from "./output-safety";
 export function liveAvailable(){
  try{
  const endpoint=approvedModelBaseUrl(process.env.AI_BASE_URL,process.env.AI_APPROVED_BASE_URLS);
@@ -35,6 +36,6 @@ export async function generateMeasured(input:Input):Promise<{report:Output;usage
  const parsed=JSON.parse(raw);
  const answer=parsed?.choices?.[0]?.message?.content;
  if(typeof answer!=="string")throw new Error("Invalid model result");
- const report=output.parse(JSON.parse(answer));
+ const report=validateSafeModelOutput(JSON.parse(answer));
  return {report,usage:modelUsageEvidence(parsed?.usage,process.env.AI_PROVIDER_NAME??"",process.env.AI_MODEL??"",costPolicy)};
 }
