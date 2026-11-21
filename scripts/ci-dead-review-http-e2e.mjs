@@ -110,7 +110,8 @@ async function run(){
  assert.equal(await countReviews(),0,"Missing Origin must not write");
  checks.push("missing-origin blocked");
  response=await post(tokenByRole.get("USER"),origin);
- assert.ok([307,308].includes(response.status),"Regular user action must redirect");
+ assert.ok([303,307,308].includes(response.status),`Regular user POST must redirect, got ${response.status}`);
+ assert.equal(location(response).pathname,"/","Regular user action cannot reach admin flow");
  await response.body?.cancel();
  assert.equal(await countReviews(),0,"Regular user must not write");
  checks.push("user POST blocked");
