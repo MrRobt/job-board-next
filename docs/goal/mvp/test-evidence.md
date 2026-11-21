@@ -392,6 +392,12 @@
 - 运行中旧 3000 服务的 `release:smoke` exit 1（新 `/admin/incidents` 尚不存在，HTTP 404）；临时独立 3100 端口启动本轮构建并实际检查 `/admin`、`/admin/incidents`、`/admin/refund-dispatch`，均 **307 /login**；没有触碰 3000 旧服务进程。HTTP 检查仅为匿名保护，不是登录态/CSRF E2E。
 - 历史隔离 MySQL 全量回归 `32 total/31 PASS/1 SKIP/0 FAIL`，SKIP 是旧库缺第 9 项事故迁移；独立记录 `b04-admin-incident-minimal-select-smoke-2026-11-21.md`，B04/U03 总体依旧 IN_PROGRESS。
 
+## 2026-11-21 B04/U03 只读权限与确认写入严格分离
+
+- 核对 GitHub Actions `2290948` run `44876839721` 完成且 success。实现 `opsIncidentGates`，只读操作不会显示或授权写入，确认开关才放行人工事务；对错误大小写/空格默认拒绝。事故四个关键 FormData 字段拒绝重复值，新增针对性单测。
+- 本地全量单元 exit 0、TypeScript exit 0、Next build exit 0。历史隔离 MySQL 首轮 **32 total/30 PASS/1 FAIL/1 SKIP**，FAIL 是其他 Agent 的 `financial-risk-audit` 测试遇 `127.0.0.1:3306` 暂时不可连接；复跑 **32 total/31 PASS/0 FAIL/1 SKIP**。唯一 SKIP 是旧隔离库缺第 9 项迁移，不能算本轮新表 UAT。
+- 真实 ADMIN/USER/匿名登录态、CSRF、只读 HTTP 和事故数据库操作链还需要预发布 E2E；仅本轮单元/编译安全子包 VERIFIED，B04/U03 整体 IN_PROGRESS。证据 `b04-incident-read-write-gates-2026-11-21.md`。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

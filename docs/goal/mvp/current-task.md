@@ -367,6 +367,12 @@
 - 更新匿名 HTTP smoke 加入 `/admin/incidents`，支持严格限制到 `127.0.0.1` 的可选本地端口。初次对既有 3000 服务运行 smoke exit 1（旧服务缺新路由返回 404）；未动其他 Agent 进程，另起当前构建临时 3100 服务，`/admin`、`/admin/incidents`、`/admin/refund-dispatch` 实际均 307→/login，临时子进程随后退出。
 - npm 单元、TS、Next build exit 0；历史独立 MySQL **31 PASS/1 SKIP/0 FAIL**（第 9 项迁移在旧库缺失，该测试在既有 CI 新 MySQL 有 PASS 证据）。完整管理员登录态/CSRF/E2E、部署库迁移、扫描通知仍 IN_PROGRESS。独立证据 `b04-admin-incident-minimal-select-smoke-2026-11-21.md`。其它 Agent 的脏文件保护不动。
 
+## 2026-11-21 B04/U03 独立只读/人工确认开关与重复表单防护
+
+- GitHub Actions `2290948` run `44876839721` success。拆分独立 `ENABLE_OPS_INCIDENT_READ=true`（只读）和 `ENABLE_OPS_INCIDENT_ACK=true`（写且可读）；默认均关闭，非精确 `true` 不放行。管理员页面仅写开关可提交、只读 OPEN 不再误显示为已解决；导航与服务端 Action 双重保持一致。
+- 事故确认表单 `confirmed/key/expectedOpenedAt/reason` 必须各恰好一个值，拒绝多值污染，补组合开关与重复字段单元用例。npm test、TS、Next build exit 0。历史 MySQL 首轮 `30 PASS/1 FAIL/1 SKIP`（其他 Agent 未提交财务审计测试遇短时连接故障）；原命令复跑 `31 PASS/0 FAIL/1 SKIP`。旧库新事故表仍 SKIP，不能算真实页面 E2E。
+- 详细 `b04-incident-read-write-gates-2026-11-21.md`；B04/U03 仍 IN_PROGRESS，外部商户/模型/合规门禁未改变；其余 Agent 脏文件未修改。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

@@ -31,10 +31,17 @@ test("ack form rejects missing confirmation, unknown keys, malformed episodes",(
   assert.throws(()=>parseOpsAckForm(payload(change)));
  }
 });
+test("ack form rejects duplicate security-sensitive form fields",()=>{
+ for(const name of ["confirmed","key","expectedOpenedAt","reason"]){
+  const form=payload();
+  form.append(name,name==="confirmed"?"yes":"wrong");
+  assert.throws(()=>parseOpsAckForm(form),/Missing or duplicate/);
+ }
+});
 test("ack form rejects non-string FormData and missing values",()=>{
  const f=payload();
  f.set("key",new Blob(["not a key"]),"blob.txt");
  assert.throws(()=>parseOpsAckForm(f),/key/);
  f.delete("confirmed");
- assert.throws(()=>parseOpsAckForm(f),/confirmation/);
+ assert.throws(()=>parseOpsAckForm(f),/Missing or duplicate/);
 });

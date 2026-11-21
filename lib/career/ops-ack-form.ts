@@ -8,6 +8,11 @@ export type OpsAckFormCommand=Readonly<{
 }>;
 
 export function parseOpsAckForm(form:FormData):OpsAckFormCommand{
+ // Reject ambiguous multi-valued fields. A client must not be able to
+ // smuggle conflicting episode IDs or confirmations in multipart payloads.
+ for(const name of ["confirmed","key","expectedOpenedAt","reason"]){
+  if(form.getAll(name).length!==1)throw new Error("Missing or duplicate acknowledgment field");
+ }
  if(form.get("confirmed")!=="yes")throw new Error("Explicit confirmation required");
  const key=form.get("key");
  if(typeof key!=="string"||!keys.includes(key))throw new Error("Invalid incident key");

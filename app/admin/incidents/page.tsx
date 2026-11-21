@@ -3,6 +3,7 @@ import {requireAdmin} from "@/lib/auth";
 import {db} from "@/lib/db";
 import {confirmOpsIncident} from "@/app/actions/ops-incidents";
 import {incidentPanelSelect,toOpsIncidentView,type OpsIncidentPanelRecord} from "@/lib/career/ops-incident-view";
+import {opsIncidentGates} from "@/lib/career/ops-incident-gates";
 
 /** Manual admin-only operations review. Never writes to a financial ledger. */
 export default async function OpsIncidentAdmin({
@@ -10,7 +11,8 @@ export default async function OpsIncidentAdmin({
 }:{searchParams:Promise<{incidentError?:string;incidentOutcome?:string}>}){
  await requireAdmin();
  const params=await searchParams;
- if(process.env.ENABLE_OPS_INCIDENT_ACK!=="true")
+ const gates=opsIncidentGates(process.env);
+ if(!gates.canRead)
   return <main><h1>运行事故与告警</h1>
    <p className="muted">人工事故确认尚未启用。须先核实目标数据库迁移、权限和审计门禁。</p>
    <Link href="/admin">返回管理概览</Link></main>;
@@ -44,14 +46,14 @@ export default async function OpsIncidentAdmin({
     <td>{item.label}</td><td>{item.priority}</td><td>{item.state}</td>
     <td>{item.count}</td><td>{item.openedAt.toISOString()}</td>
     <td>{item.lastSeenAt.toISOString()}</td>
-    <td>{item.state==="OPEN"?
+    <td>{item.state==="OPEN"&&gates.canAcknowledge?
      <form action={confirmOpsIncident}>
       <input type="hidden" name="key" value={item.key}/>
       <input type="hidden" name="expectedOpenedAt" value={item.openedAt.toISOString()}/>
       <label>核实记录（10–500 字）<textarea name="reason" minLength={10} maxLength={500} required rows={3} placeholder="记录实际核对工作，不包含用户敏感信息"/></label>
       <label><input type="checkbox" name="confirmed" value="yes" required/> 已人工核实并愿意接手跟进；此操作不处理资金或自动通知</label>
       <button type="submit" className="quiet">确认接手事故</button>
-     </form>:item.state==="ACKNOWLEDGED"?"已记录人工确认":"已解决"}
+     </form>:item.state==="OPEN"?"待人工处理（只读模式）":item.state==="ACKNOWLEDGED"?"已记录人工确认":"已解决"}
     </td>
    </tr>)}</tbody>
   </table>

@@ -1,3 +1,4 @@
 import Link from "next/link";
 import {requireAdmin} from "@/lib/auth";
-export default async function AdminLayout({children}:{children:React.ReactNode}){await requireAdmin();return <div className="grid top"><aside className="card categories"><h3>管理后台</h3><Link href="/admin">数据概览</Link><Link href="/admin/tool-orders">工具订单</Link>{process.env.ENABLE_OPS_INCIDENT_ACK==="true"&&<Link href="/admin/incidents">运行事故</Link>}<Link href="/admin/jobs">历史招聘</Link><Link href="/admin/orders">历史订单</Link><Link href="/admin/reports">历史举报</Link></aside><section>{children}</section></div>}
+import {opsIncidentGates} from "@/lib/career/ops-incident-gates";
+export default async function AdminLayout({children}:{children:React.ReactNode}){await requireAdmin();return <div className="grid top"><aside className="card categories"><h3>管理后台</h3><Link href="/admin">数据概览</Link><Link href="/admin/tool-orders">工具订单</Link>{opsIncidentGates(process.env).canRead&&<Link href="/admin/incidents">运行事故</Link>}<Link href="/admin/jobs">历史招聘</Link><Link href="/admin/orders">历史订单</Link><Link href="/admin/reports">历史举报</Link></aside><section>{children}</section></div>}

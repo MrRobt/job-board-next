@@ -5,6 +5,7 @@ import {requireAdmin} from "@/lib/auth";
 import {db} from "@/lib/db";
 import {allowAttempt} from "@/lib/rate-limit";
 import {parseOpsAckForm} from "@/lib/career/ops-ack-form";
+import {opsIncidentGates} from "@/lib/career/ops-incident-gates";
 import {acknowledgeOpsIncidentWithStore} from "@/lib/career/ops-incident-acknowledgment-service";
 import {createPrismaOpsIncidentStore,type OpsPrismaClientPort} from "@/lib/career/ops-incident-prisma-store";
 
@@ -15,7 +16,7 @@ import {createPrismaOpsIncidentStore,type OpsPrismaClientPort} from "@/lib/caree
  */
 export async function confirmOpsIncident(form:FormData){
  const admin=await requireAdmin();
- if(process.env.ENABLE_OPS_INCIDENT_ACK!=="true")
+ if(!opsIncidentGates(process.env).canAcknowledge)
   redirect("/admin/incidents?incidentError=disabled");
  let outcome:"ACKNOWLEDGED"|"ALREADY_ACKNOWLEDGED";
  try{
