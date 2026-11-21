@@ -404,6 +404,12 @@
 - `npm test`、独立 TypeScript `tsc --noEmit` 和 Next build 全部 exit 0；本地历史隔离库 **33 total/31 PASS/0 FAIL/2 SKIP**，两个 SKIP 都因旧库没有第 9 项迁移，绝非新业务链路真实数据库已通过。新增 CI=true 缺表失败的新 MySQL 集成测试将由远端 CI 验证。
 - 未开启事故自动落库/通知、无预发布迁移或恢复演练，商业资金和外部资质仍未验收。完整 `b04-incident-sync-prisma-candidate-2026-11-21.md`，B04/U03 整体 IN_PROGRESS。
 
+## 2026-11-21 B04/U03 完整扫描三类别事务原子性
+
+- 同一扫描完整计数通过 `assessOpsAlerts` 校验，再在一个 `store.transaction` 里对全部三类事故分别读状态、CAS 更新、追加审计。用 mock 注入模拟第三类审计失败，前两类状态及事件同时回滚；缺计数、不合法 count 或时间未启动事务。
+- 本地 npm 单元、TypeScript、Next 生产构建 exit 0，历史隔离 MySQL **33 total / 31 PASS / 0 FAIL / 2 SKIP**；SKIP 是旧库缺第 9 项迁移。已核实前一提交 `91f867e` GitHub Actions run `44878355008` success：111/111 单元、32/32 集成，含单类别同步真实 MySQL 审计测试通过；**本轮新增三类同事务仍仅本地单测，待自己的 CI**。未启动自动扫描/通知，未改生产库或财务状态。
+- 独立 `b04-incident-batch-scan-transaction-2026-11-21.md`。本轮纯逻辑 VERIFIED，完整 B04/U03 仍 IN_PROGRESS。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
