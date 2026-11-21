@@ -117,7 +117,8 @@ async function run(){
  checks.push("user POST blocked");
  response=await post(tokenByRole.get("ADMIN"),origin);
  assert.ok([303,307,308].includes(response.status),`Admin action POST unexpected ${response.status}`);
- assert.equal(location(response).searchParams.get("reviewOutcome"),"REVIEWED");
+ assert.equal(location(response).searchParams.get("reviewOutcome"),"REVIEWED",
+  `Valid admin POST unexpected status=${response.status} path=${location(response).pathname} error=${location(response).searchParams.get("reviewError")} reviewCount=${await countReviews()}`);
  await response.body?.cancel();
  assert.equal(await countReviews(),1,"Admin review must write once");
  checks.push("admin POST reviewed once");
