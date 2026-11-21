@@ -313,6 +313,12 @@
 - TDD 初次 72/73 RED（策略未存在）；完善后单元 **76/76 PASS**，独立 TypeScript exit 0、专用隔离 MySQL 全量集成 **31/31 PASS**、Next.js 生产 build exit 0。见 `b04-incident-policy-2026-11-21.md`。
 - 该子包只验证**无副作用规则**，没有持久事故记录、管理员确认 API、实际通知送达/重试或数据库迁移，不能宣称生产告警去重已经生效。B04/B06/U03 仍 IN_PROGRESS；其他 Agent 共享文档和财务风险审计不得混提交。
 
+## 2026-11-21 B04/U03 运维事故持久化结构候选（待迁移 UAT）
+
+- 为跨进程告警确认准备 `OpsAlertIncident`、`OpsAlertIncidentEvent` Prisma 模型和独立 SQL 迁移候选；本轮未在任何数据库应用，未改资金/次数账本。新增 `transitionOpsIncident` 无副作用状态转换，异常归零 RESOLVED，重新出现必须 REOPENED 并重置原确认，防止旧确认永久抑制新事故。
+- 新单元 4 项，TDD 先 RED 76/77 后全量 **80/80 PASS**；Prisma validate exit 0、直接 TS exit 0、Next.js build exit 0。`prisma generate` Windows DLL EPERM，专用隔离库 migrate deploy 被安全门禁拦截，本轮集成复验调用也被拦截；不宣称 9 项迁移/持久化/数据库 E2E 验收成功。
+- 本轮纯状态转换子包 VERIFIED，**事故持久化与迁移整体 BLOCKED/IN_PROGRESS**；独立证据 `b04-incident-persistence-candidate-2026-11-21.md`。其他 Agent 共享 handoff/矩阵/风险、财务审计保持原样。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

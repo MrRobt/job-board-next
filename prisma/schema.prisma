@@ -45,6 +45,8 @@ model User {
   approvedRefunds ToolRefundIntent[] @relation("RefundIntentApprover")
   claimedRefundDispatches ToolRefundDispatch[]
   refundInquiryEvents ToolRefundInquiryEvent[]
+  acknowledgedOpsIncidents OpsAlertIncident[] @relation("OpsIncidentAcknowledgment")
+  operatedOpsIncidentEvents OpsAlertIncidentEvent[] @relation("OpsIncidentEventOperator")
 }
 model Session {
   tokenHash String @id @db.Char(64)
@@ -304,6 +306,39 @@ model ToolOrderReconcileEvent {
   createdAt DateTime @default(now())
   @@index([orderId,createdAt])
   @@index([operatorId,createdAt])
+}
+
+// B04/U03: Operational incident state is isolated from financial ledgers.
+enum OpsAlertIncidentState {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+model OpsAlertIncident {
+  key String @id @db.VarChar(40)
+  state OpsAlertIncidentState @default(OPEN)
+  count Int
+  openedAt DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  acknowledgedAt DateTime?
+  acknowledgedById String?
+  acknowledgedBy User? @relation("OpsIncidentAcknowledgment", fields:[acknowledgedById], references:[id], onDelete:Restrict)
+  acknowledgmentNote String? @db.VarChar(500)
+  resolvedAt DateTime?
+  events OpsAlertIncidentEvent[]
+  @@index([state,lastSeenAt])
+}
+model OpsAlertIncidentEvent {
+  id String @id @default(cuid())
+  incidentKey String @db.VarChar(40)
+  incident OpsAlertIncident @relation(fields:[incidentKey],references:[key],onDelete:Restrict)
+  action String @db.VarChar(20)
+  count Int
+  operatorId String?
+  operator User? @relation("OpsIncidentEventOperator",fields:[operatorId],references:[id],onDelete:Restrict)
+  note String? @db.VarChar(500)
+  createdAt DateTime @default(now())
+  @@index([incidentKey,createdAt])
 }
 
 model ToolRunAdjustment {

@@ -338,6 +338,12 @@
 - 直接 `tsc --noEmit` exit 0；隔离 MySQL 完整文件串行集成 **31/31 PASS**；Next.js 生产 build exit 0。纯函数未触发真实告警、商户/AI 请求、资金/权益/正常开发库修改。
 - 仅纯策略子包 VERIFIED；实际跨进程状态持久化、管理员确认操作、通知投递与重试仍 IN_PROGRESS。证据 `b04-incident-policy-2026-11-21.md`。
 
+## 2026-11-21 B04/U03 持久事故结构候选及重开保护
+
+- 本轮新增 Prisma 双事故表、审计关系、独立候选迁移；Schema `validate` exit 0，**未执行成功数据库迁移**。纯状态转换新增 4 项：首次/更新/解决/重开（清空旧确认）、校验失败关闭。TDD 76/77 RED，最终完整单元 **80/80 PASS**、独立 TS exit 0、Next build exit 0。
+- `prisma generate` Windows query engine DLL rename EPERM；专用隔离库 migrate deploy 以及本轮完整集成测试的工具调用均被安全检查拦截，**本轮无集成通过数字**。Schema/SQL 未在数据库实地验收，真实持久化和告警投递不算 VERIFIED。
+- 详见 `b04-incident-persistence-candidate-2026-11-21.md`；B04/U03 和 D02 仍 IN_PROGRESS，外部审批继续 BLOCKED。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
