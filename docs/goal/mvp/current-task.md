@@ -325,6 +325,12 @@
 - TDD 首次 80/81 RED（模块未实现），补实现与修正大小写断言后全量单元 **85/85 PASS**、TypeScript exit 0、Next.js 构建 exit 0；现有专用隔离 MySQL 集成回归 **31/31 PASS**（不包含新确认操作落库）。证据 `b04-acknowledgment-episode-guard-2026-11-21.md`。
 - 该子包本地规则 VERIFIED；第 9 项迁移 UAT、实际管理员确认服务/权限、事务审计及告警发送仍 IN_PROGRESS/BLOCKED。其他 Agent 的共享 handoff、风险、矩阵、发布清单和财务审计继续保护。
 
+## 2026-11-21 B04/U03 告警确认事务服务契约（本地子包）
+
+- 接续前轮 CAS 确认策略，新增 `acknowledgeOpsIncidentWithStore` 事务服务：管理员身份必须从存储侧重新查询，事务内读取事故快照、按类别/当前 OPEN/发生轮次 CAS 更新一行后写审计；相同确认重试幂等，旧事故轮次、并发抢先更新及审计失败必须拒绝或回滚，不接触资金账本。
+- 新增 5 项事务存储模拟器单测，先 RED（服务不存在），后全量单元 **90/90 PASS**、TypeScript exit 0、Next.js build exit 0，隔离 MySQL 现有回归 **31/31 PASS**。这不是新事务的 MySQL 验收；未接真实 Prisma adapter，未应用第 9 项迁移，真实持久化和通知仍 BLOCKED/IN_PROGRESS。见 `b04-ack-transaction-contract-2026-11-21.md`。
+- 本地事务契约子包 VERIFIED，B04/U03 整体依旧 IN_PROGRESS；共享 handoff、矩阵、风险与其他 Agent 的财务审计保护不动。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
