@@ -260,6 +260,14 @@
 - 当前 A02 整体仍 `IN_PROGRESS`：真实 usage 与 ToolRun 原子落库的工作区安全阻断、独立账单真实/完整性、动态计价、正式监控和审批未解除。见 `docs/goal/mvp/a02-offline-cost-check-2026-11-21.md` 及独立交接。
 - 当前其他 Agent 的 `financial-risk-audit`、主 handoff/需求矩阵/风险/发布清单、工具缓存及锁文件保留原样；仅精确提交本轮源码和增量证据。
 
+## 2026-11-21 A01 本地逐轮面试工作流（本轮）
+
+- 复核 A01 未完成多轮面试路径：现有 `questions` 和 `feedback` 只能单次独立操作。扩展 `components/CareerForm.tsx`：题目直接选择进入回答反馈，随后继续下一轮，当前页面最多 5 轮；历史仅保留题目/反馈摘要和来源，可清空，刷新清空，不保存完整回答/跨页历史。
+- 新增 `lib/career/interview-rounds.ts`（纯状态校验）及 `tests/interview-rounds.test.ts`（2/2 PASS），验证最多五轮、不可变历史数据、异常长度/方式拒绝及不保存答案字段。
+- TypeScript exit 0，单元全量 **62/62**，专用 MySQL 文件串行集成 **31/31**、Next.js 16.4.6 生产 build exit 0；**尚缺真实浏览器交互/移动端 E2E**，没有调用真实模型/商户、没有更改数据库、AI 授权/计次/失败返还仍沿用已有服务端链路。
+- A01 子包本地 VERIFIED，但 A01 整体 IN_PROGRESS，真正语义连贯的跨轮 AI 对话、正式隐私评审与获批模型 UAT 尚缺；不以本地 UI 通过代替生产就绪。详细证据 `docs/goal/mvp/a01-interview-rounds-2026-11-21.md`。
+- 主 handoff、风险、需求矩阵、发布清单与财务风险扫描及各种工具缓存为其他 Agent 的未提交修改，继续精确 stage 自己文件，不覆盖不混提交。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
