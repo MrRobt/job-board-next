@@ -1,6 +1,8 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import {db} from "../../lib/db";
+import {claimOpsNotificationIntent} from "../../lib/career/ops-notification-claim";
+import {createPrismaOpsNotificationLeaseStore,type OpsNotificationClaimPrismaPort} from "../../lib/career/ops-notification-claim-prisma-store";
 import {planOpsNotificationIntents} from "../../lib/career/ops-notification-intents";
 import {queueInitialOpsNotificationIntent} from "../../lib/career/ops-notification-queue";
 import {createPrismaOpsNotificationQueueStore,type OpsNotificationQueuePrismaPort} from "../../lib/career/ops-notification-queue-prisma-store";
@@ -46,9 +48,23 @@ test("B04/U03 migrated MySQL: durable notification queue is unique per episode, 
   assert.equal(rows[0].state,"QUEUED");
   assert.equal(rows[0].kind,"NOTIFY");
   assert.equal(rows[0].count,1);
-  const resolved=await syncOpsIncidentWithStore(sync,key,0,new Date(openedAt.getTime()+3000));
+  const lease=createPrismaOpsNotificationLeaseStore(db as unknown as OpsNotificationClaimPrismaPort);
+  const first=await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(openedAt.getTime()+2200));
+  assert.equal(first.status,"CLAIMED");
+  assert.equal((await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(openedAt.getTime()+2300))).status,"BUSY");
+  const recovered=await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(openedAt.getTime()+302200));
+  assert.equal(recovered.status,"CLAIMED");
+  if(first.status==="CLAIMED"&&recovered.status==="CLAIMED")
+   assert.notEqual(first.claimToken,recovered.claimToken);
+  const claimRow=await db.opsIncidentNotificationIntent.findUniqueOrThrow({
+   where:{idempotencyKey:intent.idempotencyKey}
+  });
+  // The local Windows Prisma client may still predate migration 11 (DLL locked).
+  assert.equal((claimRow as unknown as {attemptCount:number}).attemptCount,2);
+  const resolved=await syncOpsIncidentWithStore(sync,key,0,new Date(openedAt.getTime()+303000));
   assert.equal(resolved.event,"RESOLVED");
-  assert.equal(await queueInitialOpsNotificationIntent(queue,intent,new Date(openedAt.getTime()+4000)),"STALE");
+  assert.equal((await claimOpsNotificationIntent(lease,intent.idempotencyKey,new Date(openedAt.getTime()+602200))).status,"STALE");
+  assert.equal(await queueInitialOpsNotificationIntent(queue,intent,new Date(openedAt.getTime()+304000)),"STALE");
   assert.equal(await db.opsIncidentNotificationIntent.count({where:{incidentKey:key}}),1);
  }finally{
   if(own){

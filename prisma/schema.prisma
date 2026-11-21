@@ -345,6 +345,7 @@ model OpsAlertIncidentEvent {
 // B04/U03 durable notification intent only; no sender/worker is enabled.
 enum OpsNotificationIntentState {
   QUEUED
+  CLAIMED
 }
 model OpsIncidentNotificationIntent {
   idempotencyKey String @id @db.Char(64)
@@ -356,8 +357,13 @@ model OpsIncidentNotificationIntent {
   dueBucket Int
   count Int
   state OpsNotificationIntentState @default(QUEUED)
+  attemptCount Int @default(0)
+  claimToken String? @db.VarChar(36)
+  claimedAt DateTime?
+  leaseExpiresAt DateTime?
   createdAt DateTime @default(now())
   @@index([state,createdAt])
+  @@index([state,leaseExpiresAt])
   @@index([incidentKey,episodeOpenedAt])
 }
 

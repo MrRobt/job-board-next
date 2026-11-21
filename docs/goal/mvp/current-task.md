@@ -427,6 +427,12 @@
 - 新增 `queueInitialOpsNotificationIntent` 和 Serializable Prisma Adapter：仅首通知，校验真实 hash、事故 key/等级/轮次/非零数量；事务内重新检查事故必须 OPEN 且轮次匹配，DB 唯一键 + skipDuplicates 使重复请求仅一个 QUEUED，ACK/RESOLVED/旧轮次拒绝。单元覆盖伪造/重复/错轮次、数据库适配；新增迁移 MySQL 集成测试，CI 缺表 FAIL。
 - 本地 npm test、独立 TS、Next build、Prisma schema validate exit 0；`npm run typecheck` 内 `prisma generate` 因 Windows DLL 正被其他进程占用触发 EPERM，**未杀进程**，须 CI 全新 Client 验收。历史 MySQL **36 total/31 PASS/0 FAIL/5 SKIP**（旧库无第九/第十迁移），新真实入队已通过 `853d20b` GitHub Actions run `44885639216` **success**：第十迁移全新 MySQL8 apply/repeatable、129/129 单元、35/35 集成、0 FAIL/0 SKIP，真实队列唯一/重复幂等/已解决禁止再次入队明确 PASS，生产 build/smoke 通过。独立 `b04-notification-durable-queue-candidate-2026-11-21.md`。尚无领取/发送/确认/崩溃恢复、保持 NOT READY。
 
+## 2026-11-21 B04/U03 通知任务排他领取与租约超期回收候选（第 11 迁移）
+
+- 已核实 `d2834d9` GitHub Actions run `44886104615` success；第十迁移 QUEUED 唯一入队已验证。本轮新增第 11 迁移，通知任务允许 CLAIMED 状态及 attemptCount、UUID claimToken、claimedAt、leaseExpiresAt，**未接 sender/HTTP/Cron**。
+- `claimOpsNotificationIntent` 只对符合当前 OPEN 轮次的 QUEUED/过期 CLAIMED 任务使用 Serializable CAS 领取；有效租约 BUSY、已解决/已确认/旧轮次 STALE；最长 15 分钟，5 次尝试封顶。测试覆盖竞争、超期更换 token、上限、参数及事故状态；扩展原有第十迁移集成测试加入真实 MySQL 租约闭环，CI 缺表 FAIL。
+- 本地 npm 单元、tsc、Next build、Prisma validate 均 exit 0；旧隔离 MySQL `36 total/31 PASS/0 FAIL/5 SKIP`（缺第九至十一迁移），新真实事务必须等 CI。详情 `b04-notification-claim-lease-2026-11-21.md`。没有外部通知发送/确认/续租/失败重试与生产部署验收，B04/U03 继续 IN_PROGRESS，整体 NOT READY。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
