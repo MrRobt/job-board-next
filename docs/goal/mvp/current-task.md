@@ -391,6 +391,12 @@
 - 新增 `tests/integration/ops-incident-batch-mysql.test.ts`：仅在专用迁移库执行；第三类审计 INSERT 后注入故障，要求三类事故/事件一起回滚；再真实 OPENED/RESOLVED 三类与六事件核验，完毕只清理本测试数据。CI 缺第 9 项迁移须 FAIL。
 - 测试首轮花括号语法错误导致 TypeScript/Build/集成入口失败，修复后最终 npm test、TypeScript、Next build exit 0；历史专用 MySQL **34 total/31 PASS/0 FAIL/3 SKIP**，新增真实事务用例旧库缺表明确 SKIP，待新提交 CI MySQL 验证。见 `b04-batch-scan-real-mysql-rollback-2026-11-21.md`。其他 Agent 变更保留，不动真实资金/AI/通知。
 
+## 2026-11-21 B04/U03 真实 MySQL 扫描/人工确认交错并发补验
+
+- GitHub Actions `f365c28` run `44879055646` success；实际全新 MySQL8 迁移、114/114 单元、33/33 集成均 0 FAIL/0 SKIP，整批回滚真实用例 PASS，不重复验收。
+- 在已有隔离 MySQL 整批事务测试中新增真实并发交错：扫描刷新 `REFUND_READY_AGED` count 3→4 与临时 ADMIN 的 CAS 确认同时执行，实际 Serializable 冲突需独立安全重试，最终确认状态/数量/操作人不丢失、ACK 审计只一条；完成后只清理本测试创建的数据。
+- 本地 npm test、TS、Next build exit 0；历史 MySQL 首轮 `30 PASS/1 FAIL/3 SKIP`（其他 Agent 未提交财务审计测试遇短时 DB 连接故障），复跑 `31 PASS/0 FAIL/3 SKIP`。3 SKIP 均因旧库缺第 9 项事故迁移，新并发集成须由新 CI 实际证明。独立证据 `b04-scan-admin-race-mysql-2026-11-21.md`；不启用生产扫描/支付/AI/通知，保护其他 Agent 文件。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。

@@ -416,6 +416,12 @@
 - 首轮新增测试的 TS 花括号语法错误导致 tsc、build、integration 失败，修复后全量 npm 单元 exit 0、tsc exit 0、Next build exit 0；历史 MySQL **34 total/31 PASS/0 FAIL/3 SKIP**，其中本测试由于旧库未迁第 9 项为 SKIP。**新增真实整批回滚并未在本机验证，必须等此提交 CI 新 MySQL 结果**。
 - 此项子包只新增测试、无生产运行行为；管理员/用户权限 E2E、多 Worker、预发布迁移和恢复仍欠验收。证据 `b04-batch-scan-real-mysql-rollback-2026-11-21.md`；总体 NOT READY。
 
+## 2026-11-21 B04/U03 扫描与管理员确认同轮次 MySQL 争用补测
+
+- `f365c28` GitHub Actions run `44879055646` success，确认 114/114 单元、33/33 迁移 MySQL 集成（含整批回滚），0 跳过。扩展 `ops-incident-batch-mysql.test.ts`：真实 ADMIN 角色、扫描 count 更新与 ACK CAS 同时争用，容错后确认不被覆盖、操作人正确、ACK 审计恰好一条、三类最终解决且审计共 7 条。
+- 本地 npm test、tsc、Next build exit 0；历史专用 MySQL 首轮 `34 total/30 PASS/1 FAIL/3 SKIP`，唯一 FAIL 是其他 Agent 财务审计查询时 `127.0.0.1:3306` 不可达；原样复跑 `34 total/31 PASS/0 FAIL/3 SKIP`。3 SKIP 因历史库缺事故第 9 迁移，**未在本机验收真实并发数据库**，需下一次远端 CI。
+- 不连接真实扫描任务、资金、退款或模型服务；不代表管理员会话/CSRF 或预发布部署已验收。详见 `b04-scan-admin-race-mysql-2026-11-21.md`，整体 B04/U03 IN_PROGRESS。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
