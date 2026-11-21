@@ -268,6 +268,13 @@
 - A01 子包本地 VERIFIED，但 A01 整体 IN_PROGRESS，真正语义连贯的跨轮 AI 对话、正式隐私评审与获批模型 UAT 尚缺；不以本地 UI 通过代替生产就绪。详细证据 `docs/goal/mvp/a01-interview-rounds-2026-11-21.md`。
 - 主 handoff、风险、需求矩阵、发布清单与财务风险扫描及各种工具缓存为其他 Agent 的未提交修改，继续精确 stage 自己文件，不覆盖不混提交。
 
+## 2026-11-21 U01 公网注册/登录可信代理 IP 限流
+
+- 复核生产端现有认证限流：未配置可信代理时仅按邮箱控制，易被更换邮箱规避。新增 `lib/auth-throttle-policy.ts`，生产环境缺少 `TRUSTED_CLIENT_IP_HEADER` 或代理头缺失/伪造/异常时直接拒绝登录和注册；有效头需同时通过邮箱和跨邮箱共享 IP 配额，DB 限流失败亦拒绝。开发环境保留原有邮箱限流。
+- `app/actions/auth.ts` 使用上述独立规则；不修改密码、Session 或用户表。新专项先因模块不存在 `MODULE_NOT_FOUND` RED、实现后 **4/4 GREEN**；TypeScript exit 0、全量单元 **66/66**、隔离 MySQL 集成 **31/31**、Next.js 16.4.6 build exit 0。
+- **部署门禁**：生产反向代理必须覆盖选定 `x-real-ip`/`cf-connecting-ip`，阻止外部直连源站；未完成此配置，账号认证将被拒绝。缺邮箱验证、账户删除、浏览器真实 E2E、生产网关检查，U01 整体仍 IN_PROGRESS。见 `u01-production-auth-proxy-gate-2026-11-21.md`。
+- 其他 Agent 的主 handoff/需求矩阵/风险/发布清单和 financial-risk-audit 未提交文件保持原样，独立增量交接，精确暂存，不强推。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
