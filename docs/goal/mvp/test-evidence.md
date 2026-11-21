@@ -315,6 +315,12 @@
 - 独立 `tsc --noEmit` exit 0、单元测试 exit 0、Next.js 生产构建 exit 0；上轮 `npm run typecheck` 的 Prisma Client 重生成有 Windows DLL EPERM，不冒称整条命令通过。
 - 不访问真实商户、实际 AI、普通开发库或生产数据。本地子包 VERIFIED，不代表远端 Actions/生产 E2E 或合规商户 UAT 已通过。详细证据 `refund-claimant-race-2026-11-21.md`。
 
+## 2026-11-21 B04/B06 只读运维告警子包
+
+- `tests/ops-alert-policy.test.ts` 新增 2/2 规则单测；完整单元 **71/71 PASS**、TypeScript `tsc --noEmit` exit 0、专用隔离 MySQL 文件串行集成 **31/31 PASS**、Next.js 16.4.6 生产 build exit 0。
+- 明确批准的隔离库只读扫描 CLI exit 0：RESERVED 超期 0、IN_DOUBT 超期 0、READY 超期 0；无批准运行 exit 3 且拒绝。
+- 不执行生产告警、模型/商户网络或资金/权益写入；详见 `b04-ops-alert-scan-2026-11-21.md`。B04/B06 整体保持 IN_PROGRESS。
+
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。

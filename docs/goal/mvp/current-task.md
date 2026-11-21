@@ -289,6 +289,12 @@
 - 专用 `jobs_mvp_migrate_20261118_8f72` 隔离 MySQL 库的 8 项迁移 up-to-date；文件串行集成 **31/31 PASS**（包含新竞态注入测试），单元、TS、生产构建通过。完整 `npm run typecheck` 的 Prisma Client generate 曾 Windows EPERM；独立 TypeScript exit 0，不能掩盖该异常。
 - 本地子包 VERIFIED，B06 整体仍 IN_PROGRESS；真实商户、远端 CI、浏览器 E2E、生产迁移和合法上线门禁未解除。独立证据 `refund-claimant-race-2026-11-21.md`；共享 handoff/风险/矩阵等其他 Agent 修改继续保护。
 
+## 2026-11-21 B04/B06 运维异常只读扫描（独立子包）
+
+- 新增只读运维规则与测试库专用扫描 CLI，统计超过 10 分钟的 AI `RESERVED`、超过 15 分钟的退款 `IN_DOUBT` 以及超过 30 分钟的待派发 `READY`。输出仅为分类和数量，无用户/财务明细；异常 exit 2，未授权和查询失败 exit 3，默认不连接数据库，不自动返还/出款。
+- 规则专项 2/2、全量单元 **71/71**、隔离 MySQL 集成 **31/31**、TypeScript 和 Next.js 生产构建通过。历史专用隔离库只读扫描三项计数均为 0、exit 0；默认阻断 exit 3。详情 `b04-ops-alert-scan-2026-11-21.md`。
+- 本地子包 VERIFIED，生产真实自动告警投递/轮值、商户与模型、生产迁移/备份恢复/E2E 均未验收。共享 handoff、矩阵、风险、发布清单和其他 Agent 财务审计改动不得覆盖。
+
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
