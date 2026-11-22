@@ -1,13 +1,22 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
+import {fileURLToPath} from "node:url";
 import {
- requiredRecoveryTables,requiredRecoveryColumns,inspectCriticalRecoverySchema
+ requiredRecoveryTables,requiredRecoveryColumns,inspectCriticalRecoverySchema,
+ recoveryMigrationDirectoryFromScript
 } from "../scripts/b07-recovery-schema.mjs";
 
 const operational=[
  "OpsAlertIncident","OpsAlertIncidentEvent","OpsIncidentNotificationIntent",
  "OpsNotificationFailureEvent","OpsNotificationDeadReview"
 ];
+
+test("B07 recovery preflight resolves migration files relative to its script, not the shell",()=>{
+ const scriptUrl=new URL("../scripts/b07-recovery-preflight.mjs",import.meta.url);
+ const expected=fileURLToPath(new URL("../prisma/migrations/",import.meta.url));
+ assert.equal(recoveryMigrationDirectoryFromScript(scriptUrl),expected);
+ assert.equal(recoveryMigrationDirectoryFromScript(scriptUrl.href),expected);
+});
 
 test("B07 recovery policy includes durable incident, notification and review tables",()=>{
  for(const table of operational){

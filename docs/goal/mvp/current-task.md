@@ -521,3 +521,9 @@
 - TDD 新测试缺策略模块先 RED（模块导入失败），实现后全量单测、独立 TypeScript 和 Next.js 生产构建均 exit 0。本轮**未在真实 MySQL 对新结构缺失进行回放**，未执行备份恢复；B07 总体 IN_PROGRESS。独立证据 `b07-recovery-operational-schema-2026-11-22.md`。
 - 上个 D02 小包 `a70aa34` 已在严格 SSH 443 校验下正常推送并经 GitHub 确认。只单独提交本包文件，其他 Agent 未提交数据继续保护。
 
+## 2026-11-22 B07 只读恢复预检路径解耦
+
+- 已核验上轮 `59614f4` 远端 Actions：主 CI `45036485712` 与管理员 HTTP E2E `45036485756` 均 SUCCESS。B07 恢复脚本以 `process.cwd()` 读 `prisma/migrations`，MSYS2 执行器从非仓库 cwd 启动会误用迁移目录。
+- 增加路径锚定单测，初始 RED exit 1 `recoveryMigrationDirectoryFromScript is not a function`，随后以 `import.meta.url` 解析仓库迁移目录；原只读隔离白名单不变。全量 npm test、TypeScript、生产 build exit 0；未执行本轮真实 MySQL 预检与非空恢复。
+- B07 总体继续 IN_PROGRESS；本包独立证据/交接 `b07-recovery-migration-path-2026-11-22.md`。共享 handoff、需求矩阵、风险/发布清单、财务扫描等其他 Agent 未提交文件不动，继续分批安全提交。
+

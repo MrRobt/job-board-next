@@ -1,3 +1,4 @@
+export declare function recoveryMigrationDirectoryFromScript(scriptUrl:string|URL):string;
 export declare const requiredRecoveryTables:readonly string[];
 export declare const requiredRecoveryColumns:readonly string[];
 export declare function inspectCriticalRecoverySchema(

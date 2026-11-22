@@ -8,7 +8,7 @@ import {PrismaClient} from "@prisma/client";
 import {createHash} from "node:crypto";
 import {readFile,readdir} from "node:fs/promises";
 import {join} from "node:path";
-import {inspectCriticalRecoverySchema} from "./b07-recovery-schema.mjs";
+import {inspectCriticalRecoverySchema,recoveryMigrationDirectoryFromScript} from "./b07-recovery-schema.mjs";
 
 const allowed=(value)=>{
  try{
@@ -36,12 +36,13 @@ if(!approved){
   ]);
   const {missingTables,missingColumns,unexpectedAmountTypes}=
    inspectCriticalRecoverySchema(tables,columns);
-  const dirs=(await readdir(join(process.cwd(),"prisma","migrations"),{
+  const migrationDir=recoveryMigrationDirectoryFromScript(import.meta.url);
+  const dirs=(await readdir(migrationDir,{
    withFileTypes:true
   })).filter(x=>x.isDirectory()).map(x=>x.name).sort();
   const local=new Map();
   for(const dir of dirs){
-   const sql=await readFile(join(process.cwd(),"prisma","migrations",dir,"migration.sql"));
+   const sql=await readFile(join(migrationDir,dir,"migration.sql"));
    local.set(dir,createHash("sha256").update(sql).digest("hex"));
   }
   const applied=new Set(rows.filter(x=>x.finishedAt&&!x.rolledBackAt).map(x=>x.name));

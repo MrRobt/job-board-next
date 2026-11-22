@@ -545,4 +545,9 @@
 - 新增 `tests/b07-recovery-schema.test.ts`：必需 5 张运营状态/通知/审计表及关键列、缺表/缺列、金额列类型错误的无数据库合成模拟。初次单元 suite exit 1（策略模块不存在），补代码后全量 `npm test` exit 0。
 - 独立 `tsc --noEmit` exit 0、`npm --prefix F:/code/job-board-next run build` exit 0（Prisma generate + Next.js 16.4.6）。`b07-recovery-preflight.mjs` 继续只读隔离白名单、迁移 checksum 及资金事故计数；**未运行新的真实 DB 缺结构回放/备份恢复**。B07 继续 IN_PROGRESS。详见 `b07-recovery-operational-schema-2026-11-22.md`。
 
+## 2026-11-22 B07 预检迁移目录不受执行器 cwd 影响
+
+- 新增 `recoveryMigrationDirectoryFromScript` 纯函数的 `URL/string` 路径断言，初始单测 RED exit 1（函数未定义）；实现后从 `import.meta.url` 锚定本仓库迁移目录，不再使用启动终端的工作目录。
+- `npm --prefix F:/code/job-board-next test` exit 0；独立 `tsc --noEmit` exit 0；`npm --prefix F:/code/job-board-next run build` exit 0（Prisma generate、Next.js 16.4.6 生产构建）。**无本轮真实 MySQL、非空备份恢复、真实商户或模型联调**；B07 IN_PROGRESS，交接 `b07-recovery-migration-path-2026-11-22.md`。
+
 

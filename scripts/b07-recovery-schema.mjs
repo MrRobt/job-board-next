@@ -1,3 +1,10 @@
+import {fileURLToPath} from "node:url";
+
+/** Bound migration source to the checked-in script, never the operator shell cwd. */
+export function recoveryMigrationDirectoryFromScript(scriptUrl){
+ return fileURLToPath(new URL("../prisma/migrations/",scriptUrl));
+}
+
 /** Required data structures for read-only B07 recovery assessment.
  * Kept independent of DB I/O so missing tables/columns can be tested offline.
  */
