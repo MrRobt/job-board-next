@@ -550,4 +550,9 @@
 - 新增 `recoveryMigrationDirectoryFromScript` 纯函数的 `URL/string` 路径断言，初始单测 RED exit 1（函数未定义）；实现后从 `import.meta.url` 锚定本仓库迁移目录，不再使用启动终端的工作目录。
 - `npm --prefix F:/code/job-board-next test` exit 0；独立 `tsc --noEmit` exit 0；`npm --prefix F:/code/job-board-next run build` exit 0（Prisma generate、Next.js 16.4.6 生产构建）。**无本轮真实 MySQL、非空备份恢复、真实商户或模型联调**；B07 IN_PROGRESS，交接 `b07-recovery-migration-path-2026-11-22.md`。
 
+## 2026-11-22 B07 一次性 MySQL 8 只读预检 CI
+
+- CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
+- Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。本轮**远端 CI 结果尚需验证**，不能凭 YAML 就判定 MySQL 预检成功。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
+
 

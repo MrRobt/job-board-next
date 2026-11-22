@@ -1,0 +1,57 @@
+name: B07 isolated read-only recovery preflight
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  recovery-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          # Disposable credentials for this ephemeral CI service only.
+          MYSQL_ROOT_PASSWORD: b07_ci_only
+          MYSQL_DATABASE: jobs_mvp_migrate_20261122_ci
+          MYSQL_USER: b07_ci
+          MYSQL_PASSWORD: b07_ci_only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+    env:
+      DATABASE_URL: mysql://b07_ci:b07_ci_only@127.0.0.1:3306/jobs_mvp_migrate_20261122_ci
+      NODE_ENV: "test"
+      INTEGRATION_TEST_DATABASE: "true"
+      ENABLE_REAL_PAYMENT: "false"
+      ENABLE_MOCK_PAYMENT: "false"
+      ENABLE_LIVE_AI: "false"
+      ENABLE_TOOL_PAYMENTS: "false"
+      ENABLE_REFUND_QUERY: "false"
+      ENABLE_REFUND_SEND: "false"
+      ENABLE_REFUND_DISPATCH_CLAIM: "false"
+      ENABLE_PAYMENT_RECONCILIATION: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - run: npx prisma validate
+      - name: Deploy versioned migrations into disposable MySQL
+        run: npx prisma migrate deploy
+      - name: Verify the migrations are current
+        run: npx prisma migrate status
+      - name: Read-only recovery inspection (no backup or restore)
+        env:
+          DJS_RECOVERY_PREFLIGHT_APPROVED: "READ_ONLY"
+        run: node scripts/b07-recovery-preflight.mjs

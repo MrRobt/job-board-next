@@ -527,3 +527,9 @@
 - 增加路径锚定单测，初始 RED exit 1 `recoveryMigrationDirectoryFromScript is not a function`，随后以 `import.meta.url` 解析仓库迁移目录；原只读隔离白名单不变。全量 npm test、TypeScript、生产 build exit 0；未执行本轮真实 MySQL 预检与非空恢复。
 - B07 总体继续 IN_PROGRESS；本包独立证据/交接 `b07-recovery-migration-path-2026-11-22.md`。共享 handoff、需求矩阵、风险/发布清单、财务扫描等其他 Agent 未提交文件不动，继续分批安全提交。
 
+## 2026-11-22 B07 独立一次性 MySQL 只读预检 CI
+
+- 已推送 `f4e0507` B07 路径锚定子包。本轮继续补独立 `.github/workflows/b07-recovery-readonly.yml`：临时 MySQL 8 `jobs_mvp_migrate_20261122_ci`，执行全新迁移/迁移状态与显式 READ_ONLY 预检，不接触本地开发库/其他项目数据库，不运行备份、DROP 或资金操作。
+- CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
+- 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
+
