@@ -480,3 +480,9 @@
 - 本轮独立修复 `alipay.trade.refund` 已签名 POST 响应金额偏大或缺失仍可返回 ACKNOWLEDGED 的安全缺口；现在 `refund_fee` 必须是两位小数且以整数分精确匹配原申请，不一致要求独立签名查单，绝不自动重发退款 POST。
 - 新增纯规则专项和原网关 RSA2 模拟验签分支：偏大、偏小、缺失、坏签名均拒绝；网关专项 1/1 PASS，全量单元、TS/Next.js build exit 0。未运行 MySQL 全量集成、商户 UAT 或实际退款；见 `b06-alipay-refund-reply-amount-2026-11-22.md`。B06 仍 IN_PROGRESS。
 - Git `main` 原先超前两笔提交；项目专用 GitHub 官方公钥已通过严格校验，但 SSH push 仍 `Permission denied (publickey)`，须恢复授权用户身份；不降级验证、不强推，保留其他 Agent 未提交内容。
+
+## 2026-11-22 B06 支付宝退款查询商户身份成功终态门禁
+
+- 本地/远端 main 已核验同步至 `ffef774b`；不重复推送旧提交。已签名 `REFUND_SUCCESS` 查询若缺失或传空 `seller_id`，旧逻辑会放过：专项 RED exit 1 (`Missing expected rejection`)。
+- 修复为成功终态须匹配 `ALIPAY_SELLER_ID`；错误或空商户 ID 拒绝，签名/金额/订单核验不放宽；专项 1/1、npm test、tsc、生产 build 均 exit 0。无真实商户查单、MySQL 全套测试或资金操作；证据 `b06-refund-query-seller-id-2026-11-22.md`，B06 整体 IN_PROGRESS。
+- 仅提交本人 B06 文件，保留其他 Agent 未提交的财务审计、handoff、矩阵、缓存等改动。

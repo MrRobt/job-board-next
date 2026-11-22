@@ -113,6 +113,7 @@ test("Alipay refund query verifies exact signed JSON and does not infer success 
   const existingFetch = globalThis.fetch;
   let refundStatus: string | undefined = "REFUND_SUCCESS";
   let wrongAmount = false, wrongSeller = false, wrongTrade = false, forged = false;
+  let sellerId: string | undefined = "seller-local";
   try {
     globalThis.fetch = (async (url, init) => {
       assert.equal(url, "https://openapi.alipay.com/gateway.do");
@@ -129,7 +130,7 @@ test("Alipay refund query verifies exact signed JSON and does not infer success 
         code: "10000", msg: "Success", out_trade_no: orderId,
         out_request_no: inquiry.outRefundNo,
         trade_no: wrongTrade ? "not-the-original-transaction" : inquiry.providerTradeId,
-        seller_id: wrongSeller ? "other-merchant" : "seller-local",
+        seller_id: wrongSeller ? "other-merchant" : sellerId,
         total_amount: "9.90", refund_amount: wrongAmount ? "0.01" : "9.90",
         ...(refundStatus === undefined ? {} : { refund_status: refundStatus }),
       });
@@ -139,6 +140,11 @@ test("Alipay refund query verifies exact signed JSON and does not infer success 
       }), { status: 200 });
     }) as typeof fetch;
     assert.equal((await liveRefundInquiryGateway.query("ALIPAY", inquiry)).state, "SUCCEEDED");
+    sellerId = "";
+    await assert.rejects(liveRefundInquiryGateway.query("ALIPAY", inquiry), /seller mismatch/);
+    sellerId = undefined;
+    await assert.rejects(liveRefundInquiryGateway.query("ALIPAY", inquiry), /seller mismatch/);
+    sellerId = "seller-local";
     refundStatus = undefined;
     assert.equal((await liveRefundInquiryGateway.query("ALIPAY", inquiry)).state, "UNKNOWN");
     refundStatus = "REFUND_PROCESSING";

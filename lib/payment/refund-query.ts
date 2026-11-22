@@ -167,7 +167,10 @@ async function queryAlipay(inquiry: RefundInquiry): Promise<RefundInquiryObserva
   checkIdentity(body.out_trade_no, inquiry.orderId, "order");
   checkIdentity(body.out_request_no, inquiry.outRefundNo, "request");
   checkIdentity(body.trade_no, inquiry.providerTradeId, "transaction");
-  if (body.seller_id && body.seller_id !== env("ALIPAY_SELLER_ID")) {
+  // Only a fully identified merchant may drive terminal refund settlement.
+  // Unknown states remain under manual review when the channel omits seller_id.
+  if ((body.refund_status === "REFUND_SUCCESS" && body.seller_id !== env("ALIPAY_SELLER_ID")) ||
+      (body.seller_id !== undefined && body.seller_id !== env("ALIPAY_SELLER_ID"))) {
     throw new Error("Merchant refund seller mismatch");
   }
   if (yuanToFen(body.refund_amount) !== inquiry.refundAmountFen ||

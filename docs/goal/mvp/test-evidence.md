@@ -509,3 +509,9 @@
 - 扩展 `tests/integration/refund-submission.test.ts`：模拟 RSA2 已签名响应，测试偏大/偏小/缺失金额与伪造签名。独立执行指定 Alipay 测试 `1/1 PASS`，无真实商户请求。
 - 完整 `npm test`、TypeScript `--noEmit`、Next.js 16.4.6 production build 均 exit 0；MySQL 全量集成、远端 CI、真实商户支付/退款和生产迁移未验收，详见 `b06-alipay-refund-reply-amount-2026-11-22.md`。
 
+## 2026-11-22 B06 退款成功回包商户身份核验
+
+- 支付宝退款查询测试新增已签名 `REFUND_SUCCESS` 空/缺失 seller_id 场景：修改前专项 exit 1，`Missing expected rejection`；修复后专项 1/1 PASS，exit 0。
+- `npm --prefix F:/code/job-board-next test`、独立 `tsc --noEmit`、`npm --prefix F:/code/job-board-next run build` 均 exit 0。
+- 只在 mock fetch/临时 RSA2 测试环境测试，未调用商户 API、MySQL 全量集成或资金终态写入。专项记录 `b06-refund-query-seller-id-2026-11-22.md`，B06 仍 IN_PROGRESS。
+
