@@ -520,3 +520,8 @@
 - 新增微信退款 POST 回包遗漏或伪造 transaction_id 的模拟签名回归，原代码专项 RED exit 1 (`Missing expected rejection`)；修复网关要求交易号与历史支付号精确一致，专项 1/1 PASS。
 - 全量单元 `npm test`、独立 `tsc --noEmit`、Prisma generate/Next.js production build 均 exit 0。没有执行 MySQL 全量集成、真实商户联调或资金流水回退。详见 `b06-wechat-refund-transaction-identity-2026-11-22.md`，B06 仍 IN_PROGRESS。
 
+## 2026-11-22 B06 微信退款 POST 异常状态 fail-closed
+
+- 模拟 RSA 已签名微信回应复现 CLOSED 错误 ACK，专项先 RED；修改后只对 SUCCESS/PROCESSING 返回初步 ACK，CLOSED/ABNORMAL/未知状态要求查单。
+- 本轮恢复后专项 `1/1 PASS`、全量单元、TypeScript、Next.js 生产构建全部 exit 0；MySQL 全量集成和真实商户 UAT 未执行。见 `b06-wechat-refund-status-handoff-2026-11-22.md`，B06 整体仍 IN_PROGRESS。
+

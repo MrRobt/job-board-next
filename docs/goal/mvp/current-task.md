@@ -492,3 +492,8 @@
 - 上一提交 `c427a37` 远端 CI `44969333237` / 管理员 HTTP E2E `44969333229` 已核验 SUCCESS，不重复已验收工作。
 - 发现微信退款 POST 回包缺少 `transaction_id` 时依旧 ACK：新增真实 RSA 测试签名的离线回归先 RED exit 1；修复必需匹配原支付交易号后专项 1/1、全量单元、tsc、生产 build 均 exit 0。
 - 无真实商户资金网络调用、MySQL 全量集成或正式商户确认；B06 仍 IN_PROGRESS，见 `b06-wechat-refund-transaction-identity-2026-11-22.md`。所有付款/退款、AI 和通知正式开关仍关闭。
+
+## 2026-11-22 B06 微信退款回包异常状态安全复验
+
+- 恢复前次执行器中断保留的状态修复：微信退款已验签 POST 响应仅 SUCCESS/PROCESSING 可初步 ACK，CLOSED/ABNORMAL/未知状态要求独立签名查单，不自动重发。
+- 先前专项 RED 已复现异常 ACK；本轮校正 mock 调用次数断言并重新执行：专项 1/1、全量单元、tsc、生产构建均 exit 0。MySQL 全套与真实商户 UAT 未执行，B06 仍 IN_PROGRESS；详见 `b06-wechat-refund-status-handoff-2026-11-22.md`。
