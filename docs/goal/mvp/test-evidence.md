@@ -535,4 +535,9 @@
 - 已签名 `REFUND_SUCCESS` 缺少 `total_amount` 初始 RED exit 1（`Missing expected rejection`），修复后专项 1/1 PASS；补全原总额不匹配、未知状态缺原总额不认成功，退款只读查询全文件 3/3 PASS。
 - 完整 `npm test`、独立 `tsc --noEmit`、`npm run build` 均 exit 0；未运行当前包完整 MySQL 集成、真实商户 UAT 或远端新提交 CI。见 `b06-alipay-refund-query-original-amount-2026-11-22.md`，B06 保持 IN_PROGRESS。
 
+## 2026-11-22 D02 运营事故写入开关预上线门禁
+
+- 新测试明确枚举三项运营写入开关（事故确认、DEAD 复核写入、事故同步），覆盖 `LOCAL_PREVIEW` 与 `PUBLIC_PRELAUNCH` 的 `true` 阻断和 `false` 安全默认。TDD RED 在旧实现下退出码 1，报告 `Untracked prelaunch gate: ENABLE_OPS_INCIDENT_ACK`；独立定向运行的额外 CLI cwd 错误不计入业务 RED。
+- 扩展 `offFlags` 后完整 `npm --prefix F:/code/job-board-next test` exit 0；独立 TS `--noEmit` exit 0；`npm --prefix F:/code/job-board-next run build` exit 0（Prisma Client generate / Next.js 16.4.6 全流程）。未执行新包 MySQL 全量/真实代理 HTTPS/生产部署；D02 继续 IN_PROGRESS，详见 `d02-ops-mutation-prelaunch-gates-2026-11-22.md`。
+
 

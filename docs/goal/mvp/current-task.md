@@ -509,3 +509,9 @@
 - 专项 GREEN 1/1、退款查询全文件离线集成 3/3、全单元、TypeScript 与 Next 生产 build exit 0。未做当前包全量 MySQL/UAT；B06 仍 IN_PROGRESS。证据与独立交接 `b06-alipay-refund-query-original-amount-2026-11-22.md`。
 - Git 上包 `e186774` 本地提交；普通 SSH 主机校验失败，严格验证 SSH 443 超时。仅保留本地提交、严禁绕过校验和强推；其他 Agent 脏文件不动。
 
+## 2026-11-22 D02 预上线事故写入开关拦截
+
+- 本轮恢复真实 Git 后确认 `main` 与 `origin/main` 跟踪同步，GitHub 可读取上轮 B06 最新提交 `d749cc2`；没有重复做退款修复。继续非商户门禁 P0：新增测试发现预上线预检遗漏 `ENABLE_OPS_INCIDENT_ACK`、`ENABLE_OPS_DEAD_REVIEW_WRITE`、`OPS_INCIDENT_SYNC_APPROVED`，初次 RED 报 `Untracked prelaunch gate`，修复后两种预览模式要求三项写开关关闭。
+- 完整 `npm test`、独立 TypeScript 和 Prisma Client/Next.js 生产 build 均 exit 0；未执行本包 MySQL 完整集成、反向代理/生产 E2E。仅纯配置检查，不改线上开关、不发起资金或外部通知。D02 整体仍 IN_PROGRESS、技术上线 NOT READY。
+- 独立证据及交接 `d02-ops-mutation-prelaunch-gates-2026-11-22.md`；共享 handoff、需求矩阵、风险/发布清单、财务扫描等其他 Agent 未提交修改继续保护。
+

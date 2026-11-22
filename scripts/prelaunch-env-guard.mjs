@@ -11,7 +11,11 @@ export const offFlags=[
  "ENABLE_REAL_PAYMENT","ENABLE_TOOL_PAYMENTS","TOOL_PAYMENT_APPROVED",
  "ENABLE_MOCK_PAYMENT","ENABLE_LIVE_AI","AI_COMPLIANCE_APPROVED",
  "ENABLE_PAYMENT_RECONCILIATION","ENABLE_REFUND_QUERY",
- "ENABLE_REFUND_DISPATCH_CLAIM","ENABLE_REFUND_SEND"
+ "ENABLE_REFUND_DISPATCH_CLAIM","ENABLE_REFUND_SEND",
+ // Operational incident acknowledgment, dead-letter review, and incident
+ // synchronization mutate state and need separate authorization before release.
+ "ENABLE_OPS_INCIDENT_ACK","ENABLE_OPS_DEAD_REVIEW_WRITE",
+ "OPS_INCIDENT_SYNC_APPROVED"
 ];
 
 function publicOriginAllowed(raw){

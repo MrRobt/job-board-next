@@ -20,6 +20,22 @@ test("every live payment, mock, reconciliation, refund, model or approval switch
   assert.equal(evaluatePrelaunchConfig({...safe,[flag]:"false"}).status,"PASS",flag);
  }
 });
+test("operator incident mutations and sync cannot be enabled during any prelaunch mode",()=>{
+ const operatorMutationFlags=[
+  "ENABLE_OPS_INCIDENT_ACK", "ENABLE_OPS_DEAD_REVIEW_WRITE", "OPS_INCIDENT_SYNC_APPROVED"
+ ];
+ const publicSafe={DJS_PRELAUNCH_MODE:"PUBLIC_PRELAUNCH",NODE_ENV:"production",
+  APP_ORIGIN:"https://jobs.company.com",TRUSTED_CLIENT_IP_HEADER:"x-real-ip"};
+ for(const flag of operatorMutationFlags){
+  assert.ok(offFlags.includes(flag),`Untracked prelaunch gate: ${flag}`);
+  for(const config of [safe,publicSafe]){
+   const decision=evaluatePrelaunchConfig({...config,[flag]:"true"});
+   assert.equal(decision.status,"BLOCKED",flag);
+   assert.ok(decision.violations.includes(flag),flag);
+   assert.equal(evaluatePrelaunchConfig({...config,[flag]:"false"}).status,"PASS",flag);
+  }
+ }
+});
 test("public prelaunch requires secure canonical origin, a known proxy header and production mode",()=>{
  const publicSafe={
   DJS_PRELAUNCH_MODE:"PUBLIC_PRELAUNCH",NODE_ENV:"production",
