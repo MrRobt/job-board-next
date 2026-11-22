@@ -38,6 +38,7 @@ test("WeChat refund POST signs exact JSON, checks signed identity and never retu
  });
  const original=globalThis.fetch;
  let bad=false,calls=0;
+ let missingTransaction=false,wrongTransaction=false;
  try{
   globalThis.fetch=(async(url,init)=>{
    calls++;
@@ -55,7 +56,7 @@ test("WeChat refund POST signs exact JSON, checks signed identity and never retu
    assert.equal(sent.amount.refund,990);
    const result=JSON.stringify({
     out_trade_no:intent.orderId,out_refund_no:bad?"R"+"b".repeat(30):prepared.outRefundNo,
-    transaction_id:"pay-123",status:"SUCCESS",
+    ...(missingTransaction?{}:{transaction_id:wrongTransaction?"different-payment":"pay-123"}),status:"SUCCESS",
     amount:{refund:990,total:990,currency:"CNY"}
    });
    const ts=String(Math.floor(Date.now()/1000)),responseNonce="reply-nonce";
@@ -66,12 +67,16 @@ test("WeChat refund POST signs exact JSON, checks signed identity and never retu
    }});
   }) as typeof fetch;
   assert.equal(await liveRefundSubmissionGateway.submit(intent,prepared.fingerprint),"ACKNOWLEDGED");
-  bad=true;
+  missingTransaction=true;
+  await assert.rejects(liveRefundSubmissionGateway.submit(intent,prepared.fingerprint),/transaction mismatch/);
+  missingTransaction=false;wrongTransaction=true;
+  await assert.rejects(liveRefundSubmissionGateway.submit(intent,prepared.fingerprint),/transaction mismatch/);
+  wrongTransaction=false;bad=true;
   await assert.rejects(liveRefundSubmissionGateway.submit(intent,prepared.fingerprint),/request mismatch/);
-  assert.equal(calls,2);
+  assert.equal(calls,4);
   process.env.ENABLE_REFUND_SEND="false";
   await assert.rejects(liveRefundSubmissionGateway.submit(intent,prepared.fingerprint),/disabled/);
-  assert.equal(calls,2);
+  assert.equal(calls,4);
  }finally{globalThis.fetch=original;undo();}
 });
 

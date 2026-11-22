@@ -71,8 +71,7 @@ async function sendWechat(intent:MerchantRefundIntent,fingerprint:string){
  }).parse(JSON.parse(raw));
  checkIdentity(result.out_trade_no,prepared.orderId,"order");
  checkIdentity(result.out_refund_no,prepared.outRefundNo,"request");
- if(result.transaction_id!==undefined)
-  checkIdentity(result.transaction_id,intent.providerTradeId.slice("WECHAT:".length),"transaction");
+ checkIdentity(result.transaction_id??"",intent.providerTradeId.slice("WECHAT:".length),"transaction");
  if(result.amount.total!==prepared.originalAmountFen||result.amount.refund!==prepared.amountFen)
   throw new Error("Refund submission amount mismatch");
  // 200 and even status=SUCCESS are NOT a local refund settlement proof.

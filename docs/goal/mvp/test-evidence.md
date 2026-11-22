@@ -515,3 +515,8 @@
 - `npm --prefix F:/code/job-board-next test`、独立 `tsc --noEmit`、`npm --prefix F:/code/job-board-next run build` 均 exit 0。
 - 只在 mock fetch/临时 RSA2 测试环境测试，未调用商户 API、MySQL 全量集成或资金终态写入。专项记录 `b06-refund-query-seller-id-2026-11-22.md`，B06 仍 IN_PROGRESS。
 
+## 2026-11-22 B06 微信退款请求签名回应交易身份一致性
+
+- 新增微信退款 POST 回包遗漏或伪造 transaction_id 的模拟签名回归，原代码专项 RED exit 1 (`Missing expected rejection`)；修复网关要求交易号与历史支付号精确一致，专项 1/1 PASS。
+- 全量单元 `npm test`、独立 `tsc --noEmit`、Prisma generate/Next.js production build 均 exit 0。没有执行 MySQL 全量集成、真实商户联调或资金流水回退。详见 `b06-wechat-refund-transaction-identity-2026-11-22.md`，B06 仍 IN_PROGRESS。
+

@@ -486,3 +486,9 @@
 - 本地/远端 main 已核验同步至 `ffef774b`；不重复推送旧提交。已签名 `REFUND_SUCCESS` 查询若缺失或传空 `seller_id`，旧逻辑会放过：专项 RED exit 1 (`Missing expected rejection`)。
 - 修复为成功终态须匹配 `ALIPAY_SELLER_ID`；错误或空商户 ID 拒绝，签名/金额/订单核验不放宽；专项 1/1、npm test、tsc、生产 build 均 exit 0。无真实商户查单、MySQL 全套测试或资金操作；证据 `b06-refund-query-seller-id-2026-11-22.md`，B06 整体 IN_PROGRESS。
 - 仅提交本人 B06 文件，保留其他 Agent 未提交的财务审计、handoff、矩阵、缓存等改动。
+
+## 2026-11-22 B06 微信退款 POST 已签名回应交易身份严格核对
+
+- 上一提交 `c427a37` 远端 CI `44969333237` / 管理员 HTTP E2E `44969333229` 已核验 SUCCESS，不重复已验收工作。
+- 发现微信退款 POST 回包缺少 `transaction_id` 时依旧 ACK：新增真实 RSA 测试签名的离线回归先 RED exit 1；修复必需匹配原支付交易号后专项 1/1、全量单元、tsc、生产 build 均 exit 0。
+- 无真实商户资金网络调用、MySQL 全量集成或正式商户确认；B06 仍 IN_PROGRESS，见 `b06-wechat-refund-transaction-identity-2026-11-22.md`。所有付款/退款、AI 和通知正式开关仍关闭。
