@@ -497,3 +497,9 @@
 
 - 恢复前次执行器中断保留的状态修复：微信退款已验签 POST 响应仅 SUCCESS/PROCESSING 可初步 ACK，CLOSED/ABNORMAL/未知状态要求独立签名查单，不自动重发。
 - 先前专项 RED 已复现异常 ACK；本轮校正 mock 调用次数断言并重新执行：专项 1/1、全量单元、tsc、生产构建均 exit 0。MySQL 全套与真实商户 UAT 未执行，B06 仍 IN_PROGRESS；详见 `b06-wechat-refund-status-handoff-2026-11-22.md`。
+
+## 2026-11-22 B06 支付宝退款 POST 卖方身份强验证
+
+- 支付宝 RSA2 已签名且 `code=10000` 回包遗漏 `seller_id` 时原实现仍 ACK；补缺失/错误商户回归，原实现 RED `Missing expected rejection`；修正为商户必须匹配，否则独立签名查单，不自动重发/撤权。
+- 专项 GREEN 1/1、全单元、独立 TS、生产构建 exit 0；未运行完整 MySQL 集成、商户 UAT 或远端 CI，B06 总体 IN_PROGRESS。详见 `b06-alipay-refund-post-seller-identity-2026-11-22.md`。保留其他 Agent 未提交变更。
+

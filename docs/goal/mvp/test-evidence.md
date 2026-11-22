@@ -525,3 +525,9 @@
 - 模拟 RSA 已签名微信回应复现 CLOSED 错误 ACK，专项先 RED；修改后只对 SUCCESS/PROCESSING 返回初步 ACK，CLOSED/ABNORMAL/未知状态要求查单。
 - 本轮恢复后专项 `1/1 PASS`、全量单元、TypeScript、Next.js 生产构建全部 exit 0；MySQL 全量集成和真实商户 UAT 未执行。见 `b06-wechat-refund-status-handoff-2026-11-22.md`，B06 整体仍 IN_PROGRESS。
 
+## 2026-11-22 B06 支付宝退款 POST seller_id 必填
+
+- 签名成功但 `seller_id` 缺失的测试初次 RED exit 1（`Missing expected rejection`），修复后专项 GREEN 1/1，缺失和错误商户均拒绝；正常回包仍仅 ACK。
+- `npm --prefix F:/code/job-board-next test`、独立 `tsc --noEmit` 和 `npm --prefix F:/code/job-board-next run build` 均 exit 0。没有执行完整 MySQL 集成、真实商户和新远端 CI；B06 IN_PROGRESS。见 `b06-alipay-refund-post-seller-identity-2026-11-22.md`。
+
+

@@ -102,6 +102,7 @@ test("Alipay refund POST requires RSA2 response and matches merchant order/trade
  const original=globalThis.fetch;
  let wrongSignature=false,calls=0;
  let refundFee:string|undefined="9.90";
+ let sellerId:string|undefined="seller-local";
  try{
   globalThis.fetch=(async(url,init)=>{
    calls++;
@@ -114,7 +115,7 @@ test("Alipay refund POST requires RSA2 response and matches merchant order/trade
    assert.equal(request.out_request_no,prepared.outRefundNo);
    assert.equal(request.refund_amount,"9.90");
    const body=JSON.stringify({code:"10000",msg:"Success",out_trade_no:intent.orderId,
-    trade_no:"pay-123",refund_fee:refundFee,fund_change:"Y",seller_id:"seller-local"});
+    trade_no:"pay-123",refund_fee:refundFee,fund_change:"Y",seller_id:sellerId});
    return new Response('{"alipay_trade_refund_response":'+body+',"sign":"'+
     (wrongSignature?"bad":sign(body,platform.privateKey))+'"}',{status:200});
   }) as typeof fetch;
@@ -126,9 +127,14 @@ test("Alipay refund POST requires RSA2 response and matches merchant order/trade
   refundFee=undefined;
   await assert.rejects(liveRefundSubmissionGateway.submit(intent,prepared.fingerprint),/inquiry required/);
   refundFee="9.90";
+  sellerId=undefined;
+  await assert.rejects(liveRefundSubmissionGateway.submit(intent,prepared.fingerprint),/seller mismatch/);
+  sellerId="different-merchant";
+  await assert.rejects(liveRefundSubmissionGateway.submit(intent,prepared.fingerprint),/seller mismatch/);
+  sellerId="seller-local";
   wrongSignature=true;
   await assert.rejects(liveRefundSubmissionGateway.submit(intent,prepared.fingerprint),/Unverified/);
-  assert.equal(calls,5);
+  assert.equal(calls,7);
  }finally{globalThis.fetch=original;undo();}
 });
 

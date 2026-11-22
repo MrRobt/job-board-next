@@ -109,7 +109,8 @@ async function sendAlipay(intent:MerchantRefundIntent,fingerprint:string){
  if(result.code!=="10000")throw new Error("Alipay refund rejected or uncertain; inquiry required");
  checkIdentity(result.out_trade_no,prepared.orderId,"order");
  checkIdentity(result.trade_no,intent.providerTradeId.slice("ALIPAY:".length),"transaction");
- if(result.seller_id!==undefined)checkIdentity(result.seller_id,env("ALIPAY_SELLER_ID"),"seller");
+ // A signed reply without seller identity remains uncertain, never acknowledged.
+ checkIdentity(result.seller_id??"",env("ALIPAY_SELLER_ID"),"seller");
  assertAlipayRefundReplyAmount(result.refund_fee,prepared.amountFen);
  // Missing or divergent signed amount requires an independent merchant inquiry.
  // fund_change=Y, code=10000 and any signed POST reply still require independent inquiry.
