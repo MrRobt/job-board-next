@@ -503,3 +503,9 @@
 - 支付宝 RSA2 已签名且 `code=10000` 回包遗漏 `seller_id` 时原实现仍 ACK；补缺失/错误商户回归，原实现 RED `Missing expected rejection`；修正为商户必须匹配，否则独立签名查单，不自动重发/撤权。
 - 专项 GREEN 1/1、全单元、独立 TS、生产构建 exit 0；未运行完整 MySQL 集成、商户 UAT 或远端 CI，B06 总体 IN_PROGRESS。详见 `b06-alipay-refund-post-seller-identity-2026-11-22.md`。保留其他 Agent 未提交变更。
 
+## 2026-11-22 B06 支付宝退款终态原订单金额证据检查
+
+- 已签名 `REFUND_SUCCESS` 缺少特殊可选 `total_amount` 原先返回 SUCCEEDED：TDD 专项先 RED `Missing expected rejection`，新增缺少原金额时拒绝自动成功、原金额不符拒绝、非成功状态可 UNKNOWN。仅调校只读查询，未改资金/权益账本或开真实渠道。
+- 专项 GREEN 1/1、退款查询全文件离线集成 3/3、全单元、TypeScript 与 Next 生产 build exit 0。未做当前包全量 MySQL/UAT；B06 仍 IN_PROGRESS。证据与独立交接 `b06-alipay-refund-query-original-amount-2026-11-22.md`。
+- Git 上包 `e186774` 本地提交；普通 SSH 主机校验失败，严格验证 SSH 443 超时。仅保留本地提交、严禁绕过校验和强推；其他 Agent 脏文件不动。
+

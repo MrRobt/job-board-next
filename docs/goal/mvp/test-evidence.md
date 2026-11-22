@@ -530,4 +530,9 @@
 - 签名成功但 `seller_id` 缺失的测试初次 RED exit 1（`Missing expected rejection`），修复后专项 GREEN 1/1，缺失和错误商户均拒绝；正常回包仍仅 ACK。
 - `npm --prefix F:/code/job-board-next test`、独立 `tsc --noEmit` 和 `npm --prefix F:/code/job-board-next run build` 均 exit 0。没有执行完整 MySQL 集成、真实商户和新远端 CI；B06 IN_PROGRESS。见 `b06-alipay-refund-post-seller-identity-2026-11-22.md`。
 
+## 2026-11-22 B06 支付宝退款查询终态缺原总额拒绝
+
+- 已签名 `REFUND_SUCCESS` 缺少 `total_amount` 初始 RED exit 1（`Missing expected rejection`），修复后专项 1/1 PASS；补全原总额不匹配、未知状态缺原总额不认成功，退款只读查询全文件 3/3 PASS。
+- 完整 `npm test`、独立 `tsc --noEmit`、`npm run build` 均 exit 0；未运行当前包完整 MySQL 集成、真实商户 UAT 或远端新提交 CI。见 `b06-alipay-refund-query-original-amount-2026-11-22.md`，B06 保持 IN_PROGRESS。
+
 

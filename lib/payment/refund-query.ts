@@ -173,6 +173,10 @@ async function queryAlipay(inquiry: RefundInquiry): Promise<RefundInquiryObserva
       (body.seller_id !== undefined && body.seller_id !== env("ALIPAY_SELLER_ID"))) {
     throw new Error("Merchant refund seller mismatch");
   }
+  // Alipay documents total_amount as conditionally optional. Without it a signed
+  // REFUND_SUCCESS response is insufficient for automatic entitlement revocation.
+  if (body.refund_status === "REFUND_SUCCESS" && body.total_amount === undefined)
+    throw new Error("Refund original amount unverified; manual inquiry required");
   if (yuanToFen(body.refund_amount) !== inquiry.refundAmountFen ||
       (body.total_amount !== undefined &&
        yuanToFen(body.total_amount) !== inquiry.originalAmountFen)) {

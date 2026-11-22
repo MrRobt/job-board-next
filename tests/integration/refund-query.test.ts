@@ -114,6 +114,7 @@ test("Alipay refund query verifies exact signed JSON and does not infer success 
   let refundStatus: string | undefined = "REFUND_SUCCESS";
   let wrongAmount = false, wrongSeller = false, wrongTrade = false, forged = false;
   let sellerId: string | undefined = "seller-local";
+  let originalTotal: string | undefined = "9.90";
   try {
     globalThis.fetch = (async (url, init) => {
       assert.equal(url, "https://openapi.alipay.com/gateway.do");
@@ -131,7 +132,8 @@ test("Alipay refund query verifies exact signed JSON and does not infer success 
         out_request_no: inquiry.outRefundNo,
         trade_no: wrongTrade ? "not-the-original-transaction" : inquiry.providerTradeId,
         seller_id: wrongSeller ? "other-merchant" : sellerId,
-        total_amount: "9.90", refund_amount: wrongAmount ? "0.01" : "9.90",
+        ...(originalTotal === undefined ? {} : { total_amount: originalTotal }),
+        refund_amount: wrongAmount ? "0.01" : "9.90",
         ...(refundStatus === undefined ? {} : { refund_status: refundStatus }),
       });
       return new Response(JSON.stringify({
@@ -140,13 +142,20 @@ test("Alipay refund query verifies exact signed JSON and does not infer success 
       }), { status: 200 });
     }) as typeof fetch;
     assert.equal((await liveRefundInquiryGateway.query("ALIPAY", inquiry)).state, "SUCCEEDED");
+    originalTotal = undefined;
+    await assert.rejects(liveRefundInquiryGateway.query("ALIPAY", inquiry), /original amount unverified/);
+    originalTotal = "9.91";
+    await assert.rejects(liveRefundInquiryGateway.query("ALIPAY", inquiry), /money mismatch/);
+    originalTotal = "9.90";
     sellerId = "";
     await assert.rejects(liveRefundInquiryGateway.query("ALIPAY", inquiry), /seller mismatch/);
     sellerId = undefined;
     await assert.rejects(liveRefundInquiryGateway.query("ALIPAY", inquiry), /seller mismatch/);
     sellerId = "seller-local";
     refundStatus = undefined;
+    originalTotal = undefined;
     assert.equal((await liveRefundInquiryGateway.query("ALIPAY", inquiry)).state, "UNKNOWN");
+    originalTotal = "9.90";
     refundStatus = "REFUND_PROCESSING";
     assert.equal((await liveRefundInquiryGateway.query("ALIPAY", inquiry)).state, "UNKNOWN");
     wrongAmount = true;
