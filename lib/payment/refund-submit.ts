@@ -1,7 +1,8 @@
 import "server-only";
 import {randomBytes} from "node:crypto";
 import {z} from "zod";
-import {canonical,sign,verify,yuanToFen} from "./crypto";
+import {canonical,sign,verify} from "./crypto";
+import {assertAlipayRefundReplyAmount} from "./refund-submit-amount";
 import {env} from "./config";
 import {extractAlipaySignedObject} from "./merchant-gateway";
 import {readBoundedHttpText} from "../http-body-limit";
@@ -108,8 +109,8 @@ async function sendAlipay(intent:MerchantRefundIntent,fingerprint:string){
  checkIdentity(result.out_trade_no,prepared.orderId,"order");
  checkIdentity(result.trade_no,intent.providerTradeId.slice("ALIPAY:".length),"transaction");
  if(result.seller_id!==undefined)checkIdentity(result.seller_id,env("ALIPAY_SELLER_ID"),"seller");
- if(result.refund_fee!==undefined&&yuanToFen(result.refund_fee)<prepared.amountFen)
-  throw new Error("Alipay refund total smaller than requested amount");
+ assertAlipayRefundReplyAmount(result.refund_fee,prepared.amountFen);
+ // Missing or divergent signed amount requires an independent merchant inquiry.
  // fund_change=Y, code=10000 and any signed POST reply still require independent inquiry.
  return "ACKNOWLEDGED" as const;
 }

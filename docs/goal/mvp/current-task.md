@@ -474,3 +474,9 @@
 ## Git 安全
 
 工作区历史保留 `next-env.d.ts`、`package-lock.json` 和 `.dsh-meow/` 的其他 Agent/工具变更；仅暂存本轮工作包文件。遵守 `AGENTS.md`，分批 commit/push、禁止 reset/clean、force push。未经实际商户、模型、生产 UAT 和资质确认，`ENABLE_REAL_PAYMENT`、`ENABLE_LIVE_AI` 保持禁用。
+
+## 2026-11-22 B06 支付宝签名退款回包金额精确核验
+
+- 本轮独立修复 `alipay.trade.refund` 已签名 POST 响应金额偏大或缺失仍可返回 ACKNOWLEDGED 的安全缺口；现在 `refund_fee` 必须是两位小数且以整数分精确匹配原申请，不一致要求独立签名查单，绝不自动重发退款 POST。
+- 新增纯规则专项和原网关 RSA2 模拟验签分支：偏大、偏小、缺失、坏签名均拒绝；网关专项 1/1 PASS，全量单元、TS/Next.js build exit 0。未运行 MySQL 全量集成、商户 UAT 或实际退款；见 `b06-alipay-refund-reply-amount-2026-11-22.md`。B06 仍 IN_PROGRESS。
+- Git `main` 原先超前两笔提交；项目专用 GitHub 官方公钥已通过严格校验，但 SSH push 仍 `Permission denied (publickey)`，须恢复授权用户身份；不降级验证、不强推，保留其他 Agent 未提交内容。

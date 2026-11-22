@@ -502,3 +502,10 @@
 ## 保留的局限
 
 没有真实商户、沙箱、小额实付、退款或真实对账验证，没有生产环境首次迁移、恢复与回滚演练，也没有完整浏览器 E2E。以上通过的测试**不代表支付通道或正式上线已验收**。实际商户操作开关必须单独由经营者审核。
+
+## 2026-11-22 B06 支付宝退款响应金额严格匹配
+
+- 新增 `tests/refund-submit-amount.test.ts`：无缺失、超额、少额、精度异常、非法金额被接受；纯规则要求精确到整数分。
+- 扩展 `tests/integration/refund-submission.test.ts`：模拟 RSA2 已签名响应，测试偏大/偏小/缺失金额与伪造签名。独立执行指定 Alipay 测试 `1/1 PASS`，无真实商户请求。
+- 完整 `npm test`、TypeScript `--noEmit`、Next.js 16.4.6 production build 均 exit 0；MySQL 全量集成、远端 CI、真实商户支付/退款和生产迁移未验收，详见 `b06-alipay-refund-reply-amount-2026-11-22.md`。
+
