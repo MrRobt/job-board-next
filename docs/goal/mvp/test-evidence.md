@@ -540,4 +540,9 @@
 - 新测试明确枚举三项运营写入开关（事故确认、DEAD 复核写入、事故同步），覆盖 `LOCAL_PREVIEW` 与 `PUBLIC_PRELAUNCH` 的 `true` 阻断和 `false` 安全默认。TDD RED 在旧实现下退出码 1，报告 `Untracked prelaunch gate: ENABLE_OPS_INCIDENT_ACK`；独立定向运行的额外 CLI cwd 错误不计入业务 RED。
 - 扩展 `offFlags` 后完整 `npm --prefix F:/code/job-board-next test` exit 0；独立 TS `--noEmit` exit 0；`npm --prefix F:/code/job-board-next run build` exit 0（Prisma Client generate / Next.js 16.4.6 全流程）。未执行新包 MySQL 全量/真实代理 HTTPS/生产部署；D02 继续 IN_PROGRESS，详见 `d02-ops-mutation-prelaunch-gates-2026-11-22.md`。
 
+## 2026-11-22 B07 运营事故/通知持久层恢复预检
+
+- 新增 `tests/b07-recovery-schema.test.ts`：必需 5 张运营状态/通知/审计表及关键列、缺表/缺列、金额列类型错误的无数据库合成模拟。初次单元 suite exit 1（策略模块不存在），补代码后全量 `npm test` exit 0。
+- 独立 `tsc --noEmit` exit 0、`npm --prefix F:/code/job-board-next run build` exit 0（Prisma generate + Next.js 16.4.6）。`b07-recovery-preflight.mjs` 继续只读隔离白名单、迁移 checksum 及资金事故计数；**未运行新的真实 DB 缺结构回放/备份恢复**。B07 继续 IN_PROGRESS。详见 `b07-recovery-operational-schema-2026-11-22.md`。
+
 

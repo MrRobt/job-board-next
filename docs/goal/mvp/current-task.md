@@ -515,3 +515,9 @@
 - 完整 `npm test`、独立 TypeScript 和 Prisma Client/Next.js 生产 build 均 exit 0；未执行本包 MySQL 完整集成、反向代理/生产 E2E。仅纯配置检查，不改线上开关、不发起资金或外部通知。D02 整体仍 IN_PROGRESS、技术上线 NOT READY。
 - 独立证据及交接 `d02-ops-mutation-prelaunch-gates-2026-11-22.md`；共享 handoff、需求矩阵、风险/发布清单、财务扫描等其他 Agent 未提交修改继续保护。
 
+## 2026-11-22 B07 恢复预检关键运营表/列完整性
+
+- 在已验收的事故持久化/Outbox/死信工作基础上补恢复只读预检：旧脚本未将第九至十四迁移中的运营事故、通知队列、失败审计、死信复核表作为关键表检查。新增纯模块列出五张表和关键字段，并为缺表、缺列、金额字段类型错误提供合成回归，脚本保持原只读隔离门禁。
+- TDD 新测试缺策略模块先 RED（模块导入失败），实现后全量单测、独立 TypeScript 和 Next.js 生产构建均 exit 0。本轮**未在真实 MySQL 对新结构缺失进行回放**，未执行备份恢复；B07 总体 IN_PROGRESS。独立证据 `b07-recovery-operational-schema-2026-11-22.md`。
+- 上个 D02 小包 `a70aa34` 已在严格 SSH 443 校验下正常推送并经 GitHub 确认。只单独提交本包文件，其他 Agent 未提交数据继续保护。
+

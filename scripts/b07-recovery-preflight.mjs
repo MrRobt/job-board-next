@@ -8,6 +8,7 @@ import {PrismaClient} from "@prisma/client";
 import {createHash} from "node:crypto";
 import {readFile,readdir} from "node:fs/promises";
 import {join} from "node:path";
+import {inspectCriticalRecoverySchema} from "./b07-recovery-schema.mjs";
 
 const allowed=(value)=>{
  try{
@@ -33,23 +34,8 @@ if(!approved){
    db.$queryRaw`SELECT migration_name AS name, checksum, finished_at AS finishedAt,
                  rolled_back_at AS rolledBackAt FROM _prisma_migrations ORDER BY started_at`
   ]);
-  const actualTables=new Set(tables.map(x=>x.tableName));
-  const critical=["_prisma_migrations","User","ToolOrder","ToolGrant","ToolRun",
-   "ToolRefundCase","ToolRefundIntent","ToolRefundDispatch","ToolRefundInquiryEvent"];
-  const missingTables=critical.filter(x=>!actualTables.has(x));
-  const colMap=new Map(columns.map(x=>[x.tableName+"."+x.columnName,x.dataType]));
-  const requiredColumns=[
-   "ToolOrder.status","ToolOrder.refundHold","ToolGrant.remaining",
-   "ToolRefundIntent.fingerprint","ToolRefundIntent.approvedById",
-   "ToolRefundIntent.approvedAt","ToolRefundDispatch.state",
-   "ToolRefundDispatch.outRefundNo","ToolRefundDispatch.claimedAt",
-   "ToolRefundDispatch.confirmedAt","ToolRefundInquiryEvent.outcome"
-  ];
-  const missingColumns=requiredColumns.filter(k=>!colMap.has(k));
-  const unexpectedAmountTypes=[
-   ["ToolOrder","amountFen"],["ToolRefundIntent","amountFen"]
-  ].filter(([a,b])=>colMap.has(a+"."+b)&&
-   !["int","bigint"].includes(colMap.get(a+"."+b)));
+  const {missingTables,missingColumns,unexpectedAmountTypes}=
+   inspectCriticalRecoverySchema(tables,columns);
   const dirs=(await readdir(join(process.cwd(),"prisma","migrations"),{
    withFileTypes:true
   })).filter(x=>x.isDirectory()).map(x=>x.name).sort();
