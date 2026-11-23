@@ -559,7 +559,7 @@
 
 - `tests/email-verification-http-ci-policy.test.ts` 起步 RED 3/3（确认同源检查/工作流/脚本均缺失）；实现 `app/actions/email-verification.ts` 两条 Origin/Host 拦截、一次性 MySQL8 `.github/workflows/email-verification-http-e2e.yml` 和 `scripts/ci-email-verification-http-e2e.mjs` 后，专项 3/3、联合已有策略 6/6 GREEN，`node --check` 通过。
 - 真实测试目标：旧账号未验证不许登录；GET 不激活；邮件外发全部 false；重发不能轮换令牌；攻击者或缺失 Origin 不能验证；过期拒绝；合法 POST 单次验证，之后才允许创建登录 session；重放拒绝。脚本仅限 `CI=true`+`INTEGRATION_TEST_DATABASE=true`+`email_verification_ci`，仅合成个人数据。
-- 本地 `tsc --noEmit` 因另一 Agent 未提交的 `lib/auth-retention.ts` `AuthRetentionResult` 新字段缺 `APPLIED` 返回而报 TS2739，非本次包文件，严禁混改；**完整干净主 CI 和真实 HTTP 尚未执行/拿到回执，不能提前标 VERIFIED**。见 `u01-email-verification-http-e2e-2026-11-23.md`。外部邮件、合规仍人工门禁。
+- 本地 `tsc --noEmit` 因另一 Agent 未提交的 `lib/auth-retention.ts` `AuthRetentionResult` 新字段缺 `APPLIED` 返回而报 TS2739，非本次包文件，严禁混改；**真实干净远端验收已确认：** `543b576` GitHub Actions 主 CI run `45129637497` / job `137541931079` completed/success（Prisma、TypeScript、单元/真实 DB 集成、build、smoke）；邮箱验证真实 HTTP run `45129637522` / job `137541931200` completed/success，实际日志 `CI_EMAIL_VERIFICATION_HTTP pass=10 fail=0`，未验证登录、GET 只读、禁发重发、CSRF、过期、有效令牌一次确认、重放、验证后建立登录会话均成功。找回密码 HTTP `45129637524`、管理员 E2E `45129637509`、B07 两条 `45129637538/45129637428` 也 SUCCESS。**仅一次性 MySQL/HTTP 邮箱验证子包 VERIFIED，不代表真实邮件、旧账号或账户注销完成**。见 `u01-email-verification-http-e2e-2026-11-23.md`。外部邮件、合规仍人工门禁。
 
 ## 2026-11-23 U01 真实 HTTP 找回密码与 CSRF 隔离演练（待 CI）
 

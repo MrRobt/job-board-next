@@ -11,6 +11,6 @@
 ## 测试与交接
 
 - **本地定向测试 6/6 通过**；但本地完整 TypeScript 检查当前被另一 Agent 的未提交 `lib/auth-retention.ts` 改动阻断，错误 TS2739：结果类型新增 `expiredPasswordResetTokens/deletedPasswordResetTokens`，但 `APPLIED` 返回尚未补齐。其对应 `tests/auth-retention-verification-policy.test.ts` 也为并行未提交改动；本包禁止触碰、改写或提交这些文件。
-- 因此**不能声称本轮完整本地 tsc/npm test/build 均 PASS**；须以推送后**干净 GitHub Actions** 主 CI/专用真实 MySQL HTTP run/job 及日志为验收标准，失败必须修复自身代码。没有获得真实回执前，子包为 IN_PROGRESS。
+- 因此**不能声称本轮完整本地 tsc/npm test/build 均 PASS**；但已独立推送提交 `543b576` 并取得**干净 GitHub Actions 真实通过回执**：主 CI run `45129637497` / job `137541931079` SUCCESS（Prisma 迁移/校验、类型、单元、真实 MySQL 集成、Next build、HTTP smoke）；邮箱确认 HTTP run `45129637522` / job `137541931200` SUCCESS，原始日志 `CI_EMAIL_VERIFICATION_HTTP pass=10 fail=0`，涵盖未验证登录拒绝、GET 只读、邮件禁用、跨域/缺 Origin 拒绝、过期拒绝、单次确认、无隐式登录、重放拒绝及验证后登录建立会话。另有管理员 HTTP `45129637509`、找回密码 HTTP `45129637524`、B07 只读 `45129637538`、B07 非空恢复 `45129637428` 均 SUCCESS。**仅 U01 合成邮箱验证 HTTP 子包 VERIFIED；不是现实邮箱送达或账户注销验收。**
 - 外部邮件发信、真实收件箱、旧账号迁移、账户删除及全站浏览器验收仍缺，U01 整体 IN_PROGRESS。B07、支付/退款、AI 法规及商户仍保留人工门禁，技术上线 NOT READY。
 - 分批提交时仅 stage 本包文件和 `current-task.md`、`test-evidence.md`、本文档，不包含其他 Agent 的 handoff、矩阵、发布/风险、财务审计、本地缓存、lockfile、认证清理中途修改。
