@@ -533,11 +533,11 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
-## 2026-11-23 U01 账户注销审核真实 localhost HTTP E2E（待 CI）
+## 2026-11-23 U01 账户注销审核真实 localhost HTTP E2E（隔离 CI VERIFIED）
 
 - 前包 `f1ef3d2` 主 CI run `45133996644` 已验收成功，随后 `178c01d` 独立回填证据/交接，不重复已完成的非破坏性申请底座。
 - 新增独立 `account-deletion-http-e2e.yml` 的一次性 MySQL 8 + Next production localhost 真实请求演练；模拟已验证用户、另一用户与 PAID 次数包，核验匿名拒绝、登录 Cookie、账户申请表单、跨域/缺 Origin 拒绝、密码/确认核验、提交后唯一审核请求、重复幂等、他人及原账务和 Session 不变。
-- 新专项策略先 RED 2/2 后 GREEN 2/2，与原账户受理策略总 4/4 PASS，node --check exit 0；本地全局受其他 Agent 的 `auth-retention` 未提交改动影响。**新 HTTP run 尚未拿到真实回执，不能提前标 VERIFIED**。独立交接 `u01-account-deletion-http-e2e-2026-11-23.md`，U01 整体 IN_PROGRESS，正式删除/法定保留仍人工门禁。
+- 新专项策略先 RED 2/2 后 GREEN 2/2，与原账户受理策略总 4/4 PASS，node --check exit 0；本地全局受其他 Agent 的 `auth-retention` 未提交改动影响。**已取得干净远端真实验收：** `8d7d494` HTTP run `45134887116` / job `137558697836` SUCCESS，日志 `CI_ACCOUNT_DELETION_HTTP pass=10 fail=0`，真实登录、密码/勾选、CSRF、防重复、他人隔离、模拟已付记录与 Session 保全全部通过；主 CI `45134887170` 及其余五条专项 CI 同样 SUCCESS。**仅账户注销人工审核申请 HTTP 子包 VERIFIED，最终删除仍未完成。**。独立交接 `u01-account-deletion-http-e2e-2026-11-23.md`，U01 整体 IN_PROGRESS，正式删除/法定保留仍人工门禁。
 
 ## 2026-11-23 U01 账户注销人工审核申请（隔离 MySQL8 VERIFIED）
 

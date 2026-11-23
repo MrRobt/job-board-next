@@ -555,10 +555,10 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
-## 2026-11-23 U01 账户注销审核申请真实 HTTP（待远端）
+## 2026-11-23 U01 账户注销审核申请真实 HTTP（隔离 CI VERIFIED）
 
 - 本包 `tests/account-deletion-http-ci-policy.test.ts` 起步缺工作流/脚本 RED 2/2，新增一次性 MySQL8 `account_deletion_http_ci` 专用 GitHub 工作流与 `ci-account-deletion-http-e2e.mjs` 后专项 2/2 PASS；联合上一单元策略 4/4 PASS；脚本 `node --check` exit 0。
-- 真 HTTP 演练使用 Server Action 表单、有效已验证用户 Cookie，测试匿名、跨域与缺 Origin、错误密码、未确认、有效请求、重复请求、用户隔离与模拟 PAID 订单和 Session 完整；支付/AI/邮件全部 false，严格拒绝非一次性 DB。**当前仍待新 CI 真实 run/job 执行，不能声称真实 HTTP E2E PASS**。交接 `u01-account-deletion-http-e2e-2026-11-23.md`。
+- 真 HTTP 演练使用 Server Action 表单、有效已验证用户 Cookie，测试匿名、跨域与缺 Origin、错误密码、未确认、有效请求、重复请求、用户隔离与模拟 PAID 订单和 Session 完整；支付/AI/邮件全部 false，严格拒绝非一次性 DB。**远端真实验收已完成：** `8d7d494` GitHub Actions 账户注销 HTTP run `45134887116` / job `137558697836` completed/success，实际日志 `CI_ACCOUNT_DELETION_HTTP pass=10 fail=0`，匿名/CSRF/错密码/未确认/重复幂等/模拟 PAID 订单不变均 PASS；主 CI run `45134887170` 类型、迁移、单元、MySQL 集成、生产构建与 smoke SUCCESS，另五条回归专项均 SUCCESS。**仅合成账户注销审核申请 HTTP 子包 VERIFIED，不代表真实注销/数据删除获得合规批准。**。交接 `u01-account-deletion-http-e2e-2026-11-23.md`。
 
 ## 2026-11-23 U01 账户注销非破坏性人工审核申请（隔离 MySQL8 VERIFIED）
 
