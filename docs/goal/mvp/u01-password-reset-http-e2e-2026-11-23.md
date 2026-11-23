@@ -11,11 +11,12 @@
 ## 本地检查
 
 - 原点策略 2/2、动作策略 3/3、HTTP CI 配置策略 2/2；`node --check scripts/ci-password-reset-http-e2e.mjs`、完整 `npm test`、独立 tsc、`npm run build` 均 exit 0。
-- **尚未真正启动此 E2E 的独立 GitHub CI run**；不能把脚本存在或构建通过解释成已验收。需读取新 run/job 日志 `CI_PASSWORD_RESET_HTTP` 的实际 pass/fail，失败时保留失败证据并先修复。
+- **远端真实 MySQL8/Next localhost HTTP 演练已通过**：提交 `d13456b` 的 GitHub Actions run `45128326350`、job `137537737478` 全部 completed/success。真实 job 日志记录 `CI_PASSWORD_RESET_HTTP pass=10 fail=0`；逐项确认匿名找回、跨域请求阻断、邮件禁用、GET 只读、跨域/缺失 Origin 确认拒绝、同源 POST 单次消费、scrypt 新密码、旧会话撤销、重放和旧 Cookie 拒绝。**仅这一隔离 HTTP 断言子包 VERIFIED**。
+- 同一提交 `d13456b` 的主 CI run `45128326325`、管理员 HTTP run `45128326338`、B07 只读 run `45128326408`、B07 合成非空恢复 run `45128326374` 亦均 completed/success；不因 HTTP 专项而退化既有路径。
 - 独立工作流的 CI 配置是虚构账户，未交付真实邮件发送、生产域名、真实商户/AI 或任何受法律限制的调用。
 
 ## 后续交接
 
-1. 验证本包真实 localhost HTTP run/job；如果成功，才标记**隔离 HTTP 找回密码演练子包** VERIFIED。
+1. 本包真实 localhost HTTP run/job 已验收，**隔离 HTTP 找回密码演练子包 VERIFIED**，不重复；正式邮箱供应商、生产域名和业务合规 UAT 仍未验证。
 2. U01 总体仍 IN_PROGRESS：经营者批准的实际邮件投递、密码重置收件箱与反垃圾联调、旧用户邮箱验证迁移、账号注销与隐私处理、浏览器端可用性均未验收。
 3. 严格保护其他 Agent 的 `handoff.md`、需求矩阵、风险/发布清单、财务审计及缓存/lockfile；精确 stage，本人分批普通 push，真实支付与模型开关继续关闭。

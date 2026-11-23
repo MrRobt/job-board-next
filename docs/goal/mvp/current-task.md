@@ -536,7 +536,7 @@
 ## 2026-11-23 U01 找回密码隔离 HTTP CSRF / 会话撤销演练（待远端实测）
 
 - 上轮 `0daf679` 主 CI `45127453163`、DEAD HTTP `45127453001`、B07 只读 `45127453148`、合成非空恢复 `45127453070` 全 SUCCESS，跳过重复工作。
-- 新增通用同源 Origin/Host 安全策略，密码找回请求和确认两个 POST 动作均先拒绝缺失或伪造 Origin；独立 `password-reset-http-e2e.yml` 一次性 MySQL8 + Next 生产 localhost HTTP 审核：匿名请求、邮件默认关闭、GET 只读、跨域/缺源不可消费、同源密码更新、旧会话撤销和重放失败。策略 TDD RED→GREEN、node --check、npm test、TS/生产 build 均 exit 0。**远端真实 HTTP run 尚未检查，不能标 VERIFIED**；证据/交接 `u01-password-reset-http-e2e-2026-11-23.md`。
+- 新增通用同源 Origin/Host 安全策略，密码找回请求和确认两个 POST 动作均先拒绝缺失或伪造 Origin；独立 `password-reset-http-e2e.yml` 一次性 MySQL8 + Next 生产 localhost HTTP 审核：匿名请求、邮件默认关闭、GET 只读、跨域/缺源不可消费、同源密码更新、旧会话撤销和重放失败。策略 TDD RED→GREEN、node --check、npm test、TS/生产 build 均 exit 0。**实际远端验收已通过：** `d13456b` GitHub Actions run `45128326350` / job `137537737478` SUCCESS，真实 HTTP 日志 `CI_PASSWORD_RESET_HTTP pass=10 fail=0`，含 CSRF/缺 Origin 阻断、GET 不消费、同源 POST 单次修改密码、撤销 session、重放和旧 Cookie 拒绝。**仅隔离找回密码 HTTP 子包 VERIFIED**；证据/交接 `u01-password-reset-http-e2e-2026-11-23.md`。
 
 ## 2026-11-23 U01 找回密码页面、独立邮件外发与限流
 

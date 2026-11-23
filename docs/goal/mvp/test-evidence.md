@@ -559,7 +559,7 @@
 
 - `0daf679` 主 CI `45127453163`、原管理员 E2E `45127453001`、B07 隔离只读 `45127453148`、合成非空恢复 `45127453070` 四项 SUCCESS，仅前一 Web 单元/构建子包验收。
 - `tests/action-origin-policy.test.ts` 模块未建时 RED exit1，新增 Origin/Host 纯校验后 2/2 GREEN；`tests/password-reset-http-ci-policy.test.ts` 配置/脚本缺失时 2/2 RED，补全隔离 `.github/workflows/password-reset-http-e2e.yml` + `scripts/ci-password-reset-http-e2e.mjs` 后 2/2 GREEN；动作策略新增两个 POST 同源守卫断言，定向 3/3 GREEN。完整 npm test、独立 tsc、生产 build、HTTP 脚本 node --check exit 0。
-- 脚本在临时 MySQL8 + Next localhost 内构造伪用户与重置令牌，要求 GET 只读、攻击者/缺 Origin 不消费、同源单次修改密码并撤销旧会话、重放和旧 Cookie 拒绝。**该新工作流当前无实际 run/job 回执，不得宣称 HTTP E2E 通过**；详细交接 `u01-password-reset-http-e2e-2026-11-23.md`。所有真实支付/邮件/AI 默认关闭。
+- 脚本在临时 MySQL8 + Next localhost 内构造伪用户与重置令牌，要求 GET 只读、攻击者/缺 Origin 不消费、同源单次修改密码并撤销旧会话、重放和旧 Cookie 拒绝。**远端真实 HTTP 已验收：** `d13456b` GitHub Actions run `45128326350` / job `137537737478` completed/success，实际 job 日志 `CI_PASSWORD_RESET_HTTP pass=10 fail=0`、邮件/支付/AI 全关闭；确认链接 GET 不消费、跨源及缺失 Origin 的 POST 不消费、合法 POST 后新密码生效和旧 session 失效、重放拒绝。**仅本隔离 HTTP 子包 VERIFIED，非真实邮箱投递或生产验收**；详细交接 `u01-password-reset-http-e2e-2026-11-23.md`。所有真实支付/邮件/AI 默认关闭。
 
 ## 2026-11-23 U01 找回密码页面、邮件外发与匿名接口（待真实 HTTP E2E）
 
