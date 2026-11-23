@@ -13,6 +13,12 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
+## 2026-11-24 B04 真正执行独立 CLI 与隔离 MySQL8 的演练（待远端）
+
+- 新 `tests/refund-review-incident-cli-ci-policy.test.ts` 先因缺少工作流/脚本 RED 2/2，补充固定临时 MySQL8、所有金融/AI 通道 false、CI 专用 DB 检查、三重 gate 与 CLI 子进程后 2/2 GREEN。
+- 新 `.github/workflows/b04-refund-review-incident-cli-drill.yml` 与 `scripts/ci-refund-review-incident-cli-drill.ts` 专门验证真实 process env/库名限制，拒绝非 CI/production/original jobs；合成 ALIPAY 已付订单/退款工单/权益异常经无网络模拟查单后生成审计，通过子进程手动扫描器对 OPEN/ACKNOWLEDGED/RESOLVED、重放、历史留存、关闭通道和账本不被扫描器改写逐条核对。
+- 本地 TypeScript 的唯一已知问题仍为其他 Agent 未提交 `lib/auth-retention.ts:83` TS2739，未改其文件；**本包的独立 GitHub Actions 尚未执行，不能标 VERIFIED**。独立交接 `b04-refund-review-cli-ci-drill-2026-11-24.md`。
+
 ## 2026-11-24 B04 退款核账异常单独事故同步与人工接手（干净 MySQL8 CI VERIFIED）
 
 - `tests/refund-review-incident-scan.test.ts` 起步缺模块 RED；补三个独立环境门禁、第四类别、旧三指标不变、OPEN/RESOLVED/REOPENED、非法值/读失败不自动解决、已有管理确认表单可解析但新类不能入站外部通知后 4/4 PASS。

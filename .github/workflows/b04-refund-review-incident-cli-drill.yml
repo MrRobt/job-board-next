@@ -1,0 +1,55 @@
+name: B04 isolated refund review incident CLI MySQL8 drill
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  refund-review-cli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: b04_ci_root_only
+          MYSQL_DATABASE: jobs_mvp_migrate_20261124_b04ci
+          MYSQL_USER: b04_ci
+          MYSQL_PASSWORD: b04_ci_only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+    env:
+      CI: "true"
+      NODE_ENV: "test"
+      INTEGRATION_TEST_DATABASE: "true"
+      DATABASE_URL: mysql://b04_ci:b04_ci_only@127.0.0.1:3306/jobs_mvp_migrate_20261124_b04ci
+      ENABLE_REAL_PAYMENT: "false"
+      ENABLE_REFUND_SEND: "false"
+      ENABLE_REFUND_QUERY: "false"
+      ENABLE_REFUND_DISPATCH_CLAIM: "false"
+      ENABLE_MOCK_PAYMENT: "false"
+      ENABLE_TOOL_PAYMENTS: "false"
+      ENABLE_LIVE_AI: "false"
+      ENABLE_PAYMENT_RECONCILIATION: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - run: npx prisma validate
+      - name: Deploy migrations into disposable MySQL8
+        run: npx prisma migrate deploy
+      - name: Confirm no pending migration
+        run: npx prisma migrate status
+      - name: Exercise actual isolated CLI, guarded incident transitions and financial invariants
+        run: node --conditions=react-server --import tsx scripts/ci-refund-review-incident-cli-drill.ts
