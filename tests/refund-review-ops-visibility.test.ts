@@ -8,12 +8,13 @@ const page=()=>readFileSync(fileURLToPath(
  new URL("../app/admin/incidents/page.tsx",import.meta.url)),"utf8");
 
 test("B04 refund ledger review count selects only fixed audit outcome and rejects partial/invalid results",async()=>{
- let input:{where:{outcome:string}}|undefined;
- const port={toolRefundInquiryEvent:{async count(args:{where:{outcome:string}}){
+ let input:unknown;
+ const port={toolRefundInquiryEvent:{async count(args:unknown){
   input=args;return 2;
  }}};
  assert.equal(await countRefundLedgerReviewHolds(port),2);
- assert.deepEqual(input,{where:{outcome:"MANUAL_LEDGER_REVIEW"}});
+ assert.deepEqual(input,{where:{outcome:"MANUAL_LEDGER_REVIEW",
+  dispatch:{is:{state:"IN_DOUBT"}}}});
  for(const invalid of [-1,1.2,NaN,Infinity,Number.MAX_SAFE_INTEGER+1]){
   await assert.rejects(countRefundLedgerReviewHolds({
    toolRefundInquiryEvent:{async count(){return invalid;}}

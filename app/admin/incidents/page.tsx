@@ -46,8 +46,8 @@ export default async function OpsIncidentAdmin({
   {params.incidentError&&<p role="alert">事故确认未执行或失败，请检查权限、操作限流及事故是否已更新。</p>}
   {opsIncidentOutcomeNotice(params.incidentOutcome)&&<p role="status">{opsIncidentOutcomeNotice(params.incidentOutcome)}</p>}
   {reviewCount>0&&<section className="card" role="alert">
-   <h2>退款已验签成功但本地权益无法结算：{reviewCount} 条需人工核账</h2>
-   <p>仅汇总持久化的人工复核审计事件，并非商户回款证明。本提示不会自动创建、确认或解决事故，也不重发退款或改变权益。</p>
+   <h2>当前退款已验签成功但本地权益无法结算：{reviewCount} 条需人工核账</h2>
+   <p>只计仍处于 IN_DOUBT 的退款异常，成功结算后活跃数自动消失，但历史审计仍保留；并非商户回款证明。本提示不会自动创建、确认或解决事故，也不重发退款或改变权益。</p>
    <Link href="/admin/refund-dispatch">查看退款派发账本并人工核账</Link>
   </section>}
   <section className="card scroll"><table>

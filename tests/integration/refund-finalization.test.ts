@@ -184,6 +184,8 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
   assert.equal(await reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),"ALREADY_SUCCEEDED");
   assert.equal(await db.toolRefundInquiryEvent.count({where:{dispatchId:dispatch.id}}),5);
   assert.equal(await db.toolRefundInquiryEvent.count({where:{dispatchId:dispatch.id,outcome:"MANUAL_LEDGER_REVIEW"}}),1);
+  assert.equal(await countRefundLedgerReviewHolds(db),baselineReviewCount,
+   "A completed refund must leave audit history but clear active manual-review count");
   const event=await db.toolRefundInquiryEvent.findFirstOrThrow({
    where:{dispatchId:dispatch.id,outcome:"CREDITS_REVOKED"}
   });
