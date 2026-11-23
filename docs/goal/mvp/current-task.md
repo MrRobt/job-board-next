@@ -536,7 +536,7 @@
 ## 2026-11-23 B07 一次性 MySQL8 非空业务夹具备份恢复
 
 - 已实现单独 `b07-disposable-restore.yml` 和硬编码双一次性库名的 `b07-disposable-restore.sh`；仅显式 CI 审批和匹配目标库允许操作，使用虚构订单/权益/预留四表测试 `mysqldump`/restore + 指纹一致性，目标库存在则拒绝覆盖；商户/AI/退款开关全 false。
-- 专项先 RED 缺脚本/配置，修复后 GREEN；`bash -n`、`npm test`、独立 tsc、`npm run build` exit 0；缺审批本地 shell 拒绝 exit 2。**尚未取得远端实际 MySQL 8 restore run/job 结果，不能标 VERIFIED**；B07 总体 IN_PROGRESS。独立证据/交接 `b07-disposable-restore-2026-11-23.md`。
+- 专项先 RED 缺脚本/配置，修复后 GREEN；`bash -n`、`npm test`、独立 tsc、`npm run build` exit 0；缺审批本地 shell 拒绝 exit 2。**远端运行前该状态未验收，后续补验：** `3d406ce` GitHub Actions run `45122328697` / job `137518703938` SUCCESS，真实 `mysqldump`/restore 输出 `B07_DISPOSABLE_NONEMPTY_RESTORE status=PASS fixtures=4`、源/目标库不同、恢复秒数 0（仅 CI 计时，不能作为生产 RTO）。**合成恢复子包 VERIFIED，B07 总体 IN_PROGRESS**。独立证据/交接 `b07-disposable-restore-2026-11-23.md`。
 
 ## 2026-11-22 B07 CI 真实 MySQL8 回执确认
 

@@ -558,7 +558,7 @@
 ## 2026-11-23 B07 非空数据恢复合成实验（待远端实测）
 
 - `tests/b07-disposable-restore-ci.test.ts` 初始 YAML/Shell 均不存在：专项 RED 2/2；实现后目标库门禁首次策略 RED，补守卫后专项 GREEN，`bash -n`/完整 `npm test`/独立 `tsc --noEmit`/Next 生产 build 均 exit 0。
-- 缺显式授权时脚本 exit 2；单独 CI 工作流中支付/模拟支付/AI/退款/对账均 false。测试 fixture `User + ToolOrder + ToolGrant + ToolRun` 含一个 RESERVED，恢复后用行数/字段 SHA-256 比对。**尚未实际执行远端 mysqldump/restore，不能当作 DB 恢复 PASS；未执行生产 RPO/RTO。** 详见 `b07-disposable-restore-2026-11-23.md`。
+- 缺显式授权时脚本 exit 2；单独 CI 工作流中支付/模拟支付/AI/退款/对账均 false。测试 fixture `User + ToolOrder + ToolGrant + ToolRun` 含一个 RESERVED，恢复后用行数/字段 SHA-256 比对。**远端实际恢复回执已补验：** `3d406ce` GitHub Actions run `45122328697` / job `137518703938` completed/success，日志 `B07_DISPOSABLE_NONEMPTY_RESTORE status=PASS fixtures=4`，源/目标一次性数据库独立，SQL 备份恢复后内容 SHA-256 与行数一致；CI 记录 restoreSeconds=0 仅为 CI 计时，不是生产 RTO/RPO。**仅合成恢复子包 VERIFIED，B07 整体仍 IN_PROGRESS**。 详见 `b07-disposable-restore-2026-11-23.md`。
 
 ## 2026-11-22 B07 实际 CI 预检成功回执
 
