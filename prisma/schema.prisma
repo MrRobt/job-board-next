@@ -33,6 +33,7 @@ model User {
   createdAt DateTime @default(now())
   emailVerifiedAt DateTime?
   emailVerificationToken EmailVerificationToken?
+  passwordResetToken PasswordResetToken?
   sessions Session[]
   orders Order[]
   unlocks Unlock[]
@@ -51,6 +52,14 @@ model User {
   operatedOpsIncidentEvents OpsAlertIncidentEvent[] @relation("OpsIncidentEventOperator")
 }
 model EmailVerificationToken {
+  tokenHash String @id @db.Char(64)
+  userId String @unique
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([expiresAt])
+}
+model PasswordResetToken {
   tokenHash String @id @db.Char(64)
   userId String @unique
   user User @relation(fields:[userId],references:[id],onDelete:Cascade)

@@ -555,6 +555,12 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
+## 2026-11-23 U01 找回密码令牌核心（等待真实 MySQL8 CI）
+
+- 上包 `b06feac` 真实 GitHub Actions 主 CI run `45125860248` / job `137529916098` completed/success，新增 `U01 auth retention removes only expired email verification records in disposable MySQL` PASS；主 CI 单元 `183/183` PASS、MySQL8 迁移及完整集成、Next build/HTTP smoke 全部 exit 0，同提交其他三条专项 Actions 均 SUCCESS。
+- 新增 `tests/password-reset-policy.test.ts` 初次模块不存在 RED exit 1，实现后 2/2 PASS；`PasswordResetToken` 新迁移及 `issuePasswordReset/consumePasswordReset`：哈希、30min、仅 verified 用户、轮换、事务单次 claim、成功更新 scrypt 密码+撤销全部 session。静态 Prisma validate/generate、tsc、完整 npm test、Next build exit 0。
+- 新 `tests/integration/password-reset.test.ts` 在隔离库验未验证账号、无明文、过期/重放、并发单次成功、新旧密码及会话撤销。**当前尚无本包真实 CI 回执，不能标 MySQL 专项 VERIFIED**；没启用外部邮件或真实用户账户操作。交接 `u01-password-reset-core-2026-11-23.md`。
+
 ## 2026-11-23 U01 过期验证令牌认证数据保留（等待 MySQL CI）
 
 - 前一 `94350a6` GitHub Actions 主 CI `45124959965`、管理员真实 HTTP `45124959956`、恢复只读 `45124960196`、合成非空恢复 `45124959966` completed/success；HTTP 10/10 权限及 CSRF 检查，`unverified ADMIN GET rejected` PASS。**仅原 U01 Web 安全子包具备 CI 证据，实际邮件商户/真实邮箱仍未验收。**

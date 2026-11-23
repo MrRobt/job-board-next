@@ -533,6 +533,11 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-23 U01 找回密码一次性令牌后端底座（等待 MySQL CI）
+
+- 上轮 `b06feac` 主 CI `45125860248`、HTTP E2E `45125860257`、B07 只读/非空恢复 `45125860199 / 45125860351` 四项均 SUCCESS；MySQL 8 真实过期邮箱验证令牌清理集成 PASS，不重复。
+- 继续 U01 未完成的找回密码：新增独立 `PasswordResetToken` 表与第 16 个版本化迁移，30 分钟 256bit 临时令牌只存 SHA-256，每用户唯一轮换；仅已验证邮箱账号可申请。新密码 scrypt 哈希，消费使用 Serializable 事务原子 claim/更新并撤销该账号全部旧会话；坏令牌、到期、重放拒绝。规则专项 RED→2/2 GREEN，Prisma validate/generate、TS、npm test、Next build exit 0。**真实 MySQL8 并发/失效/撤销集成待本次远端 CI 回执**；无发送器/页面，U01 总体 IN_PROGRESS。独立交接 `u01-password-reset-core-2026-11-23.md`。
+
 ## 2026-11-23 U01 过期邮箱验证令牌认证数据保留
 
 - 已核实前一 Web 子包 `94350a6` 远端主 CI `45124959965`、真 HTTP E2E `45124959956`、两条 B07 隔离 MySQL 恢复 `45124960196 / 45124959966` 均 SUCCESS；HTTP 日志实际 `pass=10,fail=0` 含未验证 ADMIN 旧会话阻断。无须重做。
