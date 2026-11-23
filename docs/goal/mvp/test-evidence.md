@@ -13,10 +13,10 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
-## 2026-11-23 U01 管理员审核事件真实 HTTP 动作（待远端）
+## 2026-11-23 U01 管理员审核事件真实 HTTP 动作（隔离 CI VERIFIED）
 
 - 新 `tests/account-deletion-review-http-ci-policy.test.ts` 起步缺独立 workflow/script RED 2/2；新增 `.github/workflows/account-deletion-review-audit-http.yml` 和 `scripts/ci-account-deletion-review-audit-http.mjs` 后 2/2 GREEN，联合固定原因/默认关闭策略 5/5 PASS，`node --check` PASS。
-- 目标只在 `CI=true` + `INTEGRATION_TEST_DATABASE=true` + 固定一次性 MySQL8 库名执行：合成 USER/ADMIN、MOCK PAID 订单、真实 Next.js Server Action，验证越权/CSRF/缺同源/明确确认/无效原因/重复/受控追加、脱敏和财务/申请状态不变。**本次尚无 GitHub run/job 实际回执，不能宣称 HTTP 子包 VERIFIED**。原始 jobs 库/真实邮箱/支付/AI 都不触碰。
+- 目标只在 `CI=true` + `INTEGRATION_TEST_DATABASE=true` + 固定一次性 MySQL8 库名执行：合成 USER/ADMIN、MOCK PAID 订单、真实 Next.js Server Action，验证越权/CSRF/缺同源/明确确认/无效原因/重复/受控追加、脱敏和财务/申请状态不变。**远端真实 E2E 已验收：** `53aa449` run `45154835179` / job `137625019357` completed/success，实际日志 `CI_ACCOUNT_DELETION_REVIEW_HTTP pass=12 fail=0`；主 CI run `45154835058` / job `137625019227` completed/success（Prisma 新库迁移/重复 migrate、类型、完整单元/集成、Next build 与 smoke），另外 6 条安全/恢复回归均 SUCCESS。**仅隔离 HTTP 审核事件子包 VERIFIED，不代表生产正式注销或法律审批。**原始 jobs 库/真实邮箱/支付/AI 都不触碰。
 - 交接 `u01-account-deletion-review-http-2026-11-23.md`。
 
 ## 2026-11-23 U01 可控人工审核事件台账（干净 MySQL8 CI VERIFIED）

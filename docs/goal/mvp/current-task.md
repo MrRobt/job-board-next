@@ -1,9 +1,9 @@
 # 当前任务（2026-11-17）
 
-## 2026-11-23 U01 注销审核写入真实 HTTP/CSRF 演练（待独立 CI）
+## 2026-11-23 U01 注销审核写入真实 HTTP/CSRF 演练（隔离 CI VERIFIED）
 
 - 继续已验收 `604602b` + `ac81a12` 的非破坏性台账，新增仅限一次性 GitHub MySQL8 `account_review_audit_ci` 的 Next 生产 HTTP E2E；仅 CI 的 synthetic 审计测试显式 `ENABLE_ACCOUNT_DELETION_REVIEW_WRITE=true`，真实支付/模拟支付/AI/退款/邮件全 false，本地预览和预发布仍禁写。
-- 目标真实 HTTP 验收：匿名/普通用户拒绝、管理员只读+事件表单、攻击者/缺失 Origin 拒绝、未确认及非法原因拒绝、合法固定原因一次记录、重复 POST 幂等、第二原因可追加；原申请仍 PENDING，模拟已付订单、用户、邮箱脱敏不变。静态专项目标 RED 2/2 → GREEN 2/2，联合核心规则 5/5、node --check PASS；**尚待独立远端 run/job**，不可提前标 VERIFIED。
+- 目标真实 HTTP 验收：匿名/普通用户拒绝、管理员只读+事件表单、攻击者/缺失 Origin 拒绝、未确认及非法原因拒绝、合法固定原因一次记录、重复 POST 幂等、第二原因可追加；原申请仍 PENDING，模拟已付订单、用户、邮箱脱敏不变。静态专项目标 RED 2/2 → GREEN 2/2，联合核心规则 5/5、node --check PASS；**已取得真实远端回执：** `53aa449` HTTP run `45154835179` / job `137625019357` SUCCESS，原始日志 `CI_ACCOUNT_DELETION_REVIEW_HTTP pass=12 fail=0`；主 CI run `45154835058` / job `137625019227` 成功，Prisma/类型/单元/真实 MySQL/Build/Smoke 全 PASS，其他 6 条专项 CI 亦 SUCCESS。**仅本合成 HTTP 审核事件子包 VERIFIED**。
 - 交接 `u01-account-deletion-review-http-2026-11-23.md`。U01 整体 IN_PROGRESS、技术上线 NOT READY，实际注销与合规仍人工门禁。
 
 ## 2026-11-23 U01 账户注销审核事件台账（干净 MySQL8 CI VERIFIED）
