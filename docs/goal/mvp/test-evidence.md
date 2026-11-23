@@ -555,6 +555,11 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
+## 2026-11-23 U01 过期验证令牌认证数据保留（等待 MySQL CI）
+
+- 前一 `94350a6` GitHub Actions 主 CI `45124959965`、管理员真实 HTTP `45124959956`、恢复只读 `45124960196`、合成非空恢复 `45124959966` completed/success；HTTP 10/10 权限及 CSRF 检查，`unverified ADMIN GET rejected` PASS。**仅原 U01 Web 安全子包具备 CI 证据，实际邮件商户/真实邮箱仍未验收。**
+- `tests/auth-retention-verification-policy.test.ts` 对旧实现先 RED；加入 `EmailVerificationToken` 的 expired/deleted 数量、只读预览、限定最多 batchSize 的索引排序以及同事务过期重检删表后专项 GREEN 1/1，完整 `npm test`、独立 tsc、Next 生产 build exit 0；`AUTH_RETENTION_APPLY_APPROVED=true` 运维门禁不变。新增 `tests/integration/auth-verification-retention.test.ts` 仅在 `INTEGRATION_TEST_DATABASE=true` 隔离库运行以验真实 DELETE/未到期保护/幂等，**本机未写库，待 GitHub CI 回执**。详见 `u01-verification-token-retention-2026-11-23.md`。
+
 ## 2026-11-23 U01 邮箱验证 Web/邮件守卫（待 HTTP 远端验收）
 
 - `669fe82` 主 CI `45123821665` completed/success，Prisma 全新 MySQL8 迁移、`npm test`、完整真实 DB `test:integration`、重复迁移、Next build/HTTP smoke 全部成功。只代表后端底座 VERIFIED。

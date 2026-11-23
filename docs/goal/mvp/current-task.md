@@ -533,6 +533,11 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-23 U01 过期邮箱验证令牌认证数据保留
+
+- 已核实前一 Web 子包 `94350a6` 远端主 CI `45124959965`、真 HTTP E2E `45124959956`、两条 B07 隔离 MySQL 恢复 `45124960196 / 45124959966` 均 SUCCESS；HTTP 日志实际 `pass=10,fail=0` 含未验证 ADMIN 旧会话阻断。无须重做。
+- 续接上一轮本地 `lib/auth-retention.ts` 未提交改动：验证令牌清理加入已存在的默认 DRY_RUN / 显式审批 APPLY，过期重检、每次 ≤1000、仅计数不泄露令牌；专项策略先 RED 后 GREEN、tsc、完整 npm test、生产 build exit 0。新一次性 MySQL8 集成校验真实已过期删除、未到期保护、幂等；**须等 GitHub run/job 实测才可标子包 VERIFIED**。交接 `u01-verification-token-retention-2026-11-23.md`；U01 总体 IN_PROGRESS、技术上线 NOT READY。
+
 ## 2026-11-23 U01 默认关闭的邮件验证与注册会话门禁
 
 - `669fe82` 核心底座主 CI `45123821665` SUCCESS：全新 MySQL8 迁移与集成、单元/构建全部通过，不再等待该已验收子包。注册不再创建 session，登录与旧 session 必须 emailVerifiedAt 已验证，发信必须显式开关+合法 HTTPS 出口/凭据，GET 打开验证链接不消费，一次性 POST 原子确认；重发/确认 DB 限流并保护邮箱枚举。
