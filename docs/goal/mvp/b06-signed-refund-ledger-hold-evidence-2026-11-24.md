@@ -18,10 +18,10 @@
 - 原 `tests/integration/refund-finalization-race.test.ts` 不变，双管理员同一笔成功响应只有一个原子终态，不重复撤权；2/2 实际 MySQL 集成 PASS。
 - `tests/refund-dispatch-integrity-admin-policy.test.ts` 增加后台查询仅选最新异常事件及醒目提醒的结构断言，先 RED，修复管理页后 GREEN，连同原账本规则 5/5 PASS。
 - 本地独立测试均在 `INTEGRATION_TEST_DATABASE=true` 和隔离预览库运行，没有真实商户联网、退款发款或密钥。
-- **当前尚未取得本次 GitHub Actions 的真实运行结果，子包暂 IN_PROGRESS。** 本地 `tsc --noEmit` 被其他 Agent 未提交 `lib/auth-retention.ts:83` 旧 TS2739 阻断；本包新增文件在本地检查未产生其他类型诊断，须干净 CI 验证。
+- **远端干净验收已完成：** 提交 `4fc401a` 的 GitHub Actions 主 CI run `45224495649` / job `137867232851` completed/success，原始集成日志 `signed refund inquiry settlement requires confirmed matching refund, atomically revokes unused credits` PASS 及 `B06 signed refund reconciliation is single-winner under concurrent reviewers` PASS；Prisma 新库迁移/重复部署、TypeScript、单元 **222/222 PASS**、真实 MySQL 8 集成、Next 生产 build/HTTP smoke 全 SUCCESS。同提交另 **7 条**账户、邮件、后台及 B07 恢复专项流水线全部 SUCCESS。**仅本审计证据子包 VERIFIED**。 本地 `tsc --noEmit` 被其他 Agent 未提交 `lib/auth-retention.ts:83` 旧 TS2739 阻断；本包新增文件在本地检查未产生其他类型诊断，须干净 CI 验证。
 
 ## 交接与发布门禁
 
 - 只 stage 本包的终态审计实现、管理员只读提示、上述两份测试及本工作包/当前任务/测试证据文件；不混入其他 Agent 已存在的 `handoff.md`、需求矩阵、发布/风险、认证数据保留或财务扫描草稿、lockfile、缓存。
-- 提交正常 push 后查主 CI 的真实 MySQL 退款测试、Prisma migrate、TypeScript、全套单元、Next 生产 build/HTTP smoke，再更新独立验收回执；失败先只修本包，不强推。
+- 本包 `4fc401a` 已正常推送，主 CI `45224495649` / job `137867232851` 和另外 7 条专项 CI 均 SUCCESS；本合成验签成功冲突审计子包已验收，不再重复。没有修改其他 Agent 的 dirty 文件或强推。
 - B06 总体仍 IN_PROGRESS，技术上线 NOT READY，真实商户验签退款/账单核对、消费者售后、凭据及资质继续人工门禁。审计事件并非资金到账或全额/部分退款决策。

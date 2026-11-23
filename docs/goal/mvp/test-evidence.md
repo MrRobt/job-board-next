@@ -13,11 +13,11 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
-## 2026-11-24 B06 验签成功却无法安全撤权时保留审计（待远端）
+## 2026-11-24 B06 验签成功却无法安全撤权时保留审计（干净 MySQL8 CI VERIFIED）
 
 - `tests/integration/refund-finalization.test.ts` 在隔离 `jobs_preview_20261123` MySQL8 RED 1：模拟合法验证的退款 `SUCCEEDED`，将 `grant.remaining` 减 1 后预期 `MANUAL_LEDGER_REVIEW` 事件 1 条，实际旧逻辑 0；实现后 GREEN。验证相同派发多次重复查单审计仍仅 1、订单 PAID、dispatch IN_DOUBT、权益无额外扣减；随后模拟 SUCCEEDED AI 运行、恢复余额后同样保持记录不强制结算，最终移除合成矛盾后原有成功终态仍 PASS。
 - `tests/integration/refund-finalization-race.test.ts` 回归 PASS，两个独立审核者仍不得重复退款终态/成功审计；双项 2/2 PASS。扩展 `tests/refund-dispatch-integrity-admin-policy.test.ts` 先 RED 后 GREEN，管理员仅只读获得最近的异常审计，合计规则/页面专项 5/5 PASS。
-- 无真实商户请求或发款；仅生成并清理自己随机 synthetic 测试夹具，原始 `jobs` 未迁移/修改。本地 `tsc` 唯一报错来自其他 Agent 未提交 `lib/auth-retention.ts:83` TS2739，未碰该文件。**尚无本包远端 run/job，当前不声明 VERIFIED**。独立证据 `b06-signed-refund-ledger-hold-evidence-2026-11-24.md`。
+- 无真实商户请求或发款；仅生成并清理自己随机 synthetic 测试夹具，原始 `jobs` 未迁移/修改。本地 `tsc` 唯一报错来自其他 Agent 未提交 `lib/auth-retention.ts:83` TS2739，未碰该文件。**干净远端实际回执：** `4fc401a` GitHub Actions 主 CI run `45224495649` / job `137867232851` SUCCESS，MySQL8 集成 `signed refund inquiry settlement requires confirmed matching refund, atomically revokes unused credits` 与 `B06 signed refund reconciliation is single-winner under concurrent reviewers` PASS，单元 222/222、Prisma migration+重复部署、TypeScript、Next 生产 build/HTTP smoke 均 SUCCESS；同提交 7 条安全/恢复专项 CI 全 SUCCESS。**仅冲突审计/原子性子包 VERIFIED，未进行真实商户资金退款。**独立证据 `b06-signed-refund-ledger-hold-evidence-2026-11-24.md`。
 
 ## 2026-11-23 B06 派发账本只读风控与异常识别（干净 MySQL8 CI VERIFIED）
 

@@ -1,12 +1,12 @@
 # 当前任务（2026-11-17）
 
-## 2026-11-24 B06 验签成功、权益冲突的安全审计证据（待干净 CI）
+## 2026-11-24 B06 验签成功、权益冲突的安全审计证据（干净 MySQL8 CI VERIFIED）
 
 - 恢复 `2f85838` 后确认 B06 并发与管理员只读派发账本均 VERIFIED；按最高 P0 资金/售后风险继续，不重复。
 - 发现：商户退款验签查单 `SUCCEEDED` 时权益已消费、余额不匹配，原事务拒绝撤权但未持久化已验证成功观察。已在 `lib/career/refund-finalization.ts` 对身份/金额校验成功且工单/派发仍一致的异常余额或 RESERVED/SUCCEEDED AI 运行写入确定性 ID `MANUAL_LEDGER_REVIEW` 审计，重复幂等；`IN_DOUBT`、`PAID` 与剩余付费权益完全不变，禁止自动结算。
 - 管理员只读退款派发账本显示历史异常事件时间及人工复核警告，不增加商户 IO/资金按钮；验证失败不创建成功证据。
 - RED：隔离 MySQL8 本地签名成功 + 权益冲突时原代码事件 0≠1；GREEN：相同退款只记一次、另一个已消费 AI 场景只留同一条事件、解除模拟冲突后原子终态通过；退款终态+并发 2/2 PASS，后台规则/鉴权 5/5 PASS。
-- 本地全局 TypeScript 仅因其他 Agent 尚未提交 `lib/auth-retention.ts` TS2739 阻断，不修改其文件。**尚需干净远端主 CI 验收，暂 IN_PROGRESS**。独立交接 `b06-signed-refund-ledger-hold-evidence-2026-11-24.md`；B06 总体 IN_PROGRESS，技术上线 NOT READY。
+- 本地全局 TypeScript 仅因其他 Agent 尚未提交 `lib/auth-retention.ts` TS2739 阻断，不修改其文件。**现已获得真实远端验收：** `4fc401a` 主 CI run `45224495649` / job `137867232851` completed/success，新增退款成功+权益冲突保全证据集成 PASS、双管理员并发 PASS、单元 222/222、迁移/TypeScript/真实 MySQL8 集成/构建/HTTP smoke 全通过，其他 7 条专项流水线也 SUCCESS。**仅异常审计子包 VERIFIED**。独立交接 `b06-signed-refund-ledger-hold-evidence-2026-11-24.md`；B06 总体 IN_PROGRESS，技术上线 NOT READY。
 
 ## 2026-11-23 B06 派发账本只读一致性风控（干净 MySQL8 CI VERIFIED）
 
