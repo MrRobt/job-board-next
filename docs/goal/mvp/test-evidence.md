@@ -13,6 +13,13 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
+## 2026-11-23 B06 退款终态双人争抢与冻结付费次数（待干净 CI）
+
+- 新增 `tests/integration/refund-finalization-race.test.ts`，模拟双方在事务前均收到同一笔 synthetic ALIPAY 退款成功查单结果后并发最终确认。测试断言：一个成功转移，一个安全拒绝/已结算；唯一 CREDITS_REVOKED 审计；订单 REFUNDED、case SUCCEEDED、dispatch SUCCEEDED、该订单余额=0；后续重复确认不再次查商户；退款冻结期间 reserve 不得消耗付费 grant，单独 trial=1 不受影响。
+- 实测 `INTEGRATION_TEST_DATABASE=true DATABASE_URL=<isolated-preview-db> node --conditions=react-server --import tsx --test --test-concurrency=1 tests/integration/refund-finalization-race.test.ts`：初版 PASS 1/1；加严 loser 条件 PASS 1/1；修正 kind 类型值后 PASS 1/1。使用随机 synthetic 实体且仅清理自己的测试数据，绝不联网调用商户。
+- 本地 TypeScript 自有文件问题已修复，但全局 `tsc --noEmit` 仍因另一 Agent 的未提交 `lib/auth-retention.ts:83` TS2739 失败。本包未改其代码、lockfile、共享矩阵/发布/风险/handoff；**尚需干净远端 GitHub run/job 明确回执才可将子包标 VERIFIED，不能等同于真实商户退款 UAT**。
+- 独立证据与交接 `b06-refund-finalization-race-2026-11-23.md`；B06 IN_PROGRESS。
+
 ## 2026-11-23 U01 管理员审核事件真实 HTTP 动作（隔离 CI VERIFIED）
 
 - 新 `tests/account-deletion-review-http-ci-policy.test.ts` 起步缺独立 workflow/script RED 2/2；新增 `.github/workflows/account-deletion-review-audit-http.yml` 和 `scripts/ci-account-deletion-review-audit-http.mjs` 后 2/2 GREEN，联合固定原因/默认关闭策略 5/5 PASS，`node --check` PASS。

@@ -1,5 +1,12 @@
 # 当前任务（2026-11-17）
 
+## 2026-11-23 B06 同一退款双管理员竞态与冻结权益（待干净 MySQL CI）
+
+- 已复核长期 Goal、最近 U01 VERIFIED 进度、真实 `main...origin/main`、服务及其他 Agent dirty 文件；按原始最高 P0 退款权益优先级转向 B06，不重做已有双人审批、持久派发、签名查单和原子撤权。
+- 新增 `tests/integration/refund-finalization-race.test.ts`：两个独立管理员在同一模拟商户成功回应后争抢退款终态，检验仅 1 次成功转移、仅 1 条资金权益成功审计、退回后再次查询幂等、冻结次数包绝不能被扣、免费试用独立。严格 `INTEGRATION_TEST_DATABASE=true`、合成订单/用户、无真实商户 POST/GET、无真实密钥。
+- 在独立 `jobs_preview_20261123` MySQL8 中本包 1/1 PASS，增加失败者结果约束后仍 1/1 PASS，修复 kind 字面值后第三次 1/1 PASS；**全局 TypeScript 仅剩其他 Agent 未提交 `lib/auth-retention.ts` TS2739，不混改**。真实 CI 及生产构建尚待远端验收，本子包 IN_PROGRESS，B06 总体 IN_PROGRESS、技术上线 NOT READY。
+- 独立交接 `b06-refund-finalization-race-2026-11-23.md`；后续商户真实退款资金、最终资金匹配/部分使用纠纷与消费者售后仍需人工授权、正式环境和合规门禁。
+
 ## 2026-11-23 U01 注销审核写入真实 HTTP/CSRF 演练（隔离 CI VERIFIED）
 
 - 继续已验收 `604602b` + `ac81a12` 的非破坏性台账，新增仅限一次性 GitHub MySQL8 `account_review_audit_ci` 的 Next 生产 HTTP E2E；仅 CI 的 synthetic 审计测试显式 `ENABLE_ACCOUNT_DELETION_REVIEW_WRITE=true`，真实支付/模拟支付/AI/退款/邮件全 false，本地预览和预发布仍禁写。
