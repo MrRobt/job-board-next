@@ -18,5 +18,6 @@ test("U01 batch query does not mutate account, refund, or financial tables",()=>
  assert.match(source,/groupBy/);
  assert.match(source,/maskedEmail/);
  assert.doesNotMatch(source,/\.(?:create|update|upsert|delete)(?:Many)?\(/);
- assert.doesNotMatch(source,/passwordHash|providerTradeId|reasonCode|privateKey/);
+ assert.doesNotMatch(source,/passwordHash|providerTradeId|privateKey/);
+ assert.match(source,/reviewEvents:\{select:\{reasonCode:true,recordedAt:true\}/);
 });

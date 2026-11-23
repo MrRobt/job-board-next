@@ -4,6 +4,7 @@ import {assessDeletionReviewExposure,type DeletionExposure} from "./account-dele
 
 export type AccountDeletionQueueRow={
  requestId:string;userId:string;maskedEmail:string;requestedAt:Date;
+ reviewEvents:{reasonCode:string;recordedAt:Date}[];
  assessment:ReturnType<typeof assessDeletionReviewExposure>;
  exposure:DeletionExposure;
 };
@@ -22,7 +23,8 @@ export async function listAccountDeletionReviewQueue(limit=20):Promise<AccountDe
  const pending=await db.accountDeletionRequest.findMany({
   where:{status:"PENDING_MANUAL_REVIEW"},
   orderBy:[{requestedAt:"asc"},{id:"asc"}],take:limit,
-  select:{id:true,userId:true,requestedAt:true,user:{select:{email:true}}}
+  select:{id:true,userId:true,requestedAt:true,user:{select:{email:true}},
+   reviewEvents:{select:{reasonCode:true,recordedAt:true},orderBy:{recordedAt:"asc"},take:3}}
  });
  if(!pending.length)return [];
  const ids=pending.map(row=>row.userId);
@@ -60,6 +62,7 @@ export async function listAccountDeletionReviewQueue(limit=20):Promise<AccountDe
  return pending.map(row=>{
   const exposure=byUser.get(row.userId)!;
   return {requestId:row.id,userId:row.userId,maskedEmail:maskedEmail(row.user.email),
-   requestedAt:row.requestedAt,exposure,assessment:assessDeletionReviewExposure(exposure)};
+   requestedAt:row.requestedAt,reviewEvents:row.reviewEvents,
+   exposure,assessment:assessDeletionReviewExposure(exposure)};
  });
 }

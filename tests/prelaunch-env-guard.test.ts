@@ -36,6 +36,15 @@ test("operator incident mutations and sync cannot be enabled during any prelaunc
   }
  }
 });
+test("U01 manual deletion audit writes are disabled in both prelaunch modes",()=>{
+ const flag="ENABLE_ACCOUNT_DELETION_REVIEW_WRITE";
+ assert.ok(offFlags.includes(flag),"Untracked prelaunch gate: "+flag);
+ for(const config of [safe,
+  {DJS_PRELAUNCH_MODE:"PUBLIC_PRELAUNCH",NODE_ENV:"production",APP_ORIGIN:"https://jobs.company.com",TRUSTED_CLIENT_IP_HEADER:"x-real-ip"}]){
+  assert.equal(evaluatePrelaunchConfig({...config,[flag]:"true"}).status,"BLOCKED");
+  assert.equal(evaluatePrelaunchConfig({...config,[flag]:"false"}).status,"PASS");
+ }
+});
 test("U01 email delivery cannot be enabled during local or public prelaunch",()=>{
  const flag="ENABLE_EMAIL_VERIFICATION_DELIVERY";
  assert.ok(offFlags.includes(flag),"Untracked prelaunch gate: "+flag);

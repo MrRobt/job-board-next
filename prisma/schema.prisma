@@ -35,6 +35,7 @@ model User {
   emailVerificationToken EmailVerificationToken?
   passwordResetToken PasswordResetToken?
   accountDeletionRequest AccountDeletionRequest?
+  operatedAccountDeletionReviewEvents AccountDeletionReviewEvent[] @relation("AccountDeletionReviewOperator")
   sessions Session[]
   orders Order[]
   unlocks Unlock[]
@@ -75,7 +76,20 @@ model AccountDeletionRequest {
   user User @relation(fields:[userId],references:[id],onDelete:Restrict)
   status String @default("PENDING_MANUAL_REVIEW") @db.VarChar(32)
   requestedAt DateTime @default(now())
+  reviewEvents AccountDeletionReviewEvent[]
   @@index([status,requestedAt])
+}
+// Append-only, non-destructive manual review record. Never an approval to erase data.
+model AccountDeletionReviewEvent {
+  id String @id @default(cuid())
+  requestId String
+  request AccountDeletionRequest @relation(fields:[requestId],references:[id],onDelete:Restrict)
+  operatorId String
+  operator User @relation("AccountDeletionReviewOperator",fields:[operatorId],references:[id],onDelete:Restrict)
+  reasonCode String @db.VarChar(40)
+  recordedAt DateTime @default(now())
+  @@unique([requestId,reasonCode])
+  @@index([operatorId,recordedAt])
 }
 model Session {
   tokenHash String @id @db.Char(64)
