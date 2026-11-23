@@ -12,10 +12,10 @@
 
 - `tests/refund-review-ops-visibility.test.ts` 先因聚合读模块缺失 RED；实现后 2/2 GREEN，断言只有固定 `MANUAL_LEDGER_REVIEW` 原因、负数/小数/NaN/Infinity/溢出和 DB 拒绝均 fail-closed、管理身份与只读门禁顺序、页面不写账。
 - 现有 `tests/ops-incident-view.test.ts` 4/4 PASS；合计 6/6。原 `tests/integration/refund-finalization.test.ts` 加入在实际 `jobs_preview_20261123` MySQL8 读取聚合的断言，合法模拟商户成功后冲突证据新增一条 → 活跃数+1，重复查询数量不变；后续成功完成原子结算后活跃数回到基线，但历史审计依旧留存，1/1 PASS。
-- 本地 `tsc --noEmit` 仍被其他 Agent 未提交的 `lib/auth-retention.ts:83` TS2739 阻断。没有修改该文件或 `handoff.md`、需求矩阵、风险/发布清单及财务审计草稿。需干净 GitHub 主 CI 真实回执后才可标本子包 VERIFIED。
+- 本地 `tsc --noEmit` 仍被其他 Agent 未提交的 `lib/auth-retention.ts:83` TS2739 阻断。没有修改该文件或 `handoff.md`、需求矩阵、风险/发布清单及财务审计草稿。**已获得干净远端真实回执：** 最终修正版 `9d47b2e` 主 CI run `45227110287` / job `137876460371` completed/success，实际日志 `B04 refund ledger review count selects only fixed audit outcome and rejects partial/invalid results` PASS、退款终态 MySQL 集成 PASS，单元 **224/224 PASS**、Prisma 迁移/重复 deploy、TypeScript、完整集成、Next 生产构建及 HTTP smoke 均 SUCCESS。其他 7 条账户、后台和 B07 安全/恢复专项工作流全 SUCCESS。**仅此活跃人工核账汇总子包 VERIFIED**。
 - 本阶段不会显示真实用户 PII；测试只使用独立数据库合成退款单，真实支付/AI 邮件、外部资质仍人工门禁，技术上线 NOT READY。
 
 ## 下一工作包
 
-- 取得远端主 CI 的 Prisma/TypeScript/全单测/实际 MySQL 集成/Next build/smoke 和其他专项回执；只在全通过后更新本交接与 current-task/test-evidence 并独立 commit/push。
+- 最终修正版 `9d47b2e` 的主 CI/七条专项工作流全部 SUCCESS；本包只读活跃计数已 VERIFIED，无须重复。此前初版 `060cc07` 的 8 条流水线也全部 SUCCESS，但真实验收以最新修正为准。
 - 后续 B04/U03 自动通知与独立持久事故状态整合仍待设计并验收，禁止把本次只读计数误报为自动通知能力；B06 真渠道回款及资金/权益对账仍须有效商户授权、法律合规人工确认。

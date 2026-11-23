@@ -1,11 +1,11 @@
 # 当前任务（2026-11-17）
 
-## 2026-11-24 B04/B06 退款成功-权益冲突运营只读提示（待干净 CI）
+## 2026-11-24 B04/B06 退款成功-权益冲突运营只读提示（干净 MySQL8 CI VERIFIED）
 
-- 已确认 B06 `4fc401a` 内部冲突审计及 `786ffc1` CI 证据 VERIFIED，不重复；补运营中心 `/admin/incidents` 的新审计数量可见性，只读显示固定 `MANUAL_LEDGER_REVIEW` 计数并链接退款派发页，明确不是自动事故/通知，也不是商户回款证明。
+- 已确认 B06 `4fc401a` 内部冲突审计及 `786ffc1` CI 证据 VERIFIED，不重复；补运营中心 `/admin/incidents` 的新审计数量可见性，只读显示固定 `MANUAL_LEDGER_REVIEW` 且派发仍为 `IN_DOUBT` 的活跃计数并链接退款派发页；成功结算后活跃数降回基线但审计历史保留，明确不是自动事故/通知，也不是商户回款证明。
 - 管理员身份验证与独立 OPS read 门禁在实际查询之前，DB 错误/异常计数 fail-closed 不可降格为 0，绝不读取或输出用户/商户敏感信息，不改变既有三类事故状态机。
 - 新增策略先 RED 后 GREEN 2/2，既有视图合计 6/6 PASS；隔离 `jobs_preview_20261123` MySQL8 退款成功冲突持久审计聚合增加 1、重复验签查询数量不变，1/1 PASS。本机 TS 仍因其他 Agent 未提交 `lib/auth-retention.ts` TS2739，不修改其文件。
-- 独立交接 `b04-refund-ledger-hold-ops-visibility-2026-11-24.md`；**尚需远端主 CI 真实回执，暂 IN_PROGRESS**。B04/B06 整体 IN_PROGRESS，自动通知、真实商户 UAT、合规与正式上线仍为人工门禁。
+- 独立交接 `b04-refund-ledger-hold-ops-visibility-2026-11-24.md`；**干净远端 CI 已验收：** `9d47b2e` 主 CI run `45227110287` / job `137876460371` SUCCESS，审计活跃计数规则与真实 MySQL 合成退款结算恢复 PASS，全部单元 **224/224**、Prisma 迁移、TypeScript、MySQL 集成、Next 生产构建/HTTP smoke 全 PASS，同提交其他 7 条专项 CI 均 SUCCESS。**仅只读运营可见性子包 VERIFIED**。B04/B06 整体 IN_PROGRESS，自动通知、真实商户 UAT、合规与正式上线仍为人工门禁。
 
 ## 2026-11-24 B06 验签成功、权益冲突的安全审计证据（干净 MySQL8 CI VERIFIED）
 

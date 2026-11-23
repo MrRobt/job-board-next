@@ -13,11 +13,11 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
-## 2026-11-24 B04 退款成功后权益冲突的运营只读汇总（待远端）
+## 2026-11-24 B04 退款成功后权益冲突的运营只读汇总（干净 MySQL8 CI VERIFIED）
 
-- `tests/refund-review-ops-visibility.test.ts` RED（聚合模块未实现）→2/2 GREEN。只查询 `MANUAL_LEDGER_REVIEW` 聚合计数，非整数、非法/缺失计数与 DB 查询故障一律抛出；先 requireAdmin + OPS read 门禁再读取；事故页可只读查看聚合警告和退款派发账本链接，无退款/确认/自动通知。
-- 既有 `tests/ops-incident-view.test.ts` 4/4 PASS，合计 6/6；`tests/integration/refund-finalization.test.ts` 实际隔离 `jobs_preview_20261123` MySQL8 1/1 PASS，新增审计后聚合计数+1，重复查询仍只加一次。合成测试没有真实商户 IO、外发模型或凭据。
-- 本地全局 TypeScript 只有其他 Agent dirty `lib/auth-retention.ts:83` TS2739，本包未触碰其文件；**尚无本子包 GitHub run/job，不能标 VERIFIED**。独立证据 `b04-refund-ledger-hold-ops-visibility-2026-11-24.md`。
+- `tests/refund-review-ops-visibility.test.ts` RED（聚合模块未实现）→2/2 GREEN。仅查询 `MANUAL_LEDGER_REVIEW` 且 `dispatch.state=IN_DOUBT` 的活跃聚合计数，已完成退款仅保留历史审计，非整数、非法/缺失计数与 DB 查询故障一律抛出；先 requireAdmin + OPS read 门禁再读取；事故页可只读查看聚合警告和退款派发账本链接，无退款/确认/自动通知。
+- 既有 `tests/ops-incident-view.test.ts` 4/4 PASS，合计 6/6；`tests/integration/refund-finalization.test.ts` 实际隔离 `jobs_preview_20261123` MySQL8 1/1 PASS，新增审计后活跃聚合计数+1，重复查询仍只加一次，成功原子结算后活跃数量恢复基线且历史审计不删除。合成测试没有真实商户 IO、外发模型或凭据。
+- 本地全局 TypeScript 只有其他 Agent dirty `lib/auth-retention.ts:83` TS2739，本包未触碰其文件；**真实远端验收完成：** 最终修正提交 `9d47b2e` 主 CI run `45227110287` / job `137876460371` completed/success，原始日志 B04 活跃退款人工核账计数规则 PASS、退款终态真实 MySQL 集成 PASS，单元 224/224、Prisma 新库迁移/重跑、TypeScript、完整 MySQL 集成、Next build/HTTP smoke 全 SUCCESS；其他 7 条专项 CI 同样 SUCCESS。**仅活跃运营只读提示子包 VERIFIED，不代表自动事故/外部通知已完成。**独立证据 `b04-refund-ledger-hold-ops-visibility-2026-11-24.md`。
 
 ## 2026-11-24 B06 验签成功却无法安全撤权时保留审计（干净 MySQL8 CI VERIFIED）
 
