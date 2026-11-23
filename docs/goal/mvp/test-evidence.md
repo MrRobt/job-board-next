@@ -555,6 +555,12 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
+## 2026-11-23 U01 邮箱验证真实 localhost HTTP E2E（待远端）
+
+- `tests/email-verification-http-ci-policy.test.ts` 起步 RED 3/3（确认同源检查/工作流/脚本均缺失）；实现 `app/actions/email-verification.ts` 两条 Origin/Host 拦截、一次性 MySQL8 `.github/workflows/email-verification-http-e2e.yml` 和 `scripts/ci-email-verification-http-e2e.mjs` 后，专项 3/3、联合已有策略 6/6 GREEN，`node --check` 通过。
+- 真实测试目标：旧账号未验证不许登录；GET 不激活；邮件外发全部 false；重发不能轮换令牌；攻击者或缺失 Origin 不能验证；过期拒绝；合法 POST 单次验证，之后才允许创建登录 session；重放拒绝。脚本仅限 `CI=true`+`INTEGRATION_TEST_DATABASE=true`+`email_verification_ci`，仅合成个人数据。
+- 本地 `tsc --noEmit` 因另一 Agent 未提交的 `lib/auth-retention.ts` `AuthRetentionResult` 新字段缺 `APPLIED` 返回而报 TS2739，非本次包文件，严禁混改；**完整干净主 CI 和真实 HTTP 尚未执行/拿到回执，不能提前标 VERIFIED**。见 `u01-email-verification-http-e2e-2026-11-23.md`。外部邮件、合规仍人工门禁。
+
 ## 2026-11-23 U01 真实 HTTP 找回密码与 CSRF 隔离演练（待 CI）
 
 - `0daf679` 主 CI `45127453163`、原管理员 E2E `45127453001`、B07 隔离只读 `45127453148`、合成非空恢复 `45127453070` 四项 SUCCESS，仅前一 Web 单元/构建子包验收。

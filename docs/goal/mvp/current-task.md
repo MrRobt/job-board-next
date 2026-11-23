@@ -533,6 +533,12 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-23 U01 邮箱验证真实 HTTP 确认 / 登录 / 防跨域演练（待 CI）
+
+- 前一 `1d629e8` 五条 GitHub Actions（主 CI、B07 两条、管理员 HTTP 和找回密码 HTTP）均 SUCCESS，不重复前包。真实 Git 状态确认 `lib/auth-retention.ts` + `tests/auth-retention-verification-policy.test.ts` 正由其他 Agent 并行修改，本包未触碰。
+- 当前 U01 只缺真实邮箱验证 Server Action HTTP 链路：增加确认+重发的服务端 Origin/Host 同源检查；新 `email-verification-http-e2e.yml` 在独立 MySQL8 假数据测试未验证登录、GET 只读、邮件禁用重发、跨源/缺 Origin 拒绝、过期、单次 POST 验证、重放和验证后登录。策略 3/3 初 RED 后 GREEN，与旧安全策略合计 6/6 GREEN，HTTP 脚本 node --check 通过。
+- **本地全局 tsc 因另一 Agent 未提交的 auth-retention APPLIED 字段缺失报 TS2739，不修改他人文件；本包 MySQL HTTP/完整主 CI 需待干净远端 run/job 才能验收**。独立证据/交接 `u01-email-verification-http-e2e-2026-11-23.md`，U01 整体 IN_PROGRESS、技术上线 NOT READY，实际发信/旧账号迁移/合规门禁保留人工。
+
 ## 2026-11-23 U01 找回密码隔离 HTTP CSRF / 会话撤销演练（待远端实测）
 
 - 上轮 `0daf679` 主 CI `45127453163`、DEAD HTTP `45127453001`、B07 只读 `45127453148`、合成非空恢复 `45127453070` 全 SUCCESS，跳过重复工作。
