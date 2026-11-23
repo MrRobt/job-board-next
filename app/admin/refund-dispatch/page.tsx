@@ -32,7 +32,8 @@ export default async function RefundDispatchLedger({searchParams}:{searchParams:
   db.toolRefundDispatch.groupBy({by:["state"],_count:{_all:true}}),
   db.toolRefundDispatch.findMany({
    orderBy:[{createdAt:"asc"},{id:"asc"}],take:50,
-   include:{intent:{
+   include:{inquiryEvents:{where:{outcome:"MANUAL_LEDGER_REVIEW"},
+     orderBy:{createdAt:"desc"},take:1,select:{id:true,createdAt:true}},intent:{
     select:{orderId:true,amountFen:true,operatorId:true,state:true,approvedById:true,
       order:{select:{provider:true,status:true,refundHold:true,credits:true,
        grant:{select:{total:true,remaining:true,
@@ -73,7 +74,8 @@ export default async function RefundDispatchLedger({searchParams}:{searchParams:
     <td>{item.intent.order.provider}</td>
     <td>¥{price(item.intent.amountFen)}</td>
     <td>{item.state==="READY"?"待派发（未发款）":item.state==="SUCCEEDED"?"渠道确认退款成功，权益已撤销":"需核账（未知是否发款）"}</td>
-    <td>{integrityLabels[item.integrity.status]}{item.integrity.issues.length>0&&<p className="error">{item.integrity.issues.map(issue=>riskLabels[issue]).join("、")}</p>}</td>
+    <td>{integrityLabels[item.integrity.status]}{item.integrity.issues.length>0&&<p className="error">{item.integrity.issues.map(issue=>riskLabels[issue]).join("、")}</p>}
+     {item.inquiryEvents.length>0&&<p className="error" role="alert">曾有已验签成功但权益无法结算的退款观察记录：需人工核实；不可重发退款、不可手动强制结算。最近记录 {item.inquiryEvents[0].createdAt.toISOString()}</p>}</td>
     <td>{item.claimedAt?.toISOString()??"—"}</td>
     <td><Link href={"/admin/refunds/"+item.intent.orderId}>{item.intent.orderId}</Link>
      {item.state==="READY"&&(item.intent.order.provider==="WECHAT"||item.intent.order.provider==="ALIPAY")&&refundSubmissionEnabled(item.intent.order.provider)&&

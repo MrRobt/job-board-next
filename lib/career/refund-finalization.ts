@@ -1,4 +1,5 @@
 import "server-only";
+import {createHash} from "node:crypto";
 import {db} from "../db";
 import {product} from "./catalog";
 import {prepareMerchantRefund} from "../payment/refund-request-payload";
@@ -74,7 +75,7 @@ export async function reconcileDispatchedRefund(
     !["SUCCEEDED","PROCESSING","FAILED","UNKNOWN"].includes(verified.state))
   throw new Error("Merchant inquiry identity or amount mismatch");
 
- return db.$transaction(async tx=>{
+ const outcome=await db.$transaction(async tx=>{
   const current=await tx.toolRefundDispatch.findUniqueOrThrow({
    where:{id:dispatchId},
    include:{intent:{include:{refundCase:true,order:{include:{grant:true}}}}}
@@ -100,11 +101,12 @@ export async function reconcileDispatchedRefund(
      nowOrder.status!=="PAID"||!nowOrder.refundHold||
      nowCase.status!=="PREPARED"||nowCase.orderId!==order.id||
      nowCase.userId!==order.userId||!nowOrder.grant||
-     nowOrder.grant.total!==order.credits||
-     nowOrder.grant.remaining!==order.credits)
+     nowOrder.grant.total!==order.credits)
    throw new Error("Refund ledger changed since signed inquiry");
 
+  const creditLedgerChanged=nowOrder.grant.remaining!==order.credits;
   if(verified.state!=="SUCCEEDED"){
+   if(creditLedgerChanged)throw new Error("Refund ledger changed since signed inquiry");
    await tx.toolRefundInquiryEvent.create({
     data:{dispatchId,operatorId,observed:verified.state,outcome:"HELD_FOR_REVIEW"}
    });
@@ -115,7 +117,17 @@ export async function reconcileDispatchedRefund(
   const unsafeRuns=await tx.toolRun.count({
    where:{grantId:nowOrder.grant.id,status:{in:["RESERVED","SUCCEEDED"]}}
   });
-  if(unsafeRuns!==0)throw new Error("Paid AI usage requires manual reconciliation");
+  if(creditLedgerChanged||unsafeRuns!==0){
+   // Signed merchant success without safe credit accounting: preserve evidence
+   // once, but NEVER mark refunded or revoke/restore credits.
+   const id="rflr_"+createHash("sha256")
+    .update("merchant-success-ledger-review:"+dispatchId).digest("hex");
+   await tx.toolRefundInquiryEvent.createMany({
+    data:[{id,dispatchId,operatorId,observed:"SUCCEEDED",outcome:"MANUAL_LEDGER_REVIEW"}],
+    skipDuplicates:true
+   });
+   return "MANUAL_LEDGER_REVIEW" as const;
+  }
 
   const g=await tx.toolGrant.updateMany({
    where:{id:nowOrder.grant.id,total:order.credits,remaining:order.credits},
@@ -141,4 +153,7 @@ export async function reconcileDispatchedRefund(
   });
   return "SUCCEEDED";
  },{isolationLevel:"Serializable",maxWait:10_000,timeout:15_000});
+ if(outcome==="MANUAL_LEDGER_REVIEW")
+  throw new Error("Verified merchant success requires manual ledger review; no credits changed");
+ return outcome;
 }

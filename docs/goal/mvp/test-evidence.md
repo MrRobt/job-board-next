@@ -13,6 +13,12 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
+## 2026-11-24 B06 验签成功却无法安全撤权时保留审计（待远端）
+
+- `tests/integration/refund-finalization.test.ts` 在隔离 `jobs_preview_20261123` MySQL8 RED 1：模拟合法验证的退款 `SUCCEEDED`，将 `grant.remaining` 减 1 后预期 `MANUAL_LEDGER_REVIEW` 事件 1 条，实际旧逻辑 0；实现后 GREEN。验证相同派发多次重复查单审计仍仅 1、订单 PAID、dispatch IN_DOUBT、权益无额外扣减；随后模拟 SUCCEEDED AI 运行、恢复余额后同样保持记录不强制结算，最终移除合成矛盾后原有成功终态仍 PASS。
+- `tests/integration/refund-finalization-race.test.ts` 回归 PASS，两个独立审核者仍不得重复退款终态/成功审计；双项 2/2 PASS。扩展 `tests/refund-dispatch-integrity-admin-policy.test.ts` 先 RED 后 GREEN，管理员仅只读获得最近的异常审计，合计规则/页面专项 5/5 PASS。
+- 无真实商户请求或发款；仅生成并清理自己随机 synthetic 测试夹具，原始 `jobs` 未迁移/修改。本地 `tsc` 唯一报错来自其他 Agent 未提交 `lib/auth-retention.ts:83` TS2739，未碰该文件。**尚无本包远端 run/job，当前不声明 VERIFIED**。独立证据 `b06-signed-refund-ledger-hold-evidence-2026-11-24.md`。
+
 ## 2026-11-23 B06 派发账本只读风控与异常识别（干净 MySQL8 CI VERIFIED）
 
 - `tests/refund-dispatch-integrity.test.ts` 起步缺模块 RED；纯规则实现后 3/3 PASS，覆盖各状态正常/异常、审批/工单/订单/冻结/次数余额/领取终态和在途 AI 用量不一致；所有路径不自动发退款或撤权。`tests/refund-dispatch-integrity-admin-policy.test.ts` 管理页缺模块及风险字段 RED 2/2，完成后 GREEN 2/2，共 5/5 PASS。

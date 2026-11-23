@@ -13,6 +13,9 @@ test("B06 admin refund dispatch page checks role before read-only integrity asse
  assert.match(source,/grant:\{select:\{total:true,remaining:true/);
  assert.match(source,/退款派发账本/);
  assert.match(source,/对账风险/);
+ assert.match(source,/MANUAL_LEDGER_REVIEW/);
+ assert.match(source,/inquiryEvents:\{where:\{outcome:"MANUAL_LEDGER_REVIEW"\}/);
+ assert.match(source,/曾有已验签成功但权益无法结算/);
 });
 test("B06 admin integrity indicators cannot be mistaken for external proof or authorized refund",()=>{
  const source=page();

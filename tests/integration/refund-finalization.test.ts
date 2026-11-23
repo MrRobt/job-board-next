@@ -144,9 +144,29 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
   // Even a signed success must NOT revoke credits if the ledger changed.
   await db.toolGrant.update({where:{id:grant.id},data:{remaining:{decrement:1}}});
   observed="SUCCEEDED";
-  await assert.rejects(reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),/ledger changed/);
+  await assert.rejects(reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),/ledger changed|manual ledger review/);
+  assert.equal(await db.toolRefundInquiryEvent.count({
+   where:{dispatchId:dispatch.id,observed:"SUCCEEDED",outcome:"MANUAL_LEDGER_REVIEW"}
+  }),1,"Verified merchant success + changed credits must persist review evidence");
+  await assert.rejects(reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),/ledger changed|manual ledger review/);
+  assert.equal(await db.toolRefundInquiryEvent.count({
+   where:{dispatchId:dispatch.id,observed:"SUCCEEDED",outcome:"MANUAL_LEDGER_REVIEW"}
+  }),1,"Replayed evidence must be idempotent");
   assert.equal((await db.toolOrder.findUniqueOrThrow({where:{id:order.id}})).status,"PAID");
+  assert.equal((await db.toolGrant.findUniqueOrThrow({where:{id:grant.id}})).remaining,19);
+  assert.equal((await db.toolRefundDispatch.findUniqueOrThrow({where:{id:dispatch.id}})).state,"IN_DOUBT");
   await db.toolGrant.update({where:{id:grant.id},data:{remaining:{increment:1}}});
+  // A run is unsafe even if the remaining balance was accidentally restored.
+  const conflictingRun=await db.toolRun.create({data:{
+   userId:buyer.id,grantId:grant.id,requestId:"refund-review-"+randomUUID(),
+   kind:"resume",status:"SUCCEEDED",finishedAt:new Date()
+  }});
+  await assert.rejects(reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),/manual ledger review/);
+  assert.equal(await db.toolRefundInquiryEvent.count({
+   where:{dispatchId:dispatch.id,outcome:"MANUAL_LEDGER_REVIEW"}
+  }),1,"A second unsafe cause must not duplicate the durable incident");
+  assert.equal((await db.toolRefundDispatch.findUniqueOrThrow({where:{id:dispatch.id}})).state,"IN_DOUBT");
+  await db.toolRun.delete({where:{id:conflictingRun.id}});
   assert.equal(await reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),"SUCCEEDED");
   const done=await db.toolRefundDispatch.findUniqueOrThrow({where:{id:dispatch.id}});
   assert.equal(done.state,"SUCCEEDED");
@@ -157,7 +177,8 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
   assert.equal((await db.toolGrant.findUniqueOrThrow({where:{orderId:order.id}})).remaining,0);
   assert.equal(await available(buyer.id),0);
   assert.equal(await reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),"ALREADY_SUCCEEDED");
-  assert.equal(await db.toolRefundInquiryEvent.count({where:{dispatchId:dispatch.id}}),4);
+  assert.equal(await db.toolRefundInquiryEvent.count({where:{dispatchId:dispatch.id}}),5);
+  assert.equal(await db.toolRefundInquiryEvent.count({where:{dispatchId:dispatch.id,outcome:"MANUAL_LEDGER_REVIEW"}}),1);
   const event=await db.toolRefundInquiryEvent.findFirstOrThrow({
    where:{dispatchId:dispatch.id,outcome:"CREDITS_REVOKED"}
   });
