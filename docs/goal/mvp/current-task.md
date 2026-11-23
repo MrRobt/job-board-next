@@ -1,5 +1,11 @@
 # 当前任务（2026-11-17）
 
+## 2026-11-23 U01 注销审核写入真实 HTTP/CSRF 演练（待独立 CI）
+
+- 继续已验收 `604602b` + `ac81a12` 的非破坏性台账，新增仅限一次性 GitHub MySQL8 `account_review_audit_ci` 的 Next 生产 HTTP E2E；仅 CI 的 synthetic 审计测试显式 `ENABLE_ACCOUNT_DELETION_REVIEW_WRITE=true`，真实支付/模拟支付/AI/退款/邮件全 false，本地预览和预发布仍禁写。
+- 目标真实 HTTP 验收：匿名/普通用户拒绝、管理员只读+事件表单、攻击者/缺失 Origin 拒绝、未确认及非法原因拒绝、合法固定原因一次记录、重复 POST 幂等、第二原因可追加；原申请仍 PENDING，模拟已付订单、用户、邮箱脱敏不变。静态专项目标 RED 2/2 → GREEN 2/2，联合核心规则 5/5、node --check PASS；**尚待独立远端 run/job**，不可提前标 VERIFIED。
+- 交接 `u01-account-deletion-review-http-2026-11-23.md`。U01 整体 IN_PROGRESS、技术上线 NOT READY，实际注销与合规仍人工门禁。
+
 ## 2026-11-23 U01 账户注销审核事件台账（干净 MySQL8 CI VERIFIED）
 
 - 已恢复 Goal/矩阵/交接、`main...origin/main`、当前服务和 Git；既有 U01 受理、只读财务预检及 HTTP 角色隔离已 VERIFIED，不重复。

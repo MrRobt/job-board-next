@@ -13,6 +13,12 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
+## 2026-11-23 U01 管理员审核事件真实 HTTP 动作（待远端）
+
+- 新 `tests/account-deletion-review-http-ci-policy.test.ts` 起步缺独立 workflow/script RED 2/2；新增 `.github/workflows/account-deletion-review-audit-http.yml` 和 `scripts/ci-account-deletion-review-audit-http.mjs` 后 2/2 GREEN，联合固定原因/默认关闭策略 5/5 PASS，`node --check` PASS。
+- 目标只在 `CI=true` + `INTEGRATION_TEST_DATABASE=true` + 固定一次性 MySQL8 库名执行：合成 USER/ADMIN、MOCK PAID 订单、真实 Next.js Server Action，验证越权/CSRF/缺同源/明确确认/无效原因/重复/受控追加、脱敏和财务/申请状态不变。**本次尚无 GitHub run/job 实际回执，不能宣称 HTTP 子包 VERIFIED**。原始 jobs 库/真实邮箱/支付/AI 都不触碰。
+- 交接 `u01-account-deletion-review-http-2026-11-23.md`。
+
 ## 2026-11-23 U01 可控人工审核事件台账（干净 MySQL8 CI VERIFIED）
 
 - `tests/account-deletion-review-event-policy.test.ts` 模块不存在时先 RED，补严格白名单、固定原因、Next Action 元数据兼容后 3/3 PASS；新增预发布写入门禁先 RED 后 GREEN。连同只读策略和预发布安全专项共 13/13 PASS。
