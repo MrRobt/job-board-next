@@ -15,7 +15,7 @@
 - 新 `tests/refund-review-incident-cli-policy.test.ts`：默认拒绝、生产模式或库名不符退出 3，无 SQL/秘钥泄漏，静态确认无 HTTP 发送/定时器/资金写代码；**2/2 PASS**。
 - 原三类规划、管理员视图/表单和通知相关单测累计补充定向 **24/24 PASS**。
 - `tests/integration/refund-finalization.test.ts` 扩展在 `jobs_preview_20261123` 独立 MySQL8 的真实流程：模拟商户成功但使用中账本不一致产生 1 条持久人工核账事件 → 读活跃数 1 → B04 事故 OPEN，重复扫描不重复创建 → 真实数据库管理员（不是伪造身份）接手 ACKNOWLEDGED 且保留事件 → 原有原子结算成功后活跃数 0、事故 RESOLVED、历史审计 `OPENED/ACKNOWLEDGED/RESOLVED` 保留。仅清理本测试 own synthetic 数据和新 incident key，不影响其他项目 DB。**1/1 PASS**。
-- 本地全量 `npm test` 实际 **230/231 PASS**，唯一失败为其他 Agent 未提交的 `tests/auth-retention-verification-policy.test.ts` 密码重置保留期测试；本机 `tsc` 唯一 TS2739 在其他 Agent 未提交 `lib/auth-retention.ts:83`，本包不修改/暂存这两个文件。**必须取得干净远端主 CI 的全量 TS、单测、MySQL 集成、生产 build/HTTP smoke 回执才可以将本包置 VERIFIED。**
+- 本地全量 `npm test` 实际 **230/231 PASS**，唯一失败为其他 Agent 未提交的 `tests/auth-retention-verification-policy.test.ts` 密码重置保留期测试；本机 `tsc` 唯一 TS2739 在其他 Agent 未提交 `lib/auth-retention.ts:83`，本包不修改/暂存这两个文件。**已取得干净远端真实验收：** 提交 `c6d4525` 主 CI run `45248128498` / job `137950245274` completed/success；原始日志新增 B04 事故三重门禁及无外发测试 PASS、MySQL8 `signed refund inquiry settlement requires confirmed matching refund, atomically revokes unused credits` 集成 PASS（含 OPEN→ACKNOWLEDGED→RESOLVED 持久审计）；Prisma 全新迁移及重复部署、TypeScript、单元 **230/230 PASS**、完整 MySQL 集成、Next 生产 build/HTTP smoke 均 SUCCESS。同提交另外 7 条邮箱/密码/后台/恢复专项 CI 全 SUCCESS。**仅此隔离合成事故同步与手动审核子包 VERIFIED**，不是正式自动通知或真实商户资金确认。
 
 ## 独立验收/交接与遗留门禁
 
