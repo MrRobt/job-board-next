@@ -12,7 +12,7 @@
 - `tests/account-deletion-review-policy.test.ts` 先缺模块 RED exit1，再 4/4 GREEN；覆盖干净记录仍不自动删除、财务/退款风险、在途/权益风险、异常计数 fail closed。
 - `tests/account-deletion-review-readonly-policy.test.ts` 初次因后台页面不存在 RED，补页面后 2/2 GREEN；验证管理员鉴权、只读查询、无写操作和脱敏策略。
 - `tests/integration/account-deletion-review-queue.test.ts` 只在 `INTEGRATION_TEST_DATABASE=true` 独立 MySQL8 数据库执行：模拟真实渠道 PAID 与 OPEN 退款、模拟订单仍有权益和 RESERVED 请求、私有求职记录，验证分组风险分类、申请人隔离、脱敏、限额与查询前后财务记录不变。
-- 本地定向 6/6 PASS；本地全局 TypeScript 被另一 Agent 已有的未提交 `lib/auth-retention.ts` TS2739 阻断。本包未修改他人的认证清理、财务扫描、主矩阵、risk/release、`handoff.md` 和缓存。**干净远端主 CI/MySQL 集成尚待本包 run/job 回执；未证明真实测试前不标 VERIFIED。**
+- 本地定向 6/6 PASS；本地全局 TypeScript 被另一 Agent 已有的未提交 `lib/auth-retention.ts` TS2739 阻断。本包未修改他人的认证清理、财务扫描、主矩阵、risk/release、`handoff.md` 和缓存。**已获干净远端主 CI/MySQL 实测回执：** `e385b3d` 主 CI run `45137031288` / job `137565666292` completed/success，原始日志 `U01 review queue is read-only, batched, tenant-scoped and blocks financial/operational exposure` PASS；Prisma 迁移、类型、全量单元和真实 MySQL 集成、生产 build/HTTP smoke 均 SUCCESS。同提交管理员 HTTP、注销申请 HTTP、邮箱 HTTP、找回密码 HTTP、B07 只读及 B07 合成非空恢复等 6 条专项 CI 全部 SUCCESS。**仅管理员只读注销风险预检子包 VERIFIED；用户数据实际删除仍为人工门禁。**
 
 ## 交接
 

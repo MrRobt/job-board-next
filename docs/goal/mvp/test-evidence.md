@@ -555,10 +555,10 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
-## 2026-11-23 U01 注销人工审核只读财务预检（待隔离 MySQL CI）
+## 2026-11-23 U01 注销人工审核只读财务预检（隔离 MySQL VERIFIED）
 
 - `account-deletion-review-policy.test.ts` RED（模块不存在）→4/4 GREEN：真实交易/退款/历史订单一律 FINANCIAL_HOLD，在途 AI/未消费权益 OPERATIONAL_HOLD，零风险仍 MANUAL_REVIEW，异常/缺计数 EVIDENCE_UNAVAILABLE，所有 `canAutoDelete=false`。
-- `account-deletion-review-readonly-policy.test.ts` 页面不存在时 RED，新增管理员 route+批量 SELECT 服务后 2/2 GREEN；不包含写库/匿名可见的操作。新增 `tests/integration/account-deletion-review-queue.test.ts`，仅 `INTEGRATION_TEST_DATABASE=true` 一次性 MySQL8 使用合成订单/退款/权益/在途 AI/求职记录验证分组与前后行数不变。本地 tsc 仍有其他 Agent 的 `auth-retention.ts` TS2739，绝不混改；**新包尚无远端 run/job 回执，不能标 VERIFIED**。交接 `u01-account-deletion-review-queue-2026-11-23.md`。
+- `account-deletion-review-readonly-policy.test.ts` 页面不存在时 RED，新增管理员 route+批量 SELECT 服务后 2/2 GREEN；不包含写库/匿名可见的操作。新增 `tests/integration/account-deletion-review-queue.test.ts`，仅 `INTEGRATION_TEST_DATABASE=true` 一次性 MySQL8 使用合成订单/退款/权益/在途 AI/求职记录验证分组与前后行数不变。本地 tsc 仍有其他 Agent 的 `auth-retention.ts` TS2739，绝不混改；**已取得远端真实 MySQL8 回执：** `e385b3d` 主 CI run `45137031288` / job `137565666292` completed/success，日志 `U01 review queue is read-only, batched, tenant-scoped and blocks financial/operational exposure` PASS，分组/隔离/脱敏/有偿订单/退款/在途/余量/只读全通过，且 TypeScript、单元、生产 build/HTTP smoke SUCCESS；同提交另六条防回归专项均 SUCCESS。**仅本只读后台预检子包 VERIFIED，不是实际数据删除或法务批准**。交接 `u01-account-deletion-review-queue-2026-11-23.md`。
 
 ## 2026-11-23 U01 账户注销审核申请真实 HTTP（隔离 CI VERIFIED）
 
