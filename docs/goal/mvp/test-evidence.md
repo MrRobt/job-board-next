@@ -555,6 +555,12 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
+## 2026-11-23 U01 邮箱验证 Web/邮件守卫（待 HTTP 远端验收）
+
+- `669fe82` 主 CI `45123821665` completed/success，Prisma 全新 MySQL8 迁移、`npm test`、完整真实 DB `test:integration`、重复迁移、Next build/HTTP smoke 全部成功。只代表后端底座 VERIFIED。
+- `email-verification-delivery.test.ts` 先缺模块 RED exit 1，后 3/3 PASS（默认禁外发、错误配置与网络失败拒绝、固定提供商）；认证/页面策略 3/3 PASS。新增 `ENABLE_EMAIL_VERIFICATION_DELIVERY` 预发布门禁，测试先 RED `Untracked prelaunch gate` 后 GREEN。完整 npm test、独立 TypeScript、Next build、HTTP E2E 脚本语法检查 exit 0。
+- 真实未验证管理员会话攻击路径已加到隔离 MySQL8 HTTP E2E，**仍待新远端运行核验，不凭静态策略就标 VERIFIED**。未提供批准的服务商凭据、不进行真实外部发信，旧用户迁移/密码找回/注销仍缺；详见 `u01-email-verification-web-2026-11-23.md`。U01 总体 IN_PROGRESS。
+
 ## 2026-11-23 U01 令牌后端与版本化迁移（等待远端集成）
 
 - `tests/email-verification-policy.test.ts` 首次缺模块 RED exit 1；实现后 3/3 PASS：随机性、SHA-256、严格输入、24h 有效期、无效时钟拒绝。

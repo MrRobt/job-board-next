@@ -49,9 +49,10 @@ async function setup(){
   attemptCount:5,failureCode:"RETRY_EXHAUSTED"
  }});
  ownsIntent=true;
- for(const role of ["ADMIN","USER"]){
+ for(const role of ["ADMIN","USER","UNVERIFIED_ADMIN"]){
   const user=await db.user.create({data:{
-   email:`${randomUUID()}-dead-e2e@example.invalid`,passwordHash:"not-a-login",role
+   email:`${randomUUID()}-dead-e2e@example.invalid`,passwordHash:"not-a-login",role:role==="UNVERIFIED_ADMIN"?"ADMIN":role,
+    emailVerifiedAt:role==="UNVERIFIED_ADMIN"?null:new Date()
   }});
   users.push(user.id);
   const token=randomBytes(32).toString("hex");
@@ -73,7 +74,10 @@ async function run(){
  let response=await request("/admin/dead-notifications");
  assert.ok([307,308].includes(response.status),"Anonymous must redirect");
  assert.equal(location(response).pathname,"/login");await response.body?.cancel();
- response=await request("/admin/dead-notifications",{cookie:tokenByRole.get("USER")});
+ response=await request("/admin/dead-notifications",{cookie:tokenByRole.get("UNVERIFIED_ADMIN")});
+  assert.ok([307,308].includes(response.status),"Unverified session must redirect");
+  assert.equal(location(response).pathname,"/login");await response.body?.cancel();
+  response=await request("/admin/dead-notifications",{cookie:tokenByRole.get("USER")});
  assert.ok([307,308].includes(response.status),"Regular user must redirect");
  assert.equal(location(response).pathname,"/");await response.body?.cancel();
  response=await request("/admin/dead-notifications",{cookie:tokenByRole.get("ADMIN")});
@@ -146,8 +150,8 @@ async function run(){
  const state=await db.opsIncidentNotificationIntent.findUniqueOrThrow({where:{idempotencyKey:intentKey}});
  assert.equal(state.state,"DEAD","Review must never reactivate task");
  checks.push("conflict blocked and DEAD retained");
- console.log(JSON.stringify({scope:"CI_LOCALHOST_SESSION_HTTP",pass:checks.length+3,fail:0,checks:[
-  "anonymous GET rejected","USER GET rejected","ADMIN GET rendered",...checks
+ console.log(JSON.stringify({scope:"CI_LOCALHOST_SESSION_HTTP",pass:checks.length+4,fail:0,checks:[
+  "anonymous GET rejected","unverified ADMIN GET rejected","USER GET rejected","ADMIN GET rendered",...checks
  ],noNotification:true,noPayment:true,noAi:true}));
 }
 async function cleanup(){

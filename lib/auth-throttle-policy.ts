@@ -1,7 +1,7 @@
 import {trustedClientIp} from "./trusted-client-ip";
 
 export type AuthenticationThrottleOptions={
- scope:"login"|"register";
+ scope:"login"|"register"|"verify"|"verify-resend";
  identity:string;
  emailLimit:number;
  ipLimit:number;

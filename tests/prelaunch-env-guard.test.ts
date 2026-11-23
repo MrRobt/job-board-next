@@ -36,6 +36,18 @@ test("operator incident mutations and sync cannot be enabled during any prelaunc
   }
  }
 });
+test("U01 email delivery cannot be enabled during local or public prelaunch",()=>{
+ const flag="ENABLE_EMAIL_VERIFICATION_DELIVERY";
+ assert.ok(offFlags.includes(flag),"Untracked prelaunch gate: "+flag);
+ const publicSafe={DJS_PRELAUNCH_MODE:"PUBLIC_PRELAUNCH",NODE_ENV:"production",
+  APP_ORIGIN:"https://jobs.company.com",TRUSTED_CLIENT_IP_HEADER:"x-real-ip"};
+ for(const config of [safe,publicSafe]){
+  const blocked=evaluatePrelaunchConfig({...config,[flag]:"true"});
+  assert.equal(blocked.status,"BLOCKED");
+  assert.ok(blocked.violations.includes(flag));
+  assert.equal(evaluatePrelaunchConfig({...config,[flag]:"false"}).status,"PASS");
+ }
+});
 test("public prelaunch requires secure canonical origin, a known proxy header and production mode",()=>{
  const publicSafe={
   DJS_PRELAUNCH_MODE:"PUBLIC_PRELAUNCH",NODE_ENV:"production",

@@ -533,6 +533,11 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-23 U01 默认关闭的邮件验证与注册会话门禁
+
+- `669fe82` 核心底座主 CI `45123821665` SUCCESS：全新 MySQL8 迁移与集成、单元/构建全部通过，不再等待该已验收子包。注册不再创建 session，登录与旧 session 必须 emailVerifiedAt 已验证，发信必须显式开关+合法 HTTPS 出口/凭据，GET 打开验证链接不消费，一次性 POST 原子确认；重发/确认 DB 限流并保护邮箱枚举。
+- 改造独立 HTTP E2E 增加未验证 ADMIN 旧会话拒绝；邮件外发纳入 D02 默认关闭预发布门禁。专项邮件 3/3、页面/安全结构 3/3、预发布 RED→GREEN、完整 npm test/TypeScript/Next build exit 0。**等待本包远端 HTTP/主 CI 回执**，真实发信及老用户恢复仍需审批；U01 总体 IN_PROGRESS。独立证据/交接 `u01-email-verification-web-2026-11-23.md`。
+
 ## 2026-11-23 U01 邮箱验证后端底座（等待 CI 实测）
 
 - 基于真实仓库注册后立即登录缺口，新增 `User.emailVerifiedAt`（旧用户保持 NULL）、`EmailVerificationToken`（仅哈希、每用户唯一、到期、级联清理），正式迁移 15；实现 256-bit 随机令牌、24h 到期、轮换和单次事务消费。后端未改注册/登录/发信；U01 总体 IN_PROGRESS。

@@ -15,7 +15,9 @@ export const offFlags=[
  // Operational incident acknowledgment, dead-letter review, and incident
  // synchronization mutate state and need separate authorization before release.
  "ENABLE_OPS_INCIDENT_ACK","ENABLE_OPS_DEAD_REVIEW_WRITE",
- "OPS_INCIDENT_SYNC_APPROVED"
+ "OPS_INCIDENT_SYNC_APPROVED",
+  // External mail delivery also needs explicit provider/privacy authorization.
+  "ENABLE_EMAIL_VERIFICATION_DELIVERY"
 ];
 
 function publicOriginAllowed(raw){

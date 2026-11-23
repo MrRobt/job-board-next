@@ -8,8 +8,9 @@ const digest = (token: string) => createHash("sha256").update(token).digest("hex
 export async function currentUser() {
   const token = (await cookies()).get(cookieName)?.value;
   if (!token) return null;
-  const session = await db.session.findUnique({ where: { tokenHash: digest(token) }, select: { expiresAt: true, user: { select: { id: true, email: true, role: true } } } });
-  return session && session.expiresAt > new Date() ? session.user : null;
+  const session = await db.session.findUnique({ where: { tokenHash: digest(token) }, select: { expiresAt: true, user: { select: { id: true, email: true, role: true, emailVerifiedAt: true } } } });
+  if (!session || session.expiresAt <= new Date() || !session.user.emailVerifiedAt) return null;
+  return {id:session.user.id,email:session.user.email,role:session.user.role};
 }
 export async function requireUser() {
   const user = await currentUser();
@@ -22,6 +23,8 @@ export async function requireAdmin() {
   return user;
 }
 export async function startSession(userId: string) {
+  const eligible = await db.user.findUnique({where:{id:userId},select:{emailVerifiedAt:true}});
+  if (!eligible?.emailVerifiedAt) throw new Error("Email verification required");
   const jar = await cookies();
   const old = jar.get(cookieName)?.value;
   if (old) await db.session.deleteMany({ where: { tokenHash: digest(old) } });
