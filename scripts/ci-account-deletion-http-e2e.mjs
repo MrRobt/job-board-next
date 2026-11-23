@@ -20,6 +20,7 @@ const db=new PrismaClient();
 const ids=[];
 let ownId=null;
 let otherId=null;
+let adminEmail=null;
 let orderId=null;
 let cookie=null;
 const currentPassword=["Account","Closure","Synthetic","2026"].join("-");
@@ -61,6 +62,11 @@ async function seed(){
   passwordHash:"placeholder",emailVerifiedAt:new Date()
  }});
  otherId=other.id;ids.push(otherId);
+ const admin=await db.user.create({data:{
+  email:"u01-http-admin-"+randomUUID()+"@example.invalid",
+  passwordHash,role:"ADMIN",emailVerifiedAt:new Date()
+ }});
+ adminEmail=admin.email;ids.push(admin.id);
  orderId=randomUUID().replace(/-/g,"").slice(0,32);
  await db.toolOrder.create({data:{
   id:orderId,userId:ownId,sku:"STARTER20",amountFen:990,
@@ -161,11 +167,44 @@ async function run(email){
  assert.ok(await db.user.findUnique({where:{id:ownId}}),"Account must remain intact");
  assert.ok(await db.user.findUnique({where:{id:otherId}}),"Unrelated account must remain intact");
  assert.equal(await db.session.count({where:{userId:ownId}}),1,"Request must not silently log out or erase account");
- console.log(JSON.stringify({scope:"CI_ACCOUNT_DELETION_HTTP",pass:10,fail:0,
+ const evidenceBefore=await db.accountDeletionRequest.count({where:{userId:ownId}});
+ const orderBefore=await db.toolOrder.findUniqueOrThrow({where:{id:orderId}});
+ response=await request("/admin/account-deletions");
+ assert.ok([303,307,308].includes(response.status),"Anonymous reviewer must be redirected");
+ assert.equal(location(response).pathname,"/login");
+ await response.body?.cancel();
+
+ response=await request("/admin/account-deletions",{cookieValue:cookie});
+ assert.ok([303,307,308].includes(response.status),"USER cannot view the review queue");
+ assert.equal(location(response).pathname,"/");
+ await response.body?.cancel();
+
+ response=await request("/login",{method:"POST",originHeader:origin,
+  body:form(loginAction,{email:adminEmail,password:currentPassword})});
+ assert.ok([303,307,308].includes(response.status),"Administrator login must redirect");
+ const adminCookie=(response.headers.get("set-cookie")??"").match(/job_session=([^;]+)/)?.[1];
+ assert.ok(adminCookie,"Administrator must receive a valid session");
+ await response.body?.cancel();
+
+ response=await request("/admin/account-deletions",{cookieValue:adminCookie});
+ assert.equal(response.status,200,"Admin can read masked review queue");
+ const reviewHTML=await response.text();
+ assert.match(reviewHTML,/账户注销人工审核队列/);
+ assert.match(reviewHTML,/禁止自动删除/);
+ assert.ok(!reviewHTML.includes(email),"Must not leak raw user email");
+ assert.ok(reviewHTML.includes("u***@example.invalid"),"Review list must mask email");
+ assert.doesNotMatch(reviewHTML,/name="confirmDeletion"/,"Review page must not expose deletion action");
+ assert.equal(await db.accountDeletionRequest.count({where:{userId:ownId}}),evidenceBefore);
+ const orderAfter=await db.toolOrder.findUniqueOrThrow({where:{id:orderId}});
+ assert.equal(orderAfter.status,orderBefore.status);
+ assert.equal(orderAfter.amountFen,orderBefore.amountFen);
+
+ console.log(JSON.stringify({scope:"CI_ACCOUNT_DELETION_HTTP",pass:14,fail:0,
   checks:["anonymous blocked","verified login","authenticated review form",
    "cross-origin rejected","missing origin rejected","wrong password rejected",
    "consent required","valid review recorded","idempotent and tenant isolated",
-   "financial/user/session records preserved"],
+   "financial/user/session records preserved","anonymous reviewer denied",
+    "USER reviewer denied","ADMIN read-only review allowed","review masking and ledger integrity"],
   noExternalCalls:true,noErasure:true}));
 }
 async function cleanup(){
