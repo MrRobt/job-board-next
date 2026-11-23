@@ -555,6 +555,11 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
+## 2026-11-23 B07 非空数据恢复合成实验（待远端实测）
+
+- `tests/b07-disposable-restore-ci.test.ts` 初始 YAML/Shell 均不存在：专项 RED 2/2；实现后目标库门禁首次策略 RED，补守卫后专项 GREEN，`bash -n`/完整 `npm test`/独立 `tsc --noEmit`/Next 生产 build 均 exit 0。
+- 缺显式授权时脚本 exit 2；单独 CI 工作流中支付/模拟支付/AI/退款/对账均 false。测试 fixture `User + ToolOrder + ToolGrant + ToolRun` 含一个 RESERVED，恢复后用行数/字段 SHA-256 比对。**尚未实际执行远端 mysqldump/restore，不能当作 DB 恢复 PASS；未执行生产 RPO/RTO。** 详见 `b07-disposable-restore-2026-11-23.md`。
+
 ## 2026-11-22 B07 实际 CI 预检成功回执
 
 - GitHub Actions `45038958476` / job `137258883779` SUCCESS，日志 `B07_READ_ONLY_RECOVERY_PREFLIGHT PASS`，迁移文件 14/DB 14，pending/unknown/unfinished/checksumMismatch 全空，missingTables/missingColumns 全空，隔离库三类风险汇总均 0；同提交主 CI `45038958420`、DEAD HTTP E2E `45038958405` SUCCESS。仅本预检子包 VERIFIED，非空业务数据备份恢复、生产迁移与 RPO/RTO 仍未验收；B07 IN_PROGRESS、上线 NOT READY。

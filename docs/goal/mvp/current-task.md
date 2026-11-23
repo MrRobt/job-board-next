@@ -533,6 +533,11 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-23 B07 一次性 MySQL8 非空业务夹具备份恢复
+
+- 已实现单独 `b07-disposable-restore.yml` 和硬编码双一次性库名的 `b07-disposable-restore.sh`；仅显式 CI 审批和匹配目标库允许操作，使用虚构订单/权益/预留四表测试 `mysqldump`/restore + 指纹一致性，目标库存在则拒绝覆盖；商户/AI/退款开关全 false。
+- 专项先 RED 缺脚本/配置，修复后 GREEN；`bash -n`、`npm test`、独立 tsc、`npm run build` exit 0；缺审批本地 shell 拒绝 exit 2。**尚未取得远端实际 MySQL 8 restore run/job 结果，不能标 VERIFIED**；B07 总体 IN_PROGRESS。独立证据/交接 `b07-disposable-restore-2026-11-23.md`。
+
 ## 2026-11-22 B07 CI 真实 MySQL8 回执确认
 
 - `9816be8` 远端 B07 独立 run `45038958476`、job `137258883779` SUCCESS；读实际 job 日志显示 `B07_READ_ONLY_RECOVERY_PREFLIGHT status=PASS`、版本化 SQL 文件 14/DB 记录 14、迁移 checksum/待执行/失败/未知均空、关键表列缺失空，隔离库 IN_DOUBT/RESERVED/已付冻结均 0。同提交主 CI `45038958420`、管理员 HTTP E2E `45038958405` SUCCESS。

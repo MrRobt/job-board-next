@@ -1,0 +1,55 @@
+name: B07 disposable nonempty backup restore exercise
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: b07_ci_only
+          MYSQL_DATABASE: jobs_mvp_migrate_20261123_restore_src
+          MYSQL_USER: b07_ci
+          MYSQL_PASSWORD: b07_ci_only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=15
+    env:
+      DATABASE_URL: mysql://b07_ci:b07_ci_only@127.0.0.1:3306/jobs_mvp_migrate_20261123_restore_src
+      NODE_ENV: "test"
+      INTEGRATION_TEST_DATABASE: "true"
+      DJS_B07_RESTORE_APPROVED: "DISPOSABLE_ONLY"
+      B07_DISPOSABLE_RESTORE_DEST: jobs_mvp_migrate_20261123_restore_dst
+      ENABLE_REAL_PAYMENT: "false"
+      ENABLE_MOCK_PAYMENT: "false"
+      ENABLE_LIVE_AI: "false"
+      ENABLE_TOOL_PAYMENTS: "false"
+      ENABLE_REFUND_QUERY: "false"
+      ENABLE_REFUND_SEND: "false"
+      ENABLE_REFUND_DISPATCH_CLAIM: "false"
+      ENABLE_PAYMENT_RECONCILIATION: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+      - name: Deploy source schema into disposable MySQL
+        run: npx prisma migrate deploy
+      - name: Check disposable source migration state
+        run: npx prisma migrate status
+      - name: Backup and restore synthetic nonempty relational data into separate disposable database
+        run: bash scripts/b07-disposable-restore.sh
