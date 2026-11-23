@@ -11,7 +11,8 @@
 
 - 新增 `tests/account-deletion-request-policy.test.ts`：初次缺表/代码/动作先 RED（2/2），实现后 2/2 PASS。Prisma `validate`/generate PASS。
 - 新增 `tests/integration/account-deletion-request.test.ts`：仅当 `INTEGRATION_TEST_DATABASE=true` 才可执行，在 CI 一次性 MySQL8 中创建两名合成用户和一份模拟支付记录，3 次并发请求应只写一条申请，不能影响另一个用户、原用户或模拟已付款订单，且外键必须禁止意外硬删除。只清理测试自己创建的数据。
-- **本地完整 TypeScript 与全量测试受另一 Agent 已存在的未提交 `lib/auth-retention.ts` 和 `tests/auth-retention-verification-policy.test.ts` 半成品阻断。** 本轮 TypeScript TS2739（`AuthRetentionResult` 的 `APPLIED` 返回缺新字段），未修复/覆盖他人文件。须等正常提交到干净远端 CI 后看实际 Prisma 迁移、集成、类型及构建结果，未取得日志前子包只能 IN_PROGRESS。
+- **本地完整 TypeScript 与全量测试受另一 Agent 已存在的未提交 `lib/auth-retention.ts` 和 `tests/auth-retention-verification-policy.test.ts` 半成品阻断。** 本地 TypeScript TS2739（`AuthRetentionResult` 的 `APPLIED` 返回缺新字段），未修复/覆盖他人文件。
+- **已完成干净远端真实验收：** `f1ef3d2` GitHub Actions 主 CI run `45133996644` / job `137555780865` completed/success；Prisma 新库迁移及重复 migrate、TypeScript、全量单元、MySQL 集成、Next 生产 build/HTTP smoke 均 PASS。原始 job 日志 `U01 deletion review remains idempotent, retains simulated order and cannot hard-delete User` PASS。同提交邮箱 HTTP、找回密码 HTTP、管理员权限、B07 只读预检及合成非空恢复五条独立 CI 均 SUCCESS。**仅账户注销人工审核受理子包 VERIFIED**，用户数据最终删除/匿名化仍未验收。
 - 所有支付、退款、真实邮箱、AI、外部合规审批仍保持原门禁；当前技术上线状态 NOT READY。
 
 ## 下一阶段交接
