@@ -12,10 +12,12 @@ import {queueApprovedRefund,claimRefundDispatchOnce} from "../../lib/career/refu
 import {reconcileDispatchedRefund} from "../../lib/career/refund-finalization";
 import type {RefundInquiryGateway} from "../../lib/payment/refund-query";
 import {available} from "../../lib/career/credits";
+import {countRefundLedgerReviewHolds} from "../../lib/career/refund-review-ops-read";
 import {approvedOpsScanEnvironment,assessOpsAlerts,opsAlertQueryFilters} from "../../lib/career/ops-alert-policy";
 
 test("signed refund inquiry settlement requires confirmed matching refund, atomically revokes unused credits",async()=>{
  if(process.env.INTEGRATION_TEST_DATABASE!=="true")throw new Error("Disposable MySQL required");
+ const baselineReviewCount=await countRefundLedgerReviewHolds(db);
  const tag=randomUUID();
  const users:string[]=[];
  const create=async(name:string,role:"ADMIN"|"USER"="USER")=>{
@@ -148,10 +150,13 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
   assert.equal(await db.toolRefundInquiryEvent.count({
    where:{dispatchId:dispatch.id,observed:"SUCCEEDED",outcome:"MANUAL_LEDGER_REVIEW"}
   }),1,"Verified merchant success + changed credits must persist review evidence");
+  assert.equal(await countRefundLedgerReviewHolds(db),baselineReviewCount+1,
+   "Ops panel should see durable review evidence in actual MySQL");
   await assert.rejects(reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),/ledger changed|manual ledger review/);
   assert.equal(await db.toolRefundInquiryEvent.count({
    where:{dispatchId:dispatch.id,observed:"SUCCEEDED",outcome:"MANUAL_LEDGER_REVIEW"}
   }),1,"Replayed evidence must be idempotent");
+  assert.equal(await countRefundLedgerReviewHolds(db),baselineReviewCount+1);
   assert.equal((await db.toolOrder.findUniqueOrThrow({where:{id:order.id}})).status,"PAID");
   assert.equal((await db.toolGrant.findUniqueOrThrow({where:{id:grant.id}})).remaining,19);
   assert.equal((await db.toolRefundDispatch.findUniqueOrThrow({where:{id:dispatch.id}})).state,"IN_DOUBT");

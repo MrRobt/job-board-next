@@ -13,6 +13,12 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
+## 2026-11-24 B04 退款成功后权益冲突的运营只读汇总（待远端）
+
+- `tests/refund-review-ops-visibility.test.ts` RED（聚合模块未实现）→2/2 GREEN。只查询 `MANUAL_LEDGER_REVIEW` 聚合计数，非整数、非法/缺失计数与 DB 查询故障一律抛出；先 requireAdmin + OPS read 门禁再读取；事故页可只读查看聚合警告和退款派发账本链接，无退款/确认/自动通知。
+- 既有 `tests/ops-incident-view.test.ts` 4/4 PASS，合计 6/6；`tests/integration/refund-finalization.test.ts` 实际隔离 `jobs_preview_20261123` MySQL8 1/1 PASS，新增审计后聚合计数+1，重复查询仍只加一次。合成测试没有真实商户 IO、外发模型或凭据。
+- 本地全局 TypeScript 只有其他 Agent dirty `lib/auth-retention.ts:83` TS2739，本包未触碰其文件；**尚无本子包 GitHub run/job，不能标 VERIFIED**。独立证据 `b04-refund-ledger-hold-ops-visibility-2026-11-24.md`。
+
 ## 2026-11-24 B06 验签成功却无法安全撤权时保留审计（干净 MySQL8 CI VERIFIED）
 
 - `tests/integration/refund-finalization.test.ts` 在隔离 `jobs_preview_20261123` MySQL8 RED 1：模拟合法验证的退款 `SUCCEEDED`，将 `grant.remaining` 减 1 后预期 `MANUAL_LEDGER_REVIEW` 事件 1 条，实际旧逻辑 0；实现后 GREEN。验证相同派发多次重复查单审计仍仅 1、订单 PAID、dispatch IN_DOUBT、权益无额外扣减；随后模拟 SUCCEEDED AI 运行、恢复余额后同样保持记录不强制结算，最终移除合成矛盾后原有成功终态仍 PASS。
