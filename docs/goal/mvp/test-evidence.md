@@ -13,6 +13,12 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
+## 2026-11-23 B06 派发账本只读风控与异常识别（待远端）
+
+- `tests/refund-dispatch-integrity.test.ts` 起步缺模块 RED；纯规则实现后 3/3 PASS，覆盖各状态正常/异常、审批/工单/订单/冻结/次数余额/领取终态和在途 AI 用量不一致；所有路径不自动发退款或撤权。`tests/refund-dispatch-integrity-admin-policy.test.ts` 管理页缺模块及风险字段 RED 2/2，完成后 GREEN 2/2，共 5/5 PASS。
+- `tests/integration/refund-dispatch-integrity.test.ts` 在 `INTEGRATION_TEST_DATABASE=true` 的独立 `jobs_preview_20261123` MySQL8 上 1/1 PASS：真实 DB 关联读取、正常未领取、异常领取字段、IN_DOUBT 待查、权益被改变后的异常标志以及恢复后正常，订单 PAID/权益总数及商户查询证据保持完整。只触及合成随机夹具。
+- 本地全局 TypeScript 仅由其他 Agent 的未提交 `lib/auth-retention.ts:83` TS2739 阻断，未修改或暂存其文件；**当前尚无本包远端主 CI run/job，不能标 VERIFIED**。独立交接 `b06-refund-dispatch-ledger-integrity-2026-11-23.md`。
+
 ## 2026-11-23 B06 退款终态双人争抢与冻结付费次数（干净 MySQL8 CI VERIFIED）
 
 - 新增 `tests/integration/refund-finalization-race.test.ts`，模拟双方在事务前均收到同一笔 synthetic ALIPAY 退款成功查单结果后并发最终确认。测试断言：一个成功转移，一个安全拒绝/已结算；唯一 CREDITS_REVOKED 审计；订单 REFUNDED、case SUCCEEDED、dispatch SUCCEEDED、该订单余额=0；后续重复确认不再次查商户；退款冻结期间 reserve 不得消耗付费 grant，单独 trial=1 不受影响。
