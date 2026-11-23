@@ -533,6 +533,12 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-23 U01 账户注销人工审核申请（待隔离 MySQL8 CI）
+
+- 从 U01 邮箱验证、找回密码已验收闭环继续，确认 `b1d9286` 远端前一组 6 条 CI SUCCESS；本地仍存在其他 Agent 的认证数据保留、财务扫描与主交接未提交修改，均保护不碰。
+- 新增 `AccountDeletionRequest` 一对一审核表和第 17 个增量迁移（默认 PENDING_MANUAL_REVIEW，外键 ON DELETE RESTRICT）；`/account` 仅受信任的登录 session + 同源请求 + 密码重验 + 显式勾选和限流可提交，使用数据库唯一约束/skipDuplicates 幂等受理。**只记录人工审核申请，不删除 User、求职、订单、退款、账本或审计数据。**
+- 安全策略首次缺模块 RED 2/2，实现后 2/2 GREEN；Prisma validate/generate PASS；新增一次性 MySQL8 集成验证三并发唯一申请、模拟已付订单不变、他人账户不受影响、关联阻止意外硬删除。**本地 TypeScript / 全量测试仍因其他 Agent 的 `lib/auth-retention.ts` 半成品失败，需干净远端 CI 回执后才标此子包 VERIFIED。** 独立交接 `u01-account-deletion-request-2026-11-23.md`；U01 总体 IN_PROGRESS、上线 NOT READY。
+
 ## 2026-11-23 U01 邮箱验证真实 HTTP 确认 / 登录 / 防跨域演练（隔离 CI VERIFIED）
 
 - 前一 `1d629e8` 五条 GitHub Actions（主 CI、B07 两条、管理员 HTTP 和找回密码 HTTP）均 SUCCESS，不重复前包。真实 Git 状态确认 `lib/auth-retention.ts` + `tests/auth-retention-verification-policy.test.ts` 正由其他 Agent 并行修改，本包未触碰。

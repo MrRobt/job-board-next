@@ -555,6 +555,11 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
+## 2026-11-23 U01 账户注销非破坏性人工审核申请（待真实 MySQL8 CI）
+
+- `tests/account-deletion-request-policy.test.ts` 先 RED 2/2（缺 schema/迁移/Server Action）；新增模型、迁移、人工审核入口后定向 GREEN 2/2，Prisma schema validate 与 Client generate PASS。新增 `tests/integration/account-deletion-request.test.ts` 使用一次性 DB、合成模拟已付款订单，要求并发幂等、账户隔离、原财务订单和用户完整、外键禁止误硬删。
+- 本地 `tsc --noEmit` 失败 TS2739：另一 Agent 正在修改未提交的 `lib/auth-retention.ts`，APPLIED 返回尚未覆盖新字段；本包未改/未 stage 该文件。全量 `npm test` 也未通过；**不能声称本地全绿，亦尚无此次新迁移与集成的远端 CI 验收回执**。详见 `u01-account-deletion-request-2026-11-23.md`；仅审核申请、没有自动删除或外部通知。
+
 ## 2026-11-23 U01 邮箱验证真实 localhost HTTP E2E（待远端）
 
 - `tests/email-verification-http-ci-policy.test.ts` 起步 RED 3/3（确认同源检查/工作流/脚本均缺失）；实现 `app/actions/email-verification.ts` 两条 Origin/Host 拦截、一次性 MySQL8 `.github/workflows/email-verification-http-e2e.yml` 和 `scripts/ci-email-verification-http-e2e.mjs` 后，专项 3/3、联合已有策略 6/6 GREEN，`node --check` 通过。

@@ -4,18 +4,20 @@ import {db} from "@/lib/db";
 import {trial,available} from "@/lib/career/credits";
 import {price,product} from "@/lib/career/catalog";
 import {submitRefundCase} from "@/app/actions/refund-cases";
+import {requestAccountDeletion} from "@/app/actions/account-deletion";
 
 const statuses={PENDING:"待支付",PAID:"已支付",CLOSED:"已关闭",REFUNDED:"已退款"};
 const refundLabels={OPEN:"待人工核查",PREPARED:"退款资料已准备（未发款）",REJECTED:"已答复",PROCESSING:"处理中",SUCCEEDED:"渠道已确认退款",FAILED:"处理失败"};
-export default async function Account({searchParams}:{searchParams:Promise<{refundRequested?:string;refundError?:string}>}){
+export default async function Account({searchParams}:{searchParams:Promise<{refundRequested?:string;refundError?:string;deletionRequested?:string;deletionError?:string}>}){
  const u=await requireUser();await trial(u.id);
- const {refundRequested,refundError}=await searchParams;
- const [credits,orders,runs,legacy]=await Promise.all([
+ const {refundRequested,refundError,deletionRequested,deletionError}=await searchParams;
+ const [credits,orders,runs,legacy,deletionRequest]=await Promise.all([
   available(u.id),
   db.toolOrder.findMany({where:{userId:u.id},orderBy:{createdAt:"desc"},take:100,
    include:{refundCases:{orderBy:{createdAt:"desc"},take:1,include:{intent:{select:{state:true}}}}}}),
   db.toolRun.findMany({where:{userId:u.id},orderBy:{createdAt:"desc"},take:50}),
-  db.order.findMany({where:{userId:u.id},select:{id:true,amountFen:true,status:true,jobId:true,unlock:{select:{orderId:true}}},orderBy:{createdAt:"desc"},take:100})
+  db.order.findMany({where:{userId:u.id},select:{id:true,amountFen:true,status:true,jobId:true,unlock:{select:{orderId:true}}},orderBy:{createdAt:"desc"},take:100}),
+   db.accountDeletionRequest.findUnique({where:{userId:u.id},select:{status:true,requestedAt:true}})
  ]);
  return <>
   <section className="card top"><h1>我的账户</h1><p className="muted">{u.email}</p><h2>剩余 AI 次数：{credits}</h2><Link href="/pricing" className="button">查看次数包</Link></section>
@@ -44,5 +46,18 @@ export default async function Account({searchParams}:{searchParams:Promise<{refu
   {legacy.length>0&&<section className="card"><h2>历史招聘订单售后</h2>
    {legacy.map(o=><div className="row" key={o.id}><span>¥{price(o.amountFen)} · {statuses[o.status]}</span><Link href={"/pay/"+o.id}>历史订单</Link>{o.status==="PAID"&&o.unlock&&<Link href={"/jobs/"+o.jobId}>已购信息</Link>}</div>)}
   </section>}
+ <section className="card">
+  <h2>账户注销与个人信息处理</h2>
+  <p className="muted">提交后进入人工审核，不会立即删除账户、支付订单、退款、权益或审计记录。处理前会核对仍需履行的合同、售后及法定保存义务；本申请不代表已完成注销。</p>
+  {deletionRequested&&<p role="status">注销审核申请已记录，尚未执行删除。</p>}
+  {deletionError&&<p className="error" role="alert">未能记录申请。请确认密码和勾选事项，或稍后重试。</p>}
+  {deletionRequest?<p role="status">已收到注销审核申请：{deletionRequest.requestedAt.toISOString().slice(0,10)} UTC。当前状态：等待人工审核；未自动删除。</p>:
+  <form className="form" action={requestAccountDeletion}>
+   <label htmlFor="deletion-password">输入当前密码确认身份</label>
+   <input id="deletion-password" name="password" type="password" autoComplete="current-password" minLength={12} maxLength={128} required/>
+   <label><input type="checkbox" name="confirmDeletion" value="REQUEST_MANUAL_REVIEW" required/>我理解这只是人工审核申请，账户和依法须保留的财务记录不会立即删除。</label>
+   <button type="submit" className="quiet">提交账户注销审核申请</button>
+  </form>}
+ </section>
  </>;
 }

@@ -34,6 +34,7 @@ model User {
   emailVerifiedAt DateTime?
   emailVerificationToken EmailVerificationToken?
   passwordResetToken PasswordResetToken?
+  accountDeletionRequest AccountDeletionRequest?
   sessions Session[]
   orders Order[]
   unlocks Unlock[]
@@ -66,6 +67,15 @@ model PasswordResetToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   @@index([expiresAt])
+}
+// Non-destructive U01 privacy request: never implies financial erasure.
+model AccountDeletionRequest {
+  id String @id @default(cuid())
+  userId String @unique
+  user User @relation(fields:[userId],references:[id],onDelete:Restrict)
+  status String @default("PENDING_MANUAL_REVIEW") @db.VarChar(32)
+  requestedAt DateTime @default(now())
+  @@index([status,requestedAt])
 }
 model Session {
   tokenHash String @id @db.Char(64)
