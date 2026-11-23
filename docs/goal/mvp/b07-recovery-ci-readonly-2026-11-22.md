@@ -18,9 +18,9 @@
 - TDD RED：`tests/b07-recovery-ci-policy.test.ts` 首次加入而 workflow 未创建时，`npm test` exit 1，`ENOENT` 指向目标 CI 工作流。
 - GREEN：工作流实现后，完整 `npm --prefix F:/code/job-board-next test` **exit 0**，专项策略断言通过；独立 TypeScript 检查 **exit 0**。
 - `npm --prefix F:/code/job-board-next run build` **exit 0**（Prisma 生成、Next.js 16.4.6 生产构建）。
-- **远端 GitHub Actions 运行结果需以真实 run/job 为准**，本地测试与 YAML 文本检查不等于真实 MySQL 预检通过，当前不可提前标 VERIFIED。
+- **远端运行实证已核验：** `9816be8` 的 B07 独立 GitHub Actions run `45038958476`，job `137258883779`，均 `completed/success`。实际只读脚本输出 `status=PASS`，本地迁移文件 14、DB 登记 14；pending/unknown/unfinished/checksumMismatch、missingTables、missingColumns 全为空，隔离库三类聚合计数（inDoubt/reserved/paidFrozen）均为 0。**仅此次 disposable CI 数据库的只读预检子包可视为 VERIFIED，B07 整体继续 IN_PROGRESS。**
 - 未在本机连接数据库，也未进行任何备份恢复写入/非空数据恢复。B07 整体 `IN_PROGRESS`，商业上线 `NOT READY`。
 
 ## 下轮衔接
 
-核验新 workflow 在最新提交上的首次 run：迁移条数与 SHA-256、关键表列、只读聚合计数、退出码；失败则定位并继续 RED/GREEN 修复。此测试仍不覆盖有状态、非空业务数据备份恢复或预发布实际 RPO/RTO，后者需要专门的授权运维与安全门禁。其他 Agent 的 `handoff.md`、requirement-matrix、risk-register、release-checklist、financial-risk-audit、Next 生成文件及缓存绝不混提交。
+B07 只读 CI 首轮已核验成功；同一提交的主 CI run `45038958420` 与 DEAD 复核 HTTP E2E run `45038958405` 也都 `completed/success`。接下来继续有状态、**非空业务数据**的隔离库备份恢复、预发布实际 RPO/RTO 和回滚故障演练；需要专门的授权运维与安全门禁。这些缺口未完成前 B07 与上线准备不得标 VERIFIED。其他 Agent 的 `handoff.md`、requirement-matrix、risk-register、release-checklist、financial-risk-audit、Next 生成文件及缓存绝不混提交。

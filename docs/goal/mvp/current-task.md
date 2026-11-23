@@ -533,3 +533,8 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-22 B07 CI 真实 MySQL8 回执确认
+
+- `9816be8` 远端 B07 独立 run `45038958476`、job `137258883779` SUCCESS；读实际 job 日志显示 `B07_READ_ONLY_RECOVERY_PREFLIGHT status=PASS`、版本化 SQL 文件 14/DB 记录 14、迁移 checksum/待执行/失败/未知均空、关键表列缺失空，隔离库 IN_DOUBT/RESERVED/已付冻结均 0。同提交主 CI `45038958420`、管理员 HTTP E2E `45038958405` SUCCESS。
+- **仅一次性 MySQL8 只读预检子包 VERIFIED，B07 总体 IN_PROGRESS**；尚缺真实隔离环境非空数据备份恢复、RPO/RTO、回滚故障演练及生产迁移。正式商户、模型、合规依旧人工门禁，整体 NOT READY。
+

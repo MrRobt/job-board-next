@@ -553,6 +553,10 @@
 ## 2026-11-22 B07 一次性 MySQL 8 只读预检 CI
 
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
-- Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。本轮**远端 CI 结果尚需验证**，不能凭 YAML 就判定 MySQL 预检成功。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
+- Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
+
+## 2026-11-22 B07 实际 CI 预检成功回执
+
+- GitHub Actions `45038958476` / job `137258883779` SUCCESS，日志 `B07_READ_ONLY_RECOVERY_PREFLIGHT PASS`，迁移文件 14/DB 14，pending/unknown/unfinished/checksumMismatch 全空，missingTables/missingColumns 全空，隔离库三类风险汇总均 0；同提交主 CI `45038958420`、DEAD HTTP E2E `45038958405` SUCCESS。仅本预检子包 VERIFIED，非空业务数据备份恢复、生产迁移与 RPO/RTO 仍未验收；B07 IN_PROGRESS、上线 NOT READY。
 
 
