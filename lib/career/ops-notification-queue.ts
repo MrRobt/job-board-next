@@ -18,6 +18,8 @@ export async function queueInitialOpsNotificationIntent(
  if(!(now instanceof Date)||!Number.isFinite(now.getTime()))
   throw new Error("Invalid notification clock");
  assertOpsIncidentKey(intent?.key);
+ if(intent.key==="REFUND_LEDGER_REVIEW")
+  throw Error("Refund ledger review notification queuing is not approved");
  if(intent.kind!=="NOTIFY"||intent.dueBucket!==0||
    !Number.isSafeInteger(intent.count)||intent.count<=0||
    !(intent.incidentOpenedAt instanceof Date)||

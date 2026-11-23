@@ -1,7 +1,7 @@
 import type {OpsIncidentKey} from "./ops-incident-policy";
 import type {OpsIncidentSnapshot} from "./ops-incident-state";
 
-const keys:readonly OpsIncidentKey[]=["REFUND_IN_DOUBT","STALE_AI_RESERVATIONS","REFUND_READY_AGED"];
+const keys:readonly OpsIncidentKey[]=["REFUND_IN_DOUBT","STALE_AI_RESERVATIONS","REFUND_READY_AGED","REFUND_LEDGER_REVIEW"];
 /** The page queries only the fields needed to render its public-to-admin summary. */
 export const incidentPanelSelect={
  key:true,state:true,count:true,openedAt:true,lastSeenAt:true,acknowledgedAt:true
@@ -15,7 +15,8 @@ export type OpsIncidentView=Readonly<{
 const label:Record<OpsIncidentKey,string>={
  REFUND_IN_DOUBT:"退款状态待核实",
  STALE_AI_RESERVATIONS:"AI 次数预留超时",
- REFUND_READY_AGED:"退款待派发积压"
+ REFUND_READY_AGED:"退款待派发积压",
+ REFUND_LEDGER_REVIEW:"已验签退款成功但权益需人工核账"
 };
 export function toOpsIncidentView(snapshot:OpsIncidentPanelRecord):OpsIncidentView{
  if(!keys.includes(snapshot.key)||
@@ -28,7 +29,7 @@ export function toOpsIncidentView(snapshot:OpsIncidentPanelRecord):OpsIncidentVi
  if(snapshot.acknowledgedAt!==null&&!Number.isFinite(snapshot.acknowledgedAt.getTime()))
   throw new Error("Invalid acknowledgment timestamp");
  return {key:snapshot.key,label:label[snapshot.key],
-  priority:snapshot.key==="REFUND_IN_DOUBT"?"CRITICAL":"HIGH",
+  priority:snapshot.key==="REFUND_IN_DOUBT"||snapshot.key==="REFUND_LEDGER_REVIEW"?"CRITICAL":"HIGH",
   state:snapshot.state,count:snapshot.count,openedAt:snapshot.openedAt,
   lastSeenAt:snapshot.lastSeenAt,acknowledgedAt:snapshot.acknowledgedAt};
 }

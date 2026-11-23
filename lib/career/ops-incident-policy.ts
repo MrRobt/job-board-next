@@ -4,7 +4,7 @@ import {assessOpsAlerts,type OpsAlertCounts} from "./ops-alert-policy";
  * Pure, deterministic incident planning. The caller owns durable storage,
  * operator authentication, notifications and audit. No network or DB writes.
  */
-export type OpsIncidentKey="STALE_AI_RESERVATIONS"|"REFUND_IN_DOUBT"|"REFUND_READY_AGED";
+export type OpsIncidentKey="STALE_AI_RESERVATIONS"|"REFUND_IN_DOUBT"|"REFUND_READY_AGED"|"REFUND_LEDGER_REVIEW";
 export type OpsIncidentAcknowledgment=Readonly<{
  key:OpsIncidentKey;
  openedAt:Date;
@@ -20,16 +20,18 @@ export type PlannedOpsIncident=Readonly<{
  escalationAfterMinutes:number;
 }>;
 
-const keys:readonly OpsIncidentKey[]=[
- "STALE_AI_RESERVATIONS","REFUND_IN_DOUBT","REFUND_READY_AGED"
-];
+// The existing aggregate scanner intentionally owns only its original 3 metrics.
+// A fourth isolated review signal has an independent read/write gate.
+const aggregateKeys=["STALE_AI_RESERVATIONS","REFUND_IN_DOUBT","REFUND_READY_AGED"] as const;
+const allowedKeys:readonly OpsIncidentKey[]=[...aggregateKeys,"REFUND_LEDGER_REVIEW"];
 /** Validate runtime values even when the caller is TypeScript-typed. */
 export function assertOpsIncidentKey(key:unknown):asserts key is OpsIncidentKey{
- if(typeof key!=="string"||!keys.includes(key as OpsIncidentKey))
+ if(typeof key!=="string"||!allowedKeys.includes(key as OpsIncidentKey))
   throw new Error("Invalid incident key");
 }
-const priority=(key:OpsIncidentKey)=>key==="REFUND_IN_DOUBT"?"CRITICAL" as const:"HIGH" as const;
-const escalationMinutes=(key:OpsIncidentKey)=>key==="REFUND_IN_DOUBT"?15:30;
+const critical=(key:OpsIncidentKey)=>key==="REFUND_IN_DOUBT"||key==="REFUND_LEDGER_REVIEW";
+const priority=(key:OpsIncidentKey)=>critical(key)?"CRITICAL" as const:"HIGH" as const;
+const escalationMinutes=(key:OpsIncidentKey)=>critical(key)?15:30;
 const millis=(date:Date,label:string)=>{
  if(!(date instanceof Date)||!Number.isFinite(date.getTime()))
   throw new Error("Invalid "+label);
@@ -62,12 +64,12 @@ export function planOpsIncidents(
   }
   records.set(record.key,record);
  }
- const countByKey:Record<OpsIncidentKey,number>={
+ const countByKey:Record<(typeof aggregateKeys)[number],number>={
   STALE_AI_RESERVATIONS:valid.staleReservations,
   REFUND_IN_DOUBT:valid.uncertainRefunds,
   REFUND_READY_AGED:valid.agedReadyRefunds
  };
- return keys.filter(key=>countByKey[key]>0).map(key=>{
+ return aggregateKeys.filter(key=>countByKey[key]>0).map(key=>{
   const record=records.get(key);
   const minutes=escalationMinutes(key);
   let action:OpsIncidentAction="NOTIFY";

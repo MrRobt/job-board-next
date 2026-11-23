@@ -13,11 +13,29 @@ import {reconcileDispatchedRefund} from "../../lib/career/refund-finalization";
 import type {RefundInquiryGateway} from "../../lib/payment/refund-query";
 import {available} from "../../lib/career/credits";
 import {countRefundLedgerReviewHolds} from "../../lib/career/refund-review-ops-read";
+import {runIsolatedRefundReviewIncidentScan} from "../../lib/career/refund-review-incident-scan";
+import {createPrismaOpsIncidentSyncStore,type OpsIncidentSyncPrismaPort} from "../../lib/career/ops-incident-sync-prisma-store";
+import {acknowledgeOpsIncidentWithStore} from "../../lib/career/ops-incident-acknowledgment-service";
+import {createPrismaOpsIncidentStore,type OpsPrismaClientPort} from "../../lib/career/ops-incident-prisma-store";
 import {approvedOpsScanEnvironment,assessOpsAlerts,opsAlertQueryFilters} from "../../lib/career/ops-alert-policy";
 
 test("signed refund inquiry settlement requires confirmed matching refund, atomically revokes unused credits",async()=>{
  if(process.env.INTEGRATION_TEST_DATABASE!=="true")throw new Error("Disposable MySQL required");
  const baselineReviewCount=await countRefundLedgerReviewHolds(db);
+ const incidentKey="REFUND_LEDGER_REVIEW" as const;
+ if(baselineReviewCount!==0||await db.opsAlertIncident.count({where:{key:incidentKey}})!==0)
+  throw Error("Refund incident integration requires clean, separate audit and incident fixtures");
+ // Synthetic gate input is confined to this disposable DB test. Runtime code
+ // and the CLI use process.env and cannot substitute a different DB URL.
+ const approvedReviewEnv={OPS_ALERT_READ_ONLY_APPROVED:"true",
+  OPS_INCIDENT_SYNC_APPROVED:"true",OPS_REFUND_LEDGER_SYNC_APPROVED:"true",
+  INTEGRATION_TEST_DATABASE:"true",NODE_ENV:"test",
+  DATABASE_URL:"mysql://test-only@127.0.0.1:3306/jobs_mvp_migrate_20261124_ci"};
+ const incidentStore=createPrismaOpsIncidentSyncStore(db as unknown as OpsIncidentSyncPrismaPort);
+ const scanReview=(now:Date)=>runIsolatedRefundReviewIncidentScan(approvedReviewEnv,
+  {readActiveHolds:()=>countRefundLedgerReviewHolds(db)},incidentStore,now);
+ let ownedReviewIncident=false;
+ let reviewOpenedAt:Date|null=null;
  const tag=randomUUID();
  const users:string[]=[];
  const create=async(name:string,role:"ADMIN"|"USER"="USER")=>{
@@ -152,6 +170,24 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
   }),1,"Verified merchant success + changed credits must persist review evidence");
   assert.equal(await countRefundLedgerReviewHolds(db),baselineReviewCount+1,
    "Ops panel should see durable review evidence in actual MySQL");
+  reviewOpenedAt=new Date();
+  ownedReviewIncident=true;
+  assert.equal((await scanReview(reviewOpenedAt)).event,"OPENED");
+  assert.equal((await scanReview(new Date(reviewOpenedAt.getTime()+1000))).event,null);
+  const createdReview=await db.opsAlertIncident.findUniqueOrThrow({where:{key:incidentKey}});
+  assert.equal(createdReview.state,"OPEN");
+  assert.equal(createdReview.count,1);
+  assert.deepEqual((await db.opsAlertIncidentEvent.findMany({
+   where:{incidentKey},select:{action:true}})).map(x=>x.action),["OPENED"]);
+  const ackStore=createPrismaOpsIncidentStore(db as unknown as OpsPrismaClientPort);
+  const ackAt=new Date(reviewOpenedAt.getTime()+1500);
+  assert.equal(await acknowledgeOpsIncidentWithStore(ackStore,{
+   key:incidentKey,expectedOpenedAt:reviewOpenedAt,operatorId:reviewer.id,
+   reason:"已核对合成退款成功与异常次数账本并接手人工检查，未发起资金操作"
+  },ackAt),"ACKNOWLEDGED");
+  const afterAck=await scanReview(new Date(reviewOpenedAt.getTime()+2000));
+  assert.equal(afterAck.state,"ACKNOWLEDGED");
+  assert.equal((await db.opsAlertIncident.findUniqueOrThrow({where:{key:incidentKey}})).acknowledgedById,reviewer.id);
   await assert.rejects(reconcileDispatchedRefund(dispatch.id,reviewer.id,gateway),/ledger changed|manual ledger review/);
   assert.equal(await db.toolRefundInquiryEvent.count({
    where:{dispatchId:dispatch.id,observed:"SUCCEEDED",outcome:"MANUAL_LEDGER_REVIEW"}
@@ -186,6 +222,11 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
   assert.equal(await db.toolRefundInquiryEvent.count({where:{dispatchId:dispatch.id,outcome:"MANUAL_LEDGER_REVIEW"}}),1);
   assert.equal(await countRefundLedgerReviewHolds(db),baselineReviewCount,
    "A completed refund must leave audit history but clear active manual-review count");
+  assert.equal((await scanReview(new Date(reviewOpenedAt!.getTime()+3000))).event,"RESOLVED");
+  assert.equal((await db.opsAlertIncident.findUniqueOrThrow({where:{key:incidentKey}})).state,"RESOLVED");
+  assert.deepEqual((await db.opsAlertIncidentEvent.findMany({
+   where:{incidentKey},select:{action:true},orderBy:{createdAt:"asc"}})).map(x=>x.action),
+   ["OPENED","ACKNOWLEDGED","RESOLVED"],"Incident history must preserve human acknowledgment and resolution");
   const event=await db.toolRefundInquiryEvent.findFirstOrThrow({
    where:{dispatchId:dispatch.id,outcome:"CREDITS_REVOKED"}
   });
@@ -193,6 +234,10 @@ test("signed refund inquiry settlement requires confirmed matching refund, atomi
   assert.equal(event.observed,"SUCCEEDED");
   assert.ok(queryCount>=5);
  }finally{
+  if(ownedReviewIncident){
+   await db.opsAlertIncidentEvent.deleteMany({where:{incidentKey}});
+   await db.opsAlertIncident.deleteMany({where:{key:incidentKey}});
+  }
   if(priorReal===undefined)delete process.env.ENABLE_REAL_PAYMENT;
   else process.env.ENABLE_REAL_PAYMENT=priorReal;
   if(priorClaim===undefined)delete process.env.ENABLE_REFUND_DISPATCH_CLAIM;

@@ -13,6 +13,14 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
+## 2026-11-24 B04 退款核账异常单独事故同步与人工接手（待远端）
+
+- `tests/refund-review-incident-scan.test.ts` 起步缺模块 RED；补三个独立环境门禁、第四类别、旧三指标不变、OPEN/RESOLVED/REOPENED、非法值/读失败不自动解决、已有管理确认表单可解析但新类不能入站外部通知后 4/4 PASS。
+- `tests/refund-review-incident-cli-policy.test.ts` 对默认拒绝、生产/错误 DB 拒绝和输出无密钥泄漏 2/2 PASS。新独立手动 CLI `scripts/refund-review-incident-scan.ts` 只允许经独立批准的本地 disposable migration DB；没有生产定时调度/HTTP 触发/外部通知/退款/权益写入。旧三类规划/队列/视图回归累计定向 **24/24 PASS**。
+- 原 `tests/integration/refund-finalization.test.ts` 增强：隔离 `jobs_preview_20261123` MySQL8 合成退款成功但权益不一致 → 数据库持久异常审计活跃 1 → `REFUND_LEDGER_REVIEW` 事故及 OPENED 审计 → ADMIN ACKNOWLEDGED +审计 → 模拟冲突解除且退款合法终态 → RESOLVED，三类历史事件不丢失。执行 **1/1 PASS**，不触碰原始 jobs/真实商户/AI 数据。
+- 本地全量 npm test **230 PASS / 1 FAIL**（其他 Agent 未提交的 `auth-retention-verification-policy`），tsc 唯一 `lib/auth-retention.ts:83` TS2739（其他 Agent dirty）；不重置/混提交。**本包需等待干净 CI/MySQL 集成/Build 真实回执，当前不标 VERIFIED**。
+- 独立交接 `b04-refund-review-isolated-incident-sync-2026-11-24.md`；B04 总体 IN_PROGRESS，真实生产调度/通知/商业资质另行验收。
+
 ## 2026-11-24 B04 退款成功后权益冲突的运营只读汇总（干净 MySQL8 CI VERIFIED）
 
 - `tests/refund-review-ops-visibility.test.ts` RED（聚合模块未实现）→2/2 GREEN。仅查询 `MANUAL_LEDGER_REVIEW` 且 `dispatch.state=IN_DOUBT` 的活跃聚合计数，已完成退款仅保留历史审计，非整数、非法/缺失计数与 DB 查询故障一律抛出；先 requireAdmin + OPS read 门禁再读取；事故页可只读查看聚合警告和退款派发账本链接，无退款/确认/自动通知。

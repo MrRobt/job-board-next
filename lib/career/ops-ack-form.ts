@@ -1,7 +1,7 @@
 import type {OpsIncidentKey} from "./ops-incident-policy";
 
 /** Parse only administrator-submitted fields; never accept a role or operator ID. */
-const keys:readonly string[]=["STALE_AI_RESERVATIONS","REFUND_IN_DOUBT","REFUND_READY_AGED"];
+const keys:readonly string[]=["STALE_AI_RESERVATIONS","REFUND_IN_DOUBT","REFUND_READY_AGED","REFUND_LEDGER_REVIEW"];
 
 export type OpsAckFormCommand=Readonly<{
  key:OpsIncidentKey;expectedOpenedAt:Date;reason:string;

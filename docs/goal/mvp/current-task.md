@@ -1,5 +1,13 @@
 # 当前任务（2026-11-17）
 
+## 2026-11-24 B04/B06 退款核账异常持久事故安全同步（待干净 CI）
+
+- 从已验收 `4b3aef2` 继续；核验真实分支/服务、隔离 MySQL8 18 迁移及 Goal/矩阵/交接，最高 P0 为 B04。原事故中心只能只读显示 `MANUAL_LEDGER_REVIEW` 活跃计数，没有进入已有的持久事故状态机。
+- 新增独立 `REFUND_LEDGER_REVIEW` 关键事故类别及 `runIsolatedRefundReviewIncidentScan`，复用已实现的 Serializable CAS + 审计，不改变其他 3 个定时聚合项。只能在显式 `OPS_REFUND_LEDGER_SYNC_APPROVED=true` + 既有独立读/写开关、非生产/隔离 MySQL 许可下运行。新增手动 CLI，没有定时任务或公网运行入口；新类别**禁止**生成/入队外部通知，禁止触及商户/付款/次数账。
+- 管理员原有 ACK 门禁继续生效，新类别可在现有事故页以 CRITICAL 展示及记录人工接手。真实隔离 `jobs_preview_20261123` MySQL8 中：合成验签成功但权益冲突 → 审计留存 → OPEN → ADMIN ACKNOWLEDGED → 解除冲突并原子结算 → RESOLVED，历史事件完整；实际集成 1/1 PASS；安全规则/CLI 定向 6/6 PASS，原三类相关回归共 24/24 PASS。
+- 本地全量单测 **230/231 PASS**，唯一失败为其他 Agent 未提交 `tests/auth-retention-verification-policy.test.ts` 密码重置留存；本机 tsc 唯一 TS2739 仍来自其未提交 `lib/auth-retention.ts`。未覆盖其文件、共享 handoff/矩阵/发布、财务审计草稿或 lockfile。
+- 独立交接/需求矩阵增量 `b04-refund-review-isolated-incident-sync-2026-11-24.md`，**需干净 GitHub 主 CI 才能置本子包 VERIFIED**。B04 总体仍 IN_PROGRESS（未实现生产安全调度、正式渠道告警和通知），商业技术上线仍 NOT READY。
+
 ## 2026-11-24 B04/B06 退款成功-权益冲突运营只读提示（干净 MySQL8 CI VERIFIED）
 
 - 已确认 B06 `4fc401a` 内部冲突审计及 `786ffc1` CI 证据 VERIFIED，不重复；补运营中心 `/admin/incidents` 的新审计数量可见性，只读显示固定 `MANUAL_LEDGER_REVIEW` 且派发仍为 `IN_DOUBT` 的活跃计数并链接退款派发页；成功结算后活跃数降回基线但审计历史保留，明确不是自动事故/通知，也不是商户回款证明。

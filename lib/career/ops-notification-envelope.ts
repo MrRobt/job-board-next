@@ -27,6 +27,9 @@ export function buildOpsNotificationEnvelope(value:Readonly<{
 }>):OpsNotificationEnvelope{
   if(!value || typeof value!=="object")throw Error("Invalid notification intent");
   assertOpsIncidentKey(value.key);
+ // This incident category has no approved sender, escalation, or outbox plan.
+ if(value.key==="REFUND_LEDGER_REVIEW")
+  throw Error("Refund ledger review notification delivery is not approved");
   if(typeof value.idempotencyKey!=="string"||
     !/^[a-f0-9]{64}$/.test(value.idempotencyKey)||
     (value.kind!=="NOTIFY"&&value.kind!=="ESCALATE")||
