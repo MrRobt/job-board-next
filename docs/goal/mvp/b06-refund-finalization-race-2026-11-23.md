@@ -12,10 +12,10 @@
 
 - 在原本用于验收的独立 `jobs_preview_20261123` MySQL 8 测试库，显式 `INTEGRATION_TEST_DATABASE=true` 运行单文件集成测试，初版 1/1 PASS；强化竞争失败者结果约束后 1/1 PASS；修正新增测试 `reserve` kind 的 TS 大小写约束后再实际复跑 1/1 PASS。
 - 新增文件的 TS 类型错误已修正；本机全局 `tsc --noEmit` 仍被**其他 Agent 尚未提交**的 `lib/auth-retention.ts:83` TS2739 阻断，返回值缺少密码重置令牌保留计数字段。本包不修改、不暂存他人的认证、财务审计、共享 handoff/需求矩阵、lockfile 等变更。
-- **此时尚待干净 GitHub 主 CI 的完整类型检查、真实 MySQL 集成及生产构建回执；不能提前将 B06 并发子包标记 VERIFIED**。B06 整体仍 IN_PROGRESS：真实支付宝/微信退款请求、正式查单与回款结果、生产财务对账及商户 UAT 需有效凭据和人工授权，不能用本合成证据替代。
+- **现已取得干净远端真实验收：** 提交 `75227ca` 主 CI run `45184435692` / job `137726254001` completed/success，实际 job 日志 `B06 signed refund reconciliation is single-winner under concurrent reviewers` PASS；Prisma 迁移部署/状态/重复执行、TypeScript、全部单元/真实 MySQL 集成、Next 生产 build 和 HTTP smoke 均 SUCCESS；同提交另 7 条邮箱、注销、后台和 B07 专项 CI 全部 SUCCESS。**仅 B06 双人并发/冻结权益回归子包 VERIFIED**。B06 整体仍 IN_PROGRESS：真实支付宝/微信退款请求、正式查单与回款结果、生产财务对账及商户 UAT 需有效凭据和人工授权，不能用本合成证据替代。
 
 ## 下一手交接
 
-1. 精确提交本测试与独立证据，正常 push 后读取 GitHub Actions 主 CI 的真实 run/job 与日志，核对新增 `B06 signed refund reconciliation is single-winner under concurrent reviewers`、全部迁移/TS/单测/集成/构建/烟测。若失败，先仅修复本包；成功后更新真实回执和 `current-task/test-evidence`，再分批提交。
+1. 已核验 `75227ca` 主 CI `45184435692` / job `137726254001` 及其余 7 条专项 CI 全部 SUCCESS，新增 MySQL B06 并发用例在原始日志中 PASS；本子包 VERIFIED，不重复已验收工作。
 2. 保留技术上线 NOT READY；对 B06 继续考虑外部商户成功但内部剩余权益有争议时的受控人工异常处理，不自动改钱、不自动重试 POST，不擅自批准或开启真实通道。
 3. Git 保护：不重置、clean、强推，不修改其他 Agent 的未提交文件；在 `handoff.md` 已有他人改动时，本独立交接文件即本包 handoff。
