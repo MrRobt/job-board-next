@@ -1,11 +1,11 @@
 # 当前任务（2026-11-17）
 
-## 2026-11-24 B04 退款人工核账事故真实 CLI 临时 MySQL8 演练（待独立 CI）
+## 2026-11-24 B04 退款人工核账事故真实 CLI 临时 MySQL8 演练（干净 CI VERIFIED）
 
 - 已验收 `c6d4525` B04 孤立持久事故同步和 `dc3d0cd` 证据，本轮只补**真正符合数据库授权条件的独立进程手动 CLI 演练**，不重复状态机功能。
 - 新增 `.github/workflows/b04-refund-review-incident-cli-drill.yml`：GitHub 一次性 MySQL8 `jobs_mvp_migrate_20261124_b04ci`、完整迁移、`INTEGRATION_TEST_DATABASE=true`，全部支付/退款/AI/模拟收款通道 false，非生产。 `scripts/ci-refund-review-incident-cli-drill.ts` 首先拒绝原始 `jobs` 或非 CI 数据库，再以合成订单及注入式无网络商户结果运行真正 CLI 子进程，验收默认拒绝、空账本、OPENED/重扫幂等、管理员 ACKNOWLEDGED、结算后 RESOLVED、历史审计保留与原财务账本原子性。
 - 新策略 `tests/refund-review-incident-cli-ci-policy.test.ts` 起步 RED 2/2，补工作流与脚本后 GREEN 2/2；本地 `tsc` 仍因其他 Agent dirty `lib/auth-retention.ts` TS2739，本包新脚本无其他 TS 错。
-- 独立证据/交接 `b04-refund-review-cli-ci-drill-2026-11-24.md`；**新独立 GitHub CI 尚待真实 run/job 验收**，本子包暂 IN_PROGRESS。B04 总体、商业技术上线仍 NOT READY；外部商户、模型和合规继续人工门禁。
+- 独立证据/交接 `b04-refund-review-cli-ci-drill-2026-11-24.md`；**远端实际 CI 已验收：** 首版 `69a0706` B04 run `45249799152` 因测试审核说明超 80 字符 FAILED；未放宽业务校验，独立修复提交 `b43858c`。该提交 B04 真实 CLI MySQL8 run `45250135310` / job `137957264366` SUCCESS，原始日志 `B04_REFUND_REVIEW_CLI_MYSQL8 status=PASS steps=12 externalCalls=0 noAutoRefund=true`；主 CI run `45250135487` / job `137957264969` SUCCESS，单测 **232/232**、Prisma migrations、TS、真实 MySQL 集成、Next 构建/HTTP smoke 全通过；其余 7 条专项 CI 全 SUCCESS，合计 9/9。**仅隔离 CLI 演练子包 VERIFIED**。B04 总体、商业技术上线仍 NOT READY；外部商户、模型和合规继续人工门禁。
 
 ## 2026-11-24 B04/B06 退款核账异常持久事故安全同步（干净 MySQL8 CI VERIFIED）
 

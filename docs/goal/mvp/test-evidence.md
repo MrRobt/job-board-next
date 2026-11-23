@@ -13,11 +13,11 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
-## 2026-11-24 B04 真正执行独立 CLI 与隔离 MySQL8 的演练（待远端）
+## 2026-11-24 B04 真正执行独立 CLI 与隔离 MySQL8 的演练（干净 CI VERIFIED）
 
 - 新 `tests/refund-review-incident-cli-ci-policy.test.ts` 先因缺少工作流/脚本 RED 2/2，补充固定临时 MySQL8、所有金融/AI 通道 false、CI 专用 DB 检查、三重 gate 与 CLI 子进程后 2/2 GREEN。
 - 新 `.github/workflows/b04-refund-review-incident-cli-drill.yml` 与 `scripts/ci-refund-review-incident-cli-drill.ts` 专门验证真实 process env/库名限制，拒绝非 CI/production/original jobs；合成 ALIPAY 已付订单/退款工单/权益异常经无网络模拟查单后生成审计，通过子进程手动扫描器对 OPEN/ACKNOWLEDGED/RESOLVED、重放、历史留存、关闭通道和账本不被扫描器改写逐条核对。
-- 本地 TypeScript 的唯一已知问题仍为其他 Agent 未提交 `lib/auth-retention.ts:83` TS2739，未改其文件；**本包的独立 GitHub Actions 尚未执行，不能标 VERIFIED**。独立交接 `b04-refund-review-cli-ci-drill-2026-11-24.md`。
+- 本地 TypeScript 的唯一已知问题仍为其他 Agent 未提交 `lib/auth-retention.ts:83` TS2739，未改其文件；**真实远端回执：** 首版 `69a0706` run `45249799152` 失败，原因是 synthetic 人工审核理由 82 字符超出 80 字符业务校验，并非生产退款代码问题；只修测试串，提交 `b43858c`。最终 B04 run `45250135310` / job `137957264366` completed/success，实际日志 JSON `B04_REFUND_REVIEW_CLI_MYSQL8 status=PASS steps=12 externalCalls=0 noAutoRefund=true`（真实进程级 CLI 合成 MySQL8 演练 PASS）；同提交主 CI run `45250135487` / job `137957264969` SUCCESS，232/232 单测、Prisma 新库迁移及重复执行、TypeScript、真实 MySQL 集成、Next 生产 build/HTTP smoke 全通过；另外 7 条专项 CI 全 SUCCESS，最终 **9/9 绿灯**。**仅临时库实跑 CLI 子包 VERIFIED；B04 整体 IN_PROGRESS。**独立交接 `b04-refund-review-cli-ci-drill-2026-11-24.md`。
 
 ## 2026-11-24 B04 退款核账异常单独事故同步与人工接手（干净 MySQL8 CI VERIFIED）
 

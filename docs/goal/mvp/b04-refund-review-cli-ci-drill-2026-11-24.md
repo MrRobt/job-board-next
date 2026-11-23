@@ -18,5 +18,5 @@
 ## 当前验收 / 交接
 
 - 本地新 workflow/script 策略 2/2 PASS、`tsc` 中新脚本无类型诊断；全量 TypeScript 仍只有其他 Agent 未提交的 `lib/auth-retention.ts:83` TS2739；不修改、不暂存 `handoff.md`、`requirement-matrix.md`、其他财务扫描草稿及 lockfile。
-- **此时尚无这条新工作流真正运行的 GitHub run/job；CLI 正向真实 MySQL 演练未 VERIFIED。** 提交正常 push 后必须核对新 Actions 运行结果中的 `B04_REFUND_REVIEW_CLI_MYSQL8 status=PASS`、实际 process exit/事件/财务无变更证据，并同时确认主 CI 与其它 P0 专项没有回归。失败只修复本包且分批推送。
+- **干净远端验收已完成：** 初版 `69a0706` 独立 B04 run `45249799152` / job `137956082816` 确实 FAILED（合成审批审核说明 82 字符，业务允许最长 80；无资金副作用），未篡改业务校验；仅修测试夹具并独立推送 `b43858c`。新 B04 run `45250135310` / job `137957264366` completed/success，实际日志 `B04_REFUND_REVIEW_CLI_MYSQL8 status=PASS steps=12 externalCalls=0 noAutoRefund=true`，真实子进程命令行演练 1/1 PASS；同提交主 CI run `45250135487` / job `137957264969` completed/success，Prisma 新库迁移及重复部署、TypeScript、全量单元 **232/232 PASS**、真实 MySQL 集成、Next 生产 build/HTTP smoke 均 SUCCESS；另外 7 条账户/后台/B07 专项 CI 全部 SUCCESS，合计 **9/9 流水线 SUCCESS**。**仅此临时 MySQL8 实际 CLI 演练子包 VERIFIED。** 提交正常 push 后必须核对新 Actions 运行结果中的 `B04_REFUND_REVIEW_CLI_MYSQL8 status=PASS`、实际 process exit/事件/财务无变更证据，并同时确认主 CI 与其它 P0 专项没有回归。失败只修复本包且分批推送。
 - B04 整体仍 IN_PROGRESS：生产级定时触发、外部运营通知投递与回执、真实商户/合规人工授权尚未打通。技术上线 NOT READY，不允许用测试替代商户资金真账证据。
