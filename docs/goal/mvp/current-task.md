@@ -533,6 +533,11 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-23 U01 找回密码隔离 HTTP CSRF / 会话撤销演练（待远端实测）
+
+- 上轮 `0daf679` 主 CI `45127453163`、DEAD HTTP `45127453001`、B07 只读 `45127453148`、合成非空恢复 `45127453070` 全 SUCCESS，跳过重复工作。
+- 新增通用同源 Origin/Host 安全策略，密码找回请求和确认两个 POST 动作均先拒绝缺失或伪造 Origin；独立 `password-reset-http-e2e.yml` 一次性 MySQL8 + Next 生产 localhost HTTP 审核：匿名请求、邮件默认关闭、GET 只读、跨域/缺源不可消费、同源密码更新、旧会话撤销和重放失败。策略 TDD RED→GREEN、node --check、npm test、TS/生产 build 均 exit 0。**远端真实 HTTP run 尚未检查，不能标 VERIFIED**；证据/交接 `u01-password-reset-http-e2e-2026-11-23.md`。
+
 ## 2026-11-23 U01 找回密码页面、独立邮件外发与限流
 
 - 已核验上一 `98af09c` 主 CI `45126554312` job `137532100371` SUCCESS：第 16 个迁移、真实 MySQL8 一次性重置/并发/撤销全部 session 测试 PASS，单元 185/185，通过不重复。

@@ -25,3 +25,9 @@ test("reset link is only consumed through explicit POST with throttling",()=>{
  assert.match(action,/consumePasswordReset\(candidate,proposed\)/);
  assert.doesNotMatch(page,/consumePasswordReset\(/);
 });
+test("both recovery actions require same-origin POST before database operations",()=>{
+ const action=read("../app/actions/password-reset.ts");
+ assert.match(action,/isTrustedActionOrigin/);
+ const guards=[...action.matchAll(/if\(!await sameOrigin\(\)\)/g)];
+ assert.equal(guards.length,2);
+});

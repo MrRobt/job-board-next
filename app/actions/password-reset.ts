@@ -9,6 +9,7 @@ import {issuePasswordReset,consumePasswordReset} from "@/lib/password-reset";
 import {validPasswordResetInput} from "@/lib/password-reset-policy";
 import {passwordResetDeliveryConfigured,sendPasswordResetEmail} from "@/lib/password-reset-delivery";
 import {validVerificationToken,hashVerificationToken} from "@/lib/email-verification-policy";
+import {isTrustedActionOrigin} from "@/lib/action-origin-policy";
 
 async function permitted(scope:"password-reset-request"|"password-reset-confirm",identity:string,emailLimit:number,ipLimit:number){
  return checkAuthenticationThrottle({
@@ -17,7 +18,13 @@ async function permitted(scope:"password-reset-request"|"password-reset-confirm"
  },allowAttempt);
 }
 
+async function sameOrigin():Promise<boolean>{
+ const h=await headers();
+ return isTrustedActionOrigin(h.get("origin"),h.get("host"));
+}
+
 export async function requestPasswordReset(form:FormData){
+ if(!await sameOrigin())redirect("/forgot-password?sent=1");
  const values=form.getAll("email");
  const parsed=values.length===1?z.string().trim().email().max(254).safeParse(values[0]):null;
  if(!parsed?.success)redirect("/forgot-password?sent=1");
@@ -38,6 +45,7 @@ export async function requestPasswordReset(form:FormData){
 }
 
 export async function confirmPasswordReset(form:FormData){
+ if(!await sameOrigin())redirect("/reset-password?error=1");
  const values=form.getAll("token");
  const candidate=values.length===1?values[0]:null;
  if(!validVerificationToken(candidate))redirect("/reset-password?error=1");

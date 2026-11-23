@@ -555,6 +555,12 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
+## 2026-11-23 U01 真实 HTTP 找回密码与 CSRF 隔离演练（待 CI）
+
+- `0daf679` 主 CI `45127453163`、原管理员 E2E `45127453001`、B07 隔离只读 `45127453148`、合成非空恢复 `45127453070` 四项 SUCCESS，仅前一 Web 单元/构建子包验收。
+- `tests/action-origin-policy.test.ts` 模块未建时 RED exit1，新增 Origin/Host 纯校验后 2/2 GREEN；`tests/password-reset-http-ci-policy.test.ts` 配置/脚本缺失时 2/2 RED，补全隔离 `.github/workflows/password-reset-http-e2e.yml` + `scripts/ci-password-reset-http-e2e.mjs` 后 2/2 GREEN；动作策略新增两个 POST 同源守卫断言，定向 3/3 GREEN。完整 npm test、独立 tsc、生产 build、HTTP 脚本 node --check exit 0。
+- 脚本在临时 MySQL8 + Next localhost 内构造伪用户与重置令牌，要求 GET 只读、攻击者/缺 Origin 不消费、同源单次修改密码并撤销旧会话、重放和旧 Cookie 拒绝。**该新工作流当前无实际 run/job 回执，不得宣称 HTTP E2E 通过**；详细交接 `u01-password-reset-http-e2e-2026-11-23.md`。所有真实支付/邮件/AI 默认关闭。
+
 ## 2026-11-23 U01 找回密码页面、邮件外发与匿名接口（待真实 HTTP E2E）
 
 - `98af09c` 真 MySQL 8 主 CI run `45126554312` / job `137532100371` completed/success，迁移/重复部署、单元 `185/185`、集成 `U01 password recovery is single-use and revokes sessions on disposable MySQL` PASS、生产 build/HTTP smoke 全成功，仅后端核心子包 VERIFIED。
