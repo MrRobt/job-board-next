@@ -555,10 +555,10 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
-## 2026-11-23 U01 管理员注销队列角色隔离与脱敏真实 HTTP（待 CI）
+## 2026-11-23 U01 管理员注销队列角色隔离与脱敏真实 HTTP（隔离 CI VERIFIED）
 
 - 新 `tests/account-deletion-admin-http-policy.test.ts` 先 RED，增强真实 `scripts/ci-account-deletion-http-e2e.mjs` 后 2/2 GREEN，联合原队列规则/策略共 8/8 PASS；`node --check` exit 0。全程仍使用 `account_deletion_http_ci` 临时 MySQL8，模拟含管理员、普通用户和真实匿名请求。
-- 新增 HTTP 断言包括匿名 GET 307 /login、USER 307 /、ADMIN 200 脱敏队列、完整用户邮箱不泄露、审核记录数/模拟 PAID 订单金额不变；原 10 项扩大至 14 项。**当前无本轮新 CI run/job，不得凭静态检查宣布真实 E2E VERIFIED**。交接 `u01-account-deletion-admin-http-2026-11-23.md`。
+- 新增 HTTP 断言包括匿名 GET 307 /login、USER 307 /、ADMIN 200 脱敏队列、完整用户邮箱不泄露、审核记录数/模拟 PAID 订单金额不变；原 10 项扩大至 14 项。**远端真实验收已通过：** `f5b77dc` GitHub Actions 管理员注销审核 HTTP run `45137974907` / job `137568710870` completed/success，实际日志 `CI_ACCOUNT_DELETION_HTTP pass=14 fail=0`，含匿名拒绝、USER 拒绝、ADMIN 只读/脱敏、账务不变；主 CI run `45137975011` / job `137568711263` completed/success（Prisma、TypeScript、全单测/真实 MySQL 集成、Next build/smoke），另外五条回归专项 SUCCESS。**仅这条一次性 HTTP 权限子包 VERIFIED，未处理真实用户或数据删除。**。交接 `u01-account-deletion-admin-http-2026-11-23.md`。
 
 ## 2026-11-23 U01 注销人工审核只读财务预检（隔离 MySQL VERIFIED）
 

@@ -533,10 +533,10 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
-## 2026-11-23 U01 管理员注销审核队列真实 HTTP 权限回归（待 CI）
+## 2026-11-23 U01 管理员注销审核队列真实 HTTP 权限回归（隔离 CI VERIFIED）
 
 - 已验收 `e385b3d` 真实 MySQL8 批量风险预检和只读页面，证据 `c1ff73e` 已推送，不重做。继续新增管理员 HTML 权限回归：扩展原临时 MySQL8/Next localhost `ci-account-deletion-http-e2e.mjs`，模拟 USER、ADMIN 两类已验证用户，匿名 GET 必须跳登录、普通 USER 必须拒绝、ADMIN 可查看脱敏待审核队列；再次比较用户/审核记录和 PAID 模拟订单状态/金额，禁止查看触发写操作。
-- 新静态策略 RED（缺管理员 HTTP 检查）→2/2 GREEN；联合只读与风险规则共 8/8 PASS、node --check PASS。原 10 项 HTTP 扩为 14 项，**尚需远端 `CI_ACCOUNT_DELETION_HTTP pass=14 fail=0` 真正验收才能标 VERIFIED**。独立交接 `u01-account-deletion-admin-http-2026-11-23.md`。U01 总体 IN_PROGRESS，最终注销/合法财务保留仍人工门禁。
+- 新静态策略 RED（缺管理员 HTTP 检查）→2/2 GREEN；联合只读与风险规则共 8/8 PASS、node --check PASS。原 10 项 HTTP 扩为 14 项，**已取得干净远端真实验收：** `f5b77dc` 账户注销 HTTP run `45137974907` / job `137568710870` SUCCESS，原始日志 `CI_ACCOUNT_DELETION_HTTP pass=14 fail=0`；主 CI run `45137975011` / job `137568711263` SUCCESS，迁移/TS/单元/真实 MySQL 集成/build/smoke 全 PASS，其余五条专项 CI 也 SUCCESS。**仅管理员只读队列 HTTP 子包 VERIFIED，最终注销审批仍未完成。**。独立交接 `u01-account-deletion-admin-http-2026-11-23.md`。U01 总体 IN_PROGRESS，最终注销/合法财务保留仍人工门禁。
 
 ## 2026-11-23 U01 账户注销管理员只读审核队列（隔离 MySQL VERIFIED）
 
