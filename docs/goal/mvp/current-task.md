@@ -1,11 +1,11 @@
 # 当前任务（2026-11-17）
 
-## 2026-11-23 B06 派发账本只读一致性风控（待干净 CI）
+## 2026-11-23 B06 派发账本只读一致性风控（干净 MySQL8 CI VERIFIED）
 
 - 接续已 VERIFIED 的 B06 双管理员签名退款同单并发用例 `75227ca` / 证据 `3edc3c3`；未重复已完成的资金派发、查单和原子撤权功能。识别缺口：派发账本缺即时展示冻结权益、工单、订单、领取/确认时间及在途 AI 状态的异常标记。
 - 新增纯只读 `lib/career/refund-dispatch-integrity.ts` 和管理员 `/admin/refund-dispatch` 风险列。仅查询必要关系（每个次数包只检索最多一个 RESERVED/SUCCEEDED 使用凭证），不增加商户请求、不写账，不开启退款或 AI 开关；所有状态 `canAutoSendRefund=false`、`canAutoRevokeCredits=false`，即使一致也不等于商户退款成功。
 - 新规则先 RED 后 3/3 GREEN、页面鉴权/无写行为先 RED 后 2/2 GREEN，合计定向 5/5 PASS；隔离 `jobs_preview_20261123` MySQL8 实际关系预检 1/1 PASS（正常 READY、异常领取时间、已领取 IN_DOUBT、损坏权益余额与恢复）；原 jobs DB/其他服务未动。
-- 本地全局 TS 仍只有并行 Agent 未提交 `lib/auth-retention.ts` 的 TS2739，**本包尚待干净远端 CI** 才能标 VERIFIED。独立交接 `b06-refund-dispatch-ledger-integrity-2026-11-23.md`，B06 总体 IN_PROGRESS、上线 NOT READY。
+- 本地全局 TS 仍只有并行 Agent 未提交 `lib/auth-retention.ts` 的 TS2739，**已取得干净远端验收：** `871823a` 主 CI run `45187327007` / job `137736215406` SUCCESS，原始日志 B06 管理员只读财务风控 MySQL 回归 PASS，222/222 单元、TypeScript、集成、迁移/构建/HTTP smoke 均通过，其余 7 条专项工作流全 SUCCESS。**仅只读风控子包 VERIFIED**。独立交接 `b06-refund-dispatch-ledger-integrity-2026-11-23.md`，B06 总体 IN_PROGRESS、上线 NOT READY。
 
 ## 2026-11-23 B06 同一退款双管理员竞态与冻结权益（干净 MySQL8 CI VERIFIED）
 

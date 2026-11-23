@@ -13,10 +13,10 @@
 - `tests/refund-dispatch-integrity-admin-policy.test.ts` 起步管理页缺风控字段 RED 2/2，增强管理页后转 2/2 GREEN；管理员鉴权、风险列、有限的必要关系读取和没有新写库调用均受策略检查约束。专项合计 5/5 PASS。
 - `tests/integration/refund-dispatch-integrity.test.ts` 在独立 `jobs_preview_20261123` MySQL8、`INTEGRATION_TEST_DATABASE=true` 下 1/1 PASS。合成 ALIPAY 订单完成双人内审/准备/派发但不联网发送；真实 SELECT 获得无领取凭证 READY、缺领取字段异常、已领取 IN_DOUBT、冲突的权益余额、恢复原余额后的结果；核对原订单仍 PAID、金额/权益未更改及没有真实查询证据。仅清理本包随机 synthetic 夹具，未接触原 `jobs` 库。
 - 本地全局 TypeScript 仅受**其他 Agent 未提交**的 `lib/auth-retention.ts:83` TS2739 阻断，本包新增源码未出现额外 TS 错误。未覆盖/暂存认证清理、其他财务扫描草稿、共享 handoff/需求矩阵、风险/发布文档、lockfile 或缓存。
-- **此时尚无本包干净远端 CI 真实回执，暂为 IN_PROGRESS。** 生产退款后端和真实商户 UAT 仍在 B06 整体门禁内；签名商户退款成功与消费者争议需独立、有效的授权证据，绝不根据本地只读风控自动采取资金操作。
+- **已取得干净远端真实验收：** 提交 `871823a` 的主 CI run `45187327007` / job `137736215406` completed/success；实际 job 日志 `B06 admin refund preflight reads actual isolated MySQL relationships without changing ledgers` PASS，新增规则单测和页面授权策略 PASS，整套单元 **222/222 PASS**，版本化迁移+重复 deploy、TypeScript、真实 MySQL 集成、Next 生产 build/HTTP smoke 均 SUCCESS。同提交邮箱/密码找回/管理员及 B07 恢复另外 **7 条**专项 CI 全部 SUCCESS。**仅此管理员只读风控子包 VERIFIED**。 生产退款后端和真实商户 UAT 仍在 B06 整体门禁内；签名商户退款成功与消费者争议需独立、有效的授权证据，绝不根据本地只读风控自动采取资金操作。
 
 ## Handoff
 
-1. 本包精确 stage 后 commit/push，获取新 GitHub Actions 主 CI 的类型/全量单元/实际 MySQL 集成/Next 生产构建/HTTP smoke 回执，确认新增 `B06 admin refund preflight reads actual isolated MySQL relationships without changing ledgers` PASS；任何失败不得标 VERIFIED，先修复本包。
+1. 本包 `871823a` 已正常推送并完成真实 CI：主 CI `45187327007` / job `137736215406` SUCCESS，新增真实 MySQL 读账回归 PASS，222 项单测、类型检查及生产构建 PASS；其他 7 条专项 CI 全成功。本子包已验收，不重复。
 2. 干净 CI 成功后回填 run/job/原始日志和总状态；其他 Agent 的 dirty 文件继续保留。下一 P0 聚焦商户退款成功但内部权益出现争议的**非破坏性财务异常处理**与合法 UAT，不允许补退款 POST 或强行标记成功。
 3. 外部商户、模型、消费者合规及正式上线资质继续人工门禁，技术上线 NOT READY。这里的独立文件充当交接，避免覆盖已被其他 Agent 修改的 `handoff.md`。

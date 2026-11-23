@@ -13,11 +13,11 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
-## 2026-11-23 B06 派发账本只读风控与异常识别（待远端）
+## 2026-11-23 B06 派发账本只读风控与异常识别（干净 MySQL8 CI VERIFIED）
 
 - `tests/refund-dispatch-integrity.test.ts` 起步缺模块 RED；纯规则实现后 3/3 PASS，覆盖各状态正常/异常、审批/工单/订单/冻结/次数余额/领取终态和在途 AI 用量不一致；所有路径不自动发退款或撤权。`tests/refund-dispatch-integrity-admin-policy.test.ts` 管理页缺模块及风险字段 RED 2/2，完成后 GREEN 2/2，共 5/5 PASS。
 - `tests/integration/refund-dispatch-integrity.test.ts` 在 `INTEGRATION_TEST_DATABASE=true` 的独立 `jobs_preview_20261123` MySQL8 上 1/1 PASS：真实 DB 关联读取、正常未领取、异常领取字段、IN_DOUBT 待查、权益被改变后的异常标志以及恢复后正常，订单 PAID/权益总数及商户查询证据保持完整。只触及合成随机夹具。
-- 本地全局 TypeScript 仅由其他 Agent 的未提交 `lib/auth-retention.ts:83` TS2739 阻断，未修改或暂存其文件；**当前尚无本包远端主 CI run/job，不能标 VERIFIED**。独立交接 `b06-refund-dispatch-ledger-integrity-2026-11-23.md`。
+- 本地全局 TypeScript 仅由其他 Agent 的未提交 `lib/auth-retention.ts:83` TS2739 阻断，未修改或暂存其文件；**干净远端验收已完成：** `871823a` 主 CI run `45187327007` / job `137736215406` completed/success，真实日志 `B06 admin refund preflight reads actual isolated MySQL relationships without changing ledgers` PASS、规则及页面测试 PASS、222/222 单测/全部 MySQL 集成、Prisma 迁移、TypeScript、Next 生产 build/HTTP smoke 全 PASS；同提交另 7 条专项 CI 均 SUCCESS。**仅本只读风险预检子包 VERIFIED**，不是商户真实退款回款凭证。独立交接 `b06-refund-dispatch-ledger-integrity-2026-11-23.md`。
 
 ## 2026-11-23 B06 退款终态双人争抢与冻结付费次数（干净 MySQL8 CI VERIFIED）
 
