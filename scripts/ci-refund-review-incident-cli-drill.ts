@@ -77,7 +77,7 @@ test("B04 actual CLI on disposable MySQL: OPEN/ACK/RESOLVED, replay safe, money 
   const request=await requestToolRefund(buyer.id,order.id,
    "Synthetic unused paid credit bundle refund requiring manual review");
   const intent=await prepareReviewedRefund(request.id,maker.id,
-   "Reviewed synthetic order, amount and full unused grant for internal reconciliation");
+   "Verified synthetic order, amount and unused credits for refund review");
   await approveRefundIntent(intent.id,checker.id,
    "Independent synthetic approval; no real merchant refund is authorised");
   const dispatch=await queueApprovedRefund(intent.id,claimer.id);
