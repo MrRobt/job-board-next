@@ -533,6 +533,12 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-23 U01 账户注销管理员只读审核队列（待远端 MySQL CI）
+
+- 前轮 `5b4b700` 之前 7 条 GitHub Actions 完成；账户注销审核申请受理及真实 HTTP 已 VERIFIED，故不重复。当前 P0 缺口是管理员看不到待处理注销请求及财务保全风险。
+- 新增只读 `/admin/account-deletions`（服务端先 `requireAdmin()`，最多 20 条、邮箱脱敏、无任何执行删除/退款/审核状态更改入口），批量 SELECT/groupBy 查询真实渠道工具订单、待支付/历史订单、退款工单/退款意图及派发、AI RESERVED、剩余权益和求职记录。发现任一财务证据时 `FINANCIAL_HOLD`，在途/剩余权益 `OPERATIONAL_HOLD`，无指标也只能 `MANUAL_REVIEW`；所有情况 `canAutoDelete=false`。
+- 风险规则先 RED 缺模块后 4/4 GREEN；管理员只读策略先 RED 缺页面后 2/2 GREEN。新增一次性 MySQL8 集成测试校验分组、用户隔离、脱敏、无写库和三种合成风险。**本地 tsc 仍受其他 Agent 未提交 auth-retention TS2739 影响，本包尚待干净远端 CI 才能认定集成 VERIFIED**。独立证据/交接 `u01-account-deletion-review-queue-2026-11-23.md`，U01 整体 IN_PROGRESS、技术上线 NOT READY。
+
 ## 2026-11-23 U01 账户注销审核真实 localhost HTTP E2E（隔离 CI VERIFIED）
 
 - 前包 `f1ef3d2` 主 CI run `45133996644` 已验收成功，随后 `178c01d` 独立回填证据/交接，不重复已完成的非破坏性申请底座。
