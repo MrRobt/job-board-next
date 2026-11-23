@@ -555,6 +555,12 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
+## 2026-11-23 U01 令牌后端与版本化迁移（等待远端集成）
+
+- `tests/email-verification-policy.test.ts` 首次缺模块 RED exit 1；实现后 3/3 PASS：随机性、SHA-256、严格输入、24h 有效期、无效时钟拒绝。
+- `prisma validate`/generate、独立 tsc、完整 `npm test`、`npm run build` exit 0。本地没有调用任何已存在 MySQL；新增 `tests/integration/email-verification.test.ts` 待 CI 一次性 MySQL 8 做真实事务及迁移验收。
+- 原始令牌仅作为待批准邮件发送的进程内短时凭证，不存库；邮件供应商、前端确认、登录/注册门禁、旧用户验证未接入，本子包不能标记 U01 VERIFIED。参见 `u01-email-verification-core-2026-11-23.md`。
+
 ## 2026-11-23 B07 非空数据恢复合成实验（待远端实测）
 
 - `tests/b07-disposable-restore-ci.test.ts` 初始 YAML/Shell 均不存在：专项 RED 2/2；实现后目标库门禁首次策略 RED，补守卫后专项 GREEN，`bash -n`/完整 `npm test`/独立 `tsc --noEmit`/Next 生产 build 均 exit 0。

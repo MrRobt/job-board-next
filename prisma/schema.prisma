@@ -31,6 +31,8 @@ model User {
   passwordHash String @db.VarChar(255)
   role Role @default(USER)
   createdAt DateTime @default(now())
+  emailVerifiedAt DateTime?
+  emailVerificationToken EmailVerificationToken?
   sessions Session[]
   orders Order[]
   unlocks Unlock[]
@@ -47,6 +49,14 @@ model User {
   refundInquiryEvents ToolRefundInquiryEvent[]
   acknowledgedOpsIncidents OpsAlertIncident[] @relation("OpsIncidentAcknowledgment")
   operatedOpsIncidentEvents OpsAlertIncidentEvent[] @relation("OpsIncidentEventOperator")
+}
+model EmailVerificationToken {
+  tokenHash String @id @db.Char(64)
+  userId String @unique
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([expiresAt])
 }
 model Session {
   tokenHash String @id @db.Char(64)

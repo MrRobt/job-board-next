@@ -533,6 +533,11 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-23 U01 邮箱验证后端底座（等待 CI 实测）
+
+- 基于真实仓库注册后立即登录缺口，新增 `User.emailVerifiedAt`（旧用户保持 NULL）、`EmailVerificationToken`（仅哈希、每用户唯一、到期、级联清理），正式迁移 15；实现 256-bit 随机令牌、24h 到期、轮换和单次事务消费。后端未改注册/登录/发信；U01 总体 IN_PROGRESS。
+- 规则单测先 RED 再 3/3 GREEN；`prisma validate/generate`、全量 `npm test`、独立 TS 与 Next 生产构建 exit 0；本机未写 MySQL，新的真实 DB 集成需等远端 CI run/job。交接 `u01-email-verification-core-2026-11-23.md`，旧用户迁移/发信配置为后续人工门禁。
+
 ## 2026-11-23 B07 一次性 MySQL8 非空业务夹具备份恢复
 
 - 已实现单独 `b07-disposable-restore.yml` 和硬编码双一次性库名的 `b07-disposable-restore.sh`；仅显式 CI 审批和匹配目标库允许操作，使用虚构订单/权益/预留四表测试 `mysqldump`/restore + 指纹一致性，目标库存在则拒绝覆盖；商户/AI/退款开关全 false。
