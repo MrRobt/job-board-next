@@ -14,11 +14,11 @@
 - 既有只读队列安全策略升级为允许仅选择 `reasonCode/recordedAt`，继续禁止密码哈希、商户交易号和密钥。相关策略/预发布共 13/13 PASS。
 - 仅在明确的隔离数据库 `jobs_preview_20261123` 上运行 `prisma migrate deploy`，17→18 个迁移全部成功，`prisma generate` 和 `migrate status` 通过；原始 `jobs` 库未进行任何迁移、删库或数据修改。
 - `tests/integration/account-deletion-review-event.test.ts`：在 `INTEGRATION_TEST_DATABASE=true` 的预览库使用 synthetic 账号和 MOCK 付款记录进行实际 MySQL 集成，**1/1 PASS**。覆盖普通用户拒绝、非法原因拒绝、3 次并发只新增一条记录、再提幂等、追加不同原因、申请仍待审核、原用户与订单金额/状态完整、操作者可追溯；测试只清理自己创建的夹具。
-- **本地全局 tsc 与 npm test 尚未全绿**：其他 Agent 未提交的 `lib/auth-retention.ts` APPLIED 返回仍缺 `expiredPasswordResetTokens/deletedPasswordResetTokens`，TS2739；其配套未提交的 `tests/auth-retention-verification-policy.test.ts` 中，原邮箱令牌保留测试 PASS，但新增的密码重置令牌保留专项 FAIL（定向 1 PASS / 1 FAIL）。没有修改、覆盖或暂存这些并行工作文件。需以干净远端 CI 的主工作流、真实 MySQL 集成和生产构建回执作为本包最终 VERIFIED 门禁。真实 HTTP 对新写入动作的权限/CSRF 演练仍为后续独立工作包。
+- **本地全局 tsc 与 npm test 尚未全绿**：其他 Agent 未提交的 `lib/auth-retention.ts` APPLIED 返回仍缺 `expiredPasswordResetTokens/deletedPasswordResetTokens`，TS2739；其配套未提交的 `tests/auth-retention-verification-policy.test.ts` 中，原邮箱令牌保留测试 PASS，但新增的密码重置令牌保留专项 FAIL（定向 1 PASS / 1 FAIL）。没有修改、覆盖或暂存这些并行工作文件。**已取得干净远端真实验收：** 提交 `604602b` 主 CI run `45153778792` / job `137621463972` completed/success，原始 job 日志 `U01 manual deletion review audit is admin-only, idempotent and non-destructive in isolated MySQL` PASS；Prisma 18 条全新迁移及重复部署、TypeScript、全量单测 **215/215 PASS**、实际 MySQL 集成、Next 生产构建/HTTP smoke 均 SUCCESS。同提交另外 6 条账户/邮箱/密码/后台/B07 恢复专项 CI 全 SUCCESS。**仅审核事件台账后端子包 VERIFIED**；真实 HTTP 对新写入动作的权限/CSRF 演练仍为后续独立工作包。
 - 真实模型、支付、退款、邮件外发和运营审核写入开关仍保持关闭。用户注销、法律保存期限、资金争议审查及最终删除/匿名化流程**不在本包**，U01 仍 IN_PROGRESS、技术上线 NOT READY。
 
 ## 交接及 Git 安全
 
-1. 远端 CI 跑完检查新的 schema/迁移与 `account-deletion-review-event` 集成；失败时先修复当前小包后再更新证据。仅成功后将“审核事件台账后端子包”标为 VERIFIED。
+1. `604602b` 远端主 CI 与六条专项流水线已成功，本审核事件台账后端子包 VERIFIED，不重复；后续只验尚未覆盖的真实 HTTP 写入路径。
 2. 后续独立演练 HTTP 角色隔离、跨域拒绝、停用门禁、重复 POST，并制定受有权主体授权的状态审核与个人信息处理方案；不自动硬删。
 3. 精确 stage 本包相关代码、测试、`current-task.md`、`test-evidence.md` 和本交接；其他 Agent 的 `handoff.md`、主需求矩阵、发布/风险、认证数据保留、财务扫描、缓存和 lockfile 一律保留，不混提交、不强推。

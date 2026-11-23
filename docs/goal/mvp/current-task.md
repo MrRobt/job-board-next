@@ -1,11 +1,11 @@
 # 当前任务（2026-11-17）
 
-## 2026-11-23 U01 账户注销审核事件台账（待干净 CI）
+## 2026-11-23 U01 账户注销审核事件台账（干净 MySQL8 CI VERIFIED）
 
 - 已恢复 Goal/矩阵/交接、`main...origin/main`、当前服务和 Git；既有 U01 受理、只读财务预检及 HTTP 角色隔离已 VERIFIED，不重复。
 - 新增 `AccountDeletionReviewEvent` 版本化第18条迁移、仅管理员/已验证账号可记录固定审核原因、同申请+原因唯一幂等、审核人 FK 审计；既有申请仍 PENDING_MANUAL_REVIEW。前端只读风险预检+可选事件列表，写入必须独立 `ENABLE_ACCOUNT_DELETION_REVIEW_WRITE=true` 且管理员权限、同源请求、限流、显式确认全部通过。LOCAL_PREVIEW/PUBLIC_PRELAUNCH 禁开写入。
 - 核验：规则初 RED 后 GREEN、预发布门禁先 RED 后 GREEN、只读回归适配后定向 13/13 PASS；仅隔离预览库 `jobs_preview_20261123` 成功执行第18条增量迁移并 regenerate，真实 MySQL synthetic 并发审核/保留数据集成 1/1 PASS；原 jobs DB 未动。
-- 本机全量 tsc 受其他 Agent 未提交 `lib/auth-retention.ts` TS2739 阻断，npm test 亦因其认证数据保留测试新子项 1 FAIL（定向 1 PASS/1 FAIL）未全绿，不改其他 Agent 文件；**需待干净远端主 CI/MySQL/Build 回执才可标本审计子包 VERIFIED**。本地预览端口 3000 会在本包收口后恢复，外部商户/模型/邮件/实际注销与合规仍人工门禁。交接 `u01-account-deletion-review-audit-2026-11-23.md`。U01 IN_PROGRESS、技术上线 NOT READY。
+- 本机全量 tsc 受其他 Agent 未提交 `lib/auth-retention.ts` TS2739 阻断，npm test 亦因其认证数据保留测试新子项 1 FAIL（定向 1 PASS/1 FAIL）未全绿，不改其他 Agent 文件；**现已取得干净远端回执：** `604602b` 主 CI run `45153778792` / job `137621463972` SUCCESS，真实 MySQL 审核事件并发、权限及财务保全集成 PASS，单测 **215/215**、Prisma 迁移、TypeScript 和 Next 生产构建均 SUCCESS；其他六条专项 CI 同样 SUCCESS。**仅后端审计台账子包 VERIFIED**。本地预览端口 3000 会在本包收口后恢复，外部商户/模型/邮件/实际注销与合规仍人工门禁。交接 `u01-account-deletion-review-audit-2026-11-23.md`。U01 IN_PROGRESS、技术上线 NOT READY。
 
 ## 最近完成并有测试证据
 

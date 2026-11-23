@@ -13,12 +13,12 @@
 | Next.js 生产构建 | `node node_modules/next/dist/bin/next build` | exit 0，Next.js 16.4.6，编译成功 |
 | 生产迁移 | `prisma migrate deploy`（全新独立库） | 上一工作包工具安全检查阻断，本轮未复验；**BLOCKED** |
 
-## 2026-11-23 U01 可控人工审核事件台账（待远端验收）
+## 2026-11-23 U01 可控人工审核事件台账（干净 MySQL8 CI VERIFIED）
 
 - `tests/account-deletion-review-event-policy.test.ts` 模块不存在时先 RED，补严格白名单、固定原因、Next Action 元数据兼容后 3/3 PASS；新增预发布写入门禁先 RED 后 GREEN。连同只读策略和预发布安全专项共 13/13 PASS。
 - `prisma validate` PASS；仅独立数据库 `jobs_preview_20261123` 对第18条增量 `20261123000400_account_deletion_review_event` 执行 migrate deploy、Prisma generate 和 migrate status 全 PASS。未对原始 `jobs` 数据库执行 migrate/db push。
 - `tests/integration/account-deletion-review-event.test.ts` 在 `INTEGRATION_TEST_DATABASE=true` 隔离数据库 1/1 PASS，覆盖非管理员拒绝、非法原因、并发3次仅1条、重复幂等、第二原因、原账号/模拟订单/申请状态保全。
-- 本地 TypeScript 检查 TS2739（其他 Agent 未提交 `lib/auth-retention.ts` 缺 expiredPasswordResetTokens/deletedPasswordResetTokens）；npm test 也因该 Agent 未提交的 `tests/auth-retention-verification-policy.test.ts` 密码重置保留专项 FAIL 而 exit 1（定向 1 PASS / 1 FAIL）。这些文件与关联测试均非本包，未修改，不能宣称本地全绿；**尚需 GitHub Actions 干净真实 CI/Build 回执**，未拿到前本包 IN_PROGRESS。记录 `u01-account-deletion-review-audit-2026-11-23.md`。
+- 本地 TypeScript 检查 TS2739（其他 Agent 未提交 `lib/auth-retention.ts` 缺 expiredPasswordResetTokens/deletedPasswordResetTokens）；npm test 也因该 Agent 未提交的 `tests/auth-retention-verification-policy.test.ts` 密码重置保留专项 FAIL 而 exit 1（定向 1 PASS / 1 FAIL）。这些文件与关联测试均非本包，未修改，不能宣称本地全绿；**干净远端真实验收已完成：** `604602b` GitHub Actions 主 CI run `45153778792` / job `137621463972` completed/success，Prisma 新库迁移/复跑、TypeScript、单元 **215/215 PASS**、真实 MySQL8 `U01 manual deletion review audit is admin-only, idempotent and non-destructive in isolated MySQL` PASS、Next 生产 build/HTTP smoke SUCCESS。同提交其他 6 条专项 CI 全 SUCCESS。**仅台账后端子包 VERIFIED，非正式注销审批/数据删除；本地其他 Agent 未提交代码仍不通过全局检查**，未拿到前本包 IN_PROGRESS。记录 `u01-account-deletion-review-audit-2026-11-23.md`。
 
 ## 本轮支付测试新增的实际场景
 
