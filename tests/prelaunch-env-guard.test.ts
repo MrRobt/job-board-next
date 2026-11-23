@@ -48,6 +48,19 @@ test("U01 email delivery cannot be enabled during local or public prelaunch",()=
   assert.equal(evaluatePrelaunchConfig({...config,[flag]:"false"}).status,"PASS");
  }
 });
+test("U01 password-reset mail must remain off during any preview mode",()=>{
+ const flag="ENABLE_PASSWORD_RESET_DELIVERY";
+ assert.ok(offFlags.includes(flag),`Untracked prelaunch gate: ${flag}`);
+ for(const config of [
+  safe,
+  {DJS_PRELAUNCH_MODE:"PUBLIC_PRELAUNCH",NODE_ENV:"production",APP_ORIGIN:"https://jobs.company.com",TRUSTED_CLIENT_IP_HEADER:"x-real-ip"}
+ ]){
+  const blocked=evaluatePrelaunchConfig({...config,[flag]:"true"});
+  assert.equal(blocked.status,"BLOCKED");
+  assert.ok(blocked.violations.includes(flag));
+  assert.equal(evaluatePrelaunchConfig({...config,[flag]:"false"}).status,"PASS");
+ }
+});
 test("public prelaunch requires secure canonical origin, a known proxy header and production mode",()=>{
  const publicSafe={
   DJS_PRELAUNCH_MODE:"PUBLIC_PRELAUNCH",NODE_ENV:"production",

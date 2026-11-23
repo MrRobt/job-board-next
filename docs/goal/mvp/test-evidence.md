@@ -555,6 +555,12 @@
 - CI 安全策略单测首次 RED exit 1（`b07-recovery-readonly.yml` 不存在 ENOENT）；新建独立 workflow 后全量 `npm --prefix F:/code/job-board-next test` exit 0，TypeScript noEmit exit 0，Prisma Client / Next.js production build exit 0。
 - Workflow 限制单独 MySQL 8 CI 服务、专有测试库名、默认关闭收费/退款/AI 开关、只在预检步骤开启 `DJS_RECOVERY_PREFLIGHT_APPROVED=READ_ONLY`；仅迁移至一次性库和 SELECT 检查，未触及任何本机数据库。见 `b07-recovery-ci-readonly-2026-11-22.md`，B07 总体 IN_PROGRESS。
 
+## 2026-11-23 U01 找回密码页面、邮件外发与匿名接口（待真实 HTTP E2E）
+
+- `98af09c` 真 MySQL 8 主 CI run `45126554312` / job `137532100371` completed/success，迁移/重复部署、单元 `185/185`、集成 `U01 password recovery is single-use and revokes sessions on disposable MySQL` PASS、生产 build/HTTP smoke 全成功，仅后端核心子包 VERIFIED。
+- 新 `tests/password-reset-delivery.test.ts` 首次缺模块 RED exit 1，完成后 3/3 GREEN：外发开关默认 false，受控 Resend HTTPS 域名、网络错误 fail closed；`tests/password-reset-auth-policy.test.ts` 2/2 PASS，页面只 POST 消费、反账户枚举/请求确认双限流。
+- `ENABLE_PASSWORD_RESET_DELIVERY` 纳入 D02 prelaunch offFlags，单测首先 RED 后 PASS；完整 `npm test`、独立 TypeScript、Next.js build exit 0。真实邮箱/UAT 与当前包真 HTTP Action 仍未验收，不能标 U01 VERIFIED；`u01-password-reset-web-2026-11-23.md`。
+
 ## 2026-11-23 U01 找回密码令牌核心（等待真实 MySQL8 CI）
 
 - 上包 `b06feac` 真实 GitHub Actions 主 CI run `45125860248` / job `137529916098` completed/success，新增 `U01 auth retention removes only expired email verification records in disposable MySQL` PASS；主 CI 单元 `183/183` PASS、MySQL8 迁移及完整集成、Next build/HTTP smoke 全部 exit 0，同提交其他三条专项 Actions 均 SUCCESS。

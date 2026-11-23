@@ -533,6 +533,12 @@
 - CI 策略单测先 RED（新工作流不存在），实现后全量 npm test、独立 tsc、Next 生产 build 全部 exit 0。**最新远端 workflow 尚未实际核验**，必须依据 run/job 实测结果再记录 PASS；B07 总体 IN_PROGRESS，技术上线 NOT READY。
 - 本包证据与交接 `b07-recovery-ci-readonly-2026-11-22.md`。共享 handoff/主矩阵/财务审计未提交改动继续保护，仅单独提交本包文件。
 
+## 2026-11-23 U01 找回密码页面、独立邮件外发与限流
+
+- 已核验上一 `98af09c` 主 CI `45126554312` job `137532100371` SUCCESS：第 16 个迁移、真实 MySQL8 一次性重置/并发/撤销全部 session 测试 PASS，单元 185/185，通过不重复。
+- 新增 `/forgot-password` / `/reset-password` 与 Server Actions：POST-only 原子确认、不泄露账号存在、按邮箱/令牌摘要+可信代理 IP 限流、默认不开网络；单独 `ENABLE_PASSWORD_RESET_DELIVERY`、固定邮件平台/HTTPS/无重定向、D02 预发布要求 false。
+- 邮件 adapter 先 RED 后 3/3 GREEN；预发布新开关先 RED 后 GREEN；Server Action 与页面安全 2/2 PASS；完整 npm test、TS、Next 生产 build exit 0。**等待新增 HTTP 实测，未配置/未发送真实邮件**，U01 总体 IN_PROGRESS。证据/交接 `u01-password-reset-web-2026-11-23.md`。
+
 ## 2026-11-23 U01 找回密码一次性令牌后端底座（等待 MySQL CI）
 
 - 上轮 `b06feac` 主 CI `45125860248`、HTTP E2E `45125860257`、B07 只读/非空恢复 `45125860199 / 45125860351` 四项均 SUCCESS；MySQL 8 真实过期邮箱验证令牌清理集成 PASS，不重复。
